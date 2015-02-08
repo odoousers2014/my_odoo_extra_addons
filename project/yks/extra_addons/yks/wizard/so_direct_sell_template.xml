@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+
+<record id="yks_so_to_dst_view" model="ir.ui.view">
+	<field name="name">yks.so.to.dst</field>
+	<field name="model">so.to.dst</field>
+	<field name="arch" type="xml">
+		<form string="生成直邮模板" version="7.0">
+			<group>
+			     <h2>根据直邮订单创建德国直邮模板</h2>
+			</group>
+			<footer>
+				<button name="create_dst" string="确定" type="object" class="oe_highlight" />
+				or
+				<button string="Cancel" class="oe_link" special="cancel" />
+			</footer>
+		</form>
+	</field>
+</record>
+
+<act_window 
+    id="action_wizard_so_to_dst"
+    multi="True"
+    key2="client_action_multi"
+    name="生成直邮模板"
+    res_model="so.to.dst"
+    src_model="sale.order"
+    view_mode="form"
+    target="new"
+    view_type="form"
+    view_id="yks_so_to_dst_view"/>
+
+    
+    
+    
+</data>
+</openerp>

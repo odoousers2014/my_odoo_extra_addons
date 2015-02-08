@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--cron-->
+        <record id="ir_cron_orderpoint_action" model="ir.cron" forcecreate="True">
+            <field name="name">okgj_orderpoint_cron</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model" eval="'stock.warehouse.orderpoint'"/>
+            <field name="function" eval="'orderpoint_cron'"/>
+	    <field name="args" eval="'(False,)'" />             
+        </record> 
+
+	<record id="ir_cron_delorderpoint_action" model="ir.cron" forcecreate="True">
+            <field name="name">okgj_delorderpoint_cron</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model" eval="'stock.warehouse.orderpoint'"/>
+            <field name="function" eval="'delorderpoint_cron'"/>
+	    	<field name="args" eval="'(False,)'" />             
+    </record> 
+        
+    <record id="make_to_order_cron_action" model="ir.cron" forcecreate="True">
+            <field name="name">okgj_procurement_make_to_order_cron</field>
+            <field eval="True" name="active"/>
+            <field name="interval_number">30</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model" eval="'procurement.order'"/>
+            <field name="function" eval="'make_to_order_cron'"/>
+	    	<field name="args" eval="'(False,)'" />             
+   </record>
+    
+    </data>
+</openerp>

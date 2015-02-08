@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+
+<data >
+	<!-- 访问规则 -->
+	<record id="model_back_order_sale_man" model="ir.rule">
+	    <field name="name">业务员</field>
+	    <field ref="model_sale_back" name="model_id"/>
+	    <field name="domain_force">[('create_uid','=',user.id)]</field>
+	    <field name="groups" eval="[(6,0, [ref('base.group_sale_salesman'),])]"/>
+	</record>
+	<record id="model_back_all_lead" model="ir.rule">
+	    <field name="name">销售主管</field>
+	    <field ref="model_sale_back" name="model_id"/>
+	    <field name="domain_force">[(1,'=',1)]</field>
+	    <field name="groups" eval="[(6,0, [ref('base.group_sale_salesman_all_leads'),])]"/>
+	</record>
+
+</data>
+
+<data>
+	<!-- 搜索筛选设置 -->
+	<record id="yks_back_order_search_view" model="ir.ui.view">
+	    <field name="name">yks.sale.back.search</field> 
+	    <field name="model">sale.back</field>
+	    <field name="sequence" eval="0"/>
+	    <field name="arch" type="xml">
+	        <search string="搜索退换货申请单">
+	        	<field name="name" string="退换货单号" filter_domain="[('name','ilike',self)]"/>
+	            <field name="so_id" string="销售单号" filter_domain="[('so_id','ilike',self)]"/>                 
+	            <field name="receive_user" string="收件人" filter_domain="[('receive_user','ilike',self)]"/>
+	            <field name="create_uid" string="业务员" filter_domain="[('create_uid','ilike',self)]"/>
+	            <field name="carrier_tracking" string="快递单号" filter_domain="[('carrier_tracking','ilike',self)]"/>
+	            <field name="picking_id" string="入库单号" filter_domain="[('picking_id','ilike',self)]"/>
+	            <field name="picking_id" string="出库单号" filter_domain="[('out_picking_id','ilike',self)]"/>
+	            <field name="platform_so_id" string="交易编号" filter_domain="[('platform_so_id','ilike',self)]"/>
+	            <field name="platform_user_id" string="买家昵称" filter_domain="[('platform_user_id','ilike',self)]"/>
+	            <field name="receiver_phone" string="送货电话" filter_domain="[('receiver_phone','ilike',self)]"/>
+	            <filter name="back_state_todo" string="未收货" domain="[('back_state','in',('draft','cancel','auto','confirmed','assigned'))]"/>
+	            <filter name="back_state_done" string="已收货" domain="[('back_state','=','done')]"/>
+	            <filter name="state_draft" string="草稿" domain="[('state','=','draft')]"/>
+	            <filter name="state_approval" string="待主管审核" domain="[('state','=','approval')]"/>
+	            <filter name="state_approval" string="待财务审核" domain="[('state','=','wait_account')]"/>
+	            <filter name="state_approval" string="待仓库审核" domain="[('state','=','wait_house')]"/>
+	            <filter name="state_approval" string="待财务复核" domain="[('state','=','confirmed')]"/>
+	            <filter name="state_confirmed" string="完成" domain="[('state','=','done')]"/>
+	            <filter name="state_cancel" string="取消" domain="[('state','=','cancel')]"/>
+	            <filter name="todo" string="My TODO" domain="[('state','in',['draft', 'approval', 'confirmed']),('create_uid','=', uid)]"/>
+	            <group expand="0" string="Group By..." colspan="16">
+	                <filter string="状态" icon="terp-personal" domain="[]" context="{'group_by':'state'}"/>
+	                <filter string="业务员" icon="terp-personal" domain="[]" context="{'group_by':'create_uid'}"/>
+	            </group>
+	        </search>
+	    </field>
+	</record>
+	
+	<!--Back tree view退货单列表视图-->
+	<record model="ir.ui.view" id="yks_back_order_tree_view">
+	    <field name="name">yks.sale.back.tree</field>
+	    <field name="model">sale.back</field>
+	    <field name="arch" type="xml">
+	        <tree string='退换货'>
+	        	<field name="name"/>
+	            <field name='so_id'/>
+	            <field name="type"/>
+	            <field name="picking_id"/>
+	            <field name="out_picking_id"/>
+	            <field name="create_uid"/>
+	            <field name="create_date"/>
+	            <field name="carrier_id"/>   
+	            <field name="carrier_tracking"/>
+	            <field name="state"/> 
+	            <field name="in_pick_state"/>
+	            <field name="out_pick_state"/>
+	        </tree>
+	    </field>
+	</record>
+	            
+	<record model="ir.ui.view" id="yks_back_order_line_form_view">
+	    <field name="name">yks.sale.back.form</field>
+	    <field name="model">sale.back</field>
+	    <field name="arch" type="xml">
+	        <form string='退换货详情' version='7.0'>
+	            <header>
+	                <button name="action_button_submit" string="提交" type="object" states="draft" class="oe_hightlight" gropus="base.group_sale_salesman"/>
+	                <button name="action_button_pass" string="主管审核" type="object" states="approval" groups="base.group_sale_salesman_all_leads"/>
+	                <button name="action_wait_account" string="财务审核" type="object" states="wait_account" groups="account.group_account_user"/>
+	                <button name="action_wait_house" string="仓库审核" type="object" states="wait_house" groups="stock.group_stock_manager"/>
+	                <button name="action_confirmed" string="财务复核" type="object" states="confirmed" groups="account.group_account_user"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="approval" groups="base.group_sale_salesman_all_leads"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="wait_account" groups="account.group_account_user"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="wait_house" groups="stock.group_stock_manager"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="confirmed" groups="account.group_account_user"/>
+	                <button name="auto_action_done" string="完成" type="object" states="confirmed"/>
+	                <button name="action_button_cancel" string="取消" type="object" states="approval,wait_account,wait_house,confirmed" groups="base.group_sale_salesman"/>
+	                <field name="state" widget="statusbar" statusbar_visible="draft,approval,wait_account,wait_house,confirmed,done,cancel" statusbar_colors='{"cancel":"blue","draft":"blue","approval":"blue","wait_account":"blue","wait_house":"blue","confirmed":"blue"}'/>
+	            </header>
+	            <sheet>  
+	                <field name='name' readonly="1"/>
+	                <group atrrs="{'invisible':[('state','!=','draft')]}">
+	                    <div style="color:red">
+	                    <h3>注意:</h3>
+	                    <h3>退/换货： 退货-创建入库单据，换货-同时创建入库单和出库单据</h3>
+	                    </div>
+	                </group>
+	                <group>
+	                   	<group string='交易信息'>
+	                   	    <field name="type" on_change="onchange_so_id(so_id, type)" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name='so_id' on_change="onchange_so_id(so_id, type)" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name="platform_so_id"/> 
+	                        <field name='api_id' readonly='1'/>
+	                        <field name="platform_user_id" />
+	                        <field name="cancel_picking_ids" widget='many2many' attrs="{'invisible':[('type','!=','refund')]}">
+	                        	<tree string='出库单号'>
+	                        		<field name='name'/>
+	                        		<field name='state'/>
+	                        	</tree>
+	                        </field>
+	                    </group>
+	                    
+	                    <group string='退款信息'>
+	                    	<field name="trade_state"/>
+	                        <field name="amount"/>
+	                        <field name="alipay_nick" attrs="{'required':['|',('trade_state','=','done')]}"/>
+	                        <field name="alipay_name" attrs="{'required':['|',('trade_state','=','done')]}"/>
+	                        <field name='alipay_phone' attrs="{'required':['|',('trade_state','=','done')]}"/>
+	                        <field name="create_uid" readonly="1" />
+	                        <field name="create_date" readonly="1"/>
+	                    </group>
+	                    <group string='入库信息' attrs="{'invisible':[('type','in',['refund','back_money'])]}">
+	                        <field name="return_location_id" domain="['|',('name','ilike','Scrapped'),('name','ilike',u'深圳自营1仓库存')]" attrs="{'readonly': [('state','in',['confirmed','approval'])], 'required':[('type','in',['back','exchange'])]}"/>
+	                        <field name="carrier_id" attrs="{'readonly': [('state','in',['confirmed','approval'])], 'required':[('type','in',['back','exchange'])]}" />
+	                        <field name="carrier_tracking" attrs="{'readonly': [('state','in',['confirmed','approval'])],'required':[('type','in',['back','exchange'])]}"/>
+	                        <field name="picking_id" readonly="1"/>
+	                        <field name="in_pick_state"/>
+	                        
+	                    </group>
+	                    <group string='出库信息' attrs="{'invisible':[('type','!=','exchange')]}">
+	                        <field name="out_picking_id" readonly='1'/>
+	                        <field name="out_pick_state"/>
+	                    </group>
+	                    <group>
+	                       <field name="new_send_info_flag" attrs="{'invisible':[('type','!=','exchange')]}"/>
+	                       <field name='new_deliver_company_name' attrs="{'invisible':['|',('new_send_info_flag','=',False),('type','=','back')]}"/>
+	                       <field name='new_deliver_name' attrs="{'invisible':['|',('new_send_info_flag','=',False),('type','=','back')]}"/> 
+	                       <field name='new_deliver_city_id' attrs="{'invisible':['|',('new_send_info_flag','=',False),('type','=','back')]}"/>
+	                       <field name='new_deliver_tel' attrs="{'invisible':['|',('new_send_info_flag','=',False),('type','=','back')]}"/>
+	                       <field name='new_deliver_address' attrs="{'invisible':['|',('new_send_info_flag','=',False),('type','=','back')]}"/>
+	                    </group>
+	                    <group>
+	                       <field name="new_receive_info_flag" attrs="{'invisible':[('type','!=','exchange')]}"/>
+	                       <field name='out_receive_user' attrs="{'invisible':['|',('new_receive_info_flag','=',False),('type','=','back')]}"/>
+	                       <field name='out_receive_phone' attrs="{'invisible':['|',('new_receive_info_flag','=',False),('type','=','back')]}"/> 
+	                       <field name='out_receive_address' attrs="{'invisible':['|',('new_receive_info_flag','=',False),('type','=','back')]}"/>
+	                       <field name='out_receiver_state_id' attrs="{'invisible':['|',('new_receive_info_flag','=',False),('type','=','back')]}"/>
+	                       <field name='out_receiver_city_id' attrs="{'invisible':['|',('new_receive_info_flag','=',False),('type','=','back')]}"/>
+	                    </group>
+	                </group>
+	                <group>
+	                    <group>
+	                      <field name="reason" attrs="{'readonly': [('state','in',['confirmed','approval'])]}"/>
+	                    </group>
+	                    <group>
+	                      <field name="note" attrs="{'readonly': [('state','=','confirmed')]}"/>  
+	                    </group>
+	                </group>
+	                <notebook>
+	                    <page string='退款明细' attrs="{'invisible':[('type','in',['exchange','back_money'])]}" >
+	                        <field name="refund_line">
+	                            <tree string="Back lines" editable="buttom" >
+	                                <field name="product_id"/>
+	                                <field name="product_qty"/>
+	                            </tree>
+	                        </field>
+	                    </page>
+	                    <page string='入库明细' attrs="{'invisible':[('type','in',['refund','back_money'])]}" >
+	                        <field name="back_line">
+	                            <tree string="Back lines" editable="buttom" >
+	                                <field name="product_id"/>
+	                                <field name="product_qty"/>
+	                            </tree>
+	                        </field>
+	                    </page>
+	                    <page string='出库明细' attrs="{'invisible':[('type','!=','exchange')]}" >
+	                        <field name="exchange_line" attrs="{'readonly': [('state','in',['confirmed','approval'])]}">
+	                            <tree string="Exchange lines" editable="buttom" >
+	                                <field name="product_id"/>
+	                                <field name="product_qty"/>
+	                            </tree>
+	                        </field>
+	                    </page>
+	                </notebook>
+	            </sheet>
+	        </form>
+	    </field>
+	</record>
+	
+		            
+	<record model="ir.ui.view" id="yks_back_order_form_view">
+	    <field name="name">yks.sale.back.form</field>
+	    <field name="model">sale.back</field>
+	    <field name="arch" type="xml">
+	        <form string='退换货详情' version='7.0'>
+	            <header>
+	                <button name="action_button_submit" string="提交" type="object" states="draft" class="oe_hightlight" gropus="base.group_sale_salesman"/>
+	                <button name="action_button_pass" string="主管审核" type="object" states="approval" groups="base.group_sale_salesman_all_leads"/>
+	                <button name="action_wait_account" string="财务审核" type="object" states="wait_account" groups="account.group_account_user"/>
+	                <button name="action_wait_house" string="仓库审核" type="object" states="wait_house" groups="stock.group_stock_manager"/>
+	                <button name="action_confirmed" string="财务复核" type="object" states="confirmed" groups="account.group_account_user"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="approval" groups="base.group_sale_salesman_all_leads"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="wait_account" groups="account.group_account_user"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="wait_house" groups="stock.group_stock_manager"/>
+	                <button name="action_button_notpass" string="返回草稿" type="object" states="confirmed" groups="account.group_account_user"/>
+	                <button name="auto_action_done" string="完成" type="object" states="confirmed"/>
+	                <button name="action_button_cancel" string="取消" confirm='取消后不可恢复，确定取消？' type="object" states="approval,wait_account,wait_house,confirmed" groups="base.group_sale_salesman"/>
+	                <field name="state" widget="statusbar" statusbar_visible="draft,approval,wait_account,wait_house,confirmed,done,cancel" statusbar_colors='{"cancel":"blue","draft":"blue","approval":"blue","wait_account":"blue","wait_house":"blue","confirmed":"blue"}'/>
+	            </header>
+	            <sheet>  
+	                <field name='name' readonly="1"/>
+	                <group>
+	                   	<group string='交易信息'>
+	                        <field name='so_id' on_change="onchange_so_id_new(so_id,in_flag,out_flag,out_cancel_flag)" attrs="{'readonly': [('state','!=','draft')]}"/>
+	                        <field name="platform_so_id"/> 
+	                        <field name='so_state'/>
+	                        <field name='api_id' readonly='1'/>
+	                        <field name="shop_id" />
+	                        <field name="create_uid" readonly="1" />
+	                        <field name="create_date" readonly="1"/>
+	                    </group>
+	                    <group string='退款信息'>
+	                    	<field name="trade_state" required='1' attrs="{'readonly':[('state','=','done')]}"/>
+	                        <field name="amount" required='1' attrs="{'readonly':[('state','=','done')]}"/>
+	                        <field name="alipay_nick" attrs="{'required':['|',('trade_state','=','done')],'readonly':[('state','=','done')]}"/>
+	                        <field name="alipay_name" attrs="{'required':['|',('trade_state','=','done')],'readonly':[('state','=','done')]}"/>
+	                        <field name='alipay_phone' attrs="{'required':['|',('trade_state','=','done')],'readonly':[('state','=','done')]}"/>
+	                        <field name='platform_user_id'/>
+	                    </group>
+	                </group>
+	                <group>
+	                    <group>
+	                      <field name="reason" required='1' attrs="{'readonly':[('state','=','done')],'readonly': [('state','=','done')]}"/>
+	                    </group>
+	                    <group>
+	                      <field name="note" />  
+	                    </group>
+	                </group>
+	                <group nolabel="1" colspan="4" col='4' >
+			            <group  colspan="2"><field name="in_flag" attrs="{'readonly':[('state','=','done')]}" on_change="onchange_so_id_new(so_id,in_flag,out_flag,out_cancel_flag)"/></group>
+			            <group  colspan="2"><field name="out_flag" attrs="{'readonly':[('state','=','done')]}" on_change="onchange_so_id_new(so_id,in_flag,out_flag,out_cancel_flag)"/></group>
+					</group>
+	                <group colspan="4" col='4'>
+	                <div style="border-style:solid solid none solid;padding:2px;border-color:#e7e7e7;border-width:2pt;" string="1" >
+	                	<group  colspan='2' ><!-- attrs="{'invisible':[('in_flag','!=',True)]}" -->
+			            	<field name="return_location_id" domain="['|',('name','ilike','Scrapped'),('name','ilike',u'深圳自营1仓库存')]" attrs="{'readonly': ['|',('state','=','done'), ('in_flag','!=',True)],'required':[('in_flag', '=', True)]}"/>
+		                    <field name="carrier_id" attrs="{'readonly': ['|',('state','=','done'), ('in_flag','!=',True)],'required':[('in_flag', '=', True)]}" />
+		                    <field name="carrier_tracking" attrs="{'readonly': ['|',('state','=','done'), ('in_flag','!=',True)],'required':[('in_flag', '=', True)]}"/>
+		                    <field name="picking_id" readonly="1"/>
+		                    <field name="in_pick_state"/>
+			                <field name="back_line" nolabel="1" colspan="4" attrs="{'readonly': ['|',('state','in',['confirmed','done']), ('in_flag','!=',True)]}" >
+			                    <tree string="Back lines" editable="buttom" attrs="{'readonly': [('state','=','done')]}">
+			                        <field name="product_id" />
+			                        <field name="product_qty" />
+			                    </tree>
+			                </field> 
+		                </group>
+		                </div>
+		                <div style="border-style:solid solid none solid;padding:2px;border-color:#e7e7e7;border-width:2pt;" string="1">
+	                	<group colspan='2' attrs="{'readonly': ['|',('state','=','done'), ('out_flag','!=',True)],}"><!-- 'invisible':[('out_flag','!=',True)] -->
+	                		<field name="out_picking_id" readonly='1'/>
+	                		<field name="new_send_info_flag" attrs="{'readonly': [('state','=','done')]}"/>
+	                		<field name='new_deliver_company_name' attrs="{'invisible':['|',('new_send_info_flag','=',False)]}"/>
+							<field name='new_deliver_name' attrs="{'invisible':['|',('new_send_info_flag','=',False)]}"/> 
+							<field name='new_deliver_city_id' attrs="{'invisible':['|',('new_send_info_flag','=',False)]}"/>
+							<field name='new_deliver_tel' attrs="{'readonly': [('state','=','done')],'invisible':['|',('new_send_info_flag','=',False)]}"/>
+							<field name='new_deliver_address' attrs="{'invisible':['|',('new_send_info_flag','=',False)]}"/>
+	                    	<field name="out_pick_state"/>
+	                    	<field name="new_receive_info_flag" attrs="{'readonly': [('state','=','done')]}"/>
+	                    	<field name='out_receive_user' attrs="{'invisible':['|',('new_receive_info_flag','=',False)]}"/>
+	                        <field name='out_receive_phone' attrs="{'invisible':['|',('new_receive_info_flag','=',False)]}"/> 
+	                        <field name='out_receive_address' attrs="{'invisible':['|',('new_receive_info_flag','=',False)]}"/>
+	                        <field name='out_receiver_state_id' attrs="{'invisible':['|',('new_receive_info_flag','=',False)]}"/>
+	                        <field name='out_receiver_city_id' attrs="{'invisible':['|',('new_receive_info_flag','=',False)]}"/>
+		                	<field name="exchange_line" nolabel="1"  colspan="4" attrs="{'readonly': ['|',('state','=','done'), ('out_flag','!=',True)]}">
+	                            <tree string="Exchange lines" editable="buttom" attrs="{'readonly': ['|',('state','=','done'), ('out_flag','!=',True)]}">
+	                                <field name="product_id"/>
+	                                <field name="product_qty"/>
+	                            </tree>
+		                    </field>
+		                </group>
+		                </div>
+			       </group>
+			       <hr style="border-style:solid none none none;border-color:#e7e7e7;border-width:4pt;" />
+			       <group ><field name='out_cancel_flag' attrs="{'readonly':[('state','=','done')]}" on_change="onchange_so_id_new(so_id,in_flag,out_flag,out_cancel_flag)"/></group>
+			       <div style="border-style:solid solid none solid;padding:2px;border-color:#e7e7e7;border-width:2pt;" string="1"><!-- attrs="{'invisible':[('out_cancel_flag','!=',True)]}" -->
+			       <group col='4' colspan='4' attrs="{'readonly': ['|',('state','=','done'), ('out_cancel_flag','!=',True)]}">
+			           <group colspan='2'>
+			           		<h3>所有出库单号</h3>
+			           	    <field name="cancel_picking_ids" nolabel="1" colspan="4" widget='one2many_list' create="false">
+	                        	<tree string='出库单号' create="false" >
+	                        		<field name='name' />
+	                        		<field name='state'/>
+	                        	</tree>
+	                        </field>
+			           </group>
+	                   <group colspan='2' create="false">
+	                   		<h3>待取消出库单</h3>
+	                		<field name="new_cancel_picking_ids" nolabel="1" colspan="4" widget='one2many_list' create="false">
+	                        	<tree string='出库单号' create="false">
+	                        		<field name='name' />
+	                        		<field name='state'/>
+	                        	</tree>
+	                        </field>
+	                    </group>
+                  </group>
+                  </div>
+	            </sheet>
+	        </form>
+	    </field>
+	</record>
+
+
+	<record model="ir.actions.act_window" id="action_yks_back_order">
+	    <field name="name">退款/退货/换货</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sale.back</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree,form</field>
+	    <field name="domain">[('type','in',['refund', 'back', 'exchange', 'back_money'])]</field>
+	</record>
+	<record id="action_yks_back_orde_view_tree" model="ir.actions.act_window.view">
+         <field name="sequence">1</field>
+         <field name="view_mode">tree</field>
+         <field name='view_id' ref='yks_back_order_tree_view'/>
+         <field name="act_window_id" ref="action_yks_back_order"/>
+     </record>
+
+     <record id="action_yks_back_orde_view_form" model="ir.actions.act_window.view">
+         <field name="sequence">2</field>
+         <field name="view_mode">form</field>
+         <field name="view_id" ref="yks_back_order_line_form_view"/>
+         <field name="act_window_id" ref="action_yks_back_order"/>
+    </record>
+    <menuitem id="menu_yks_back_order" name="退款/退货/换货(将废弃)" parent="base.menu_sales" action="action_yks_back_order" groups="base.group_sale_salesman"/>
+	<menuitem id="menu_yks_back_order_stock" name="退款/退货/换货(将废弃)" groups='stock.group_stock_manager' parent="stock.menu_stock_warehouse_mgmt" sequence="21" action="action_yks_back_order" />        
+	
+
+	<record model="ir.actions.act_window" id="new_action_yks_back_order">
+	    <field name="name">新退款/退货/换货</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sale.back</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree,form</field>
+	    <field name="domain">[]</field>
+	    <field name="view_id" ref="yks_back_order_form_view"></field>
+	</record>
+
+	<record id="new_action_yks_back_orde_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">tree</field>
+        <field name='view_id' ref='yks_back_order_tree_view'/>
+        <field name="act_window_id" ref="new_action_yks_back_order"/>
+    </record>
+
+    <record id="new_action_yks_back_orde_view_form" model="ir.actions.act_window.view">
+        <field name="sequence">2</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="yks_back_order_form_view"/>
+        <field name="act_window_id" ref="new_action_yks_back_order"/>
+    </record>
+	
+	<menuitem id="new_menu_yks_back_order" sequence='9' name="新：退换货" parent="base.menu_sales" action="new_action_yks_back_order" groups="base.group_sale_salesman"/>
+	<menuitem id="new_menu_yks_back_order_stock" name="新：退换货" groups='stock.group_stock_manager' parent="stock.menu_stock_warehouse_mgmt" sequence="21" action="new_action_yks_back_order"/>
+	<act_window 
+	    id="yks_sale_back_action"
+	    name="退换货申请"
+	    res_model="sale.back"
+	    src_model="sale.order"
+	    view_mode="form"
+	    view_id='yks_back_order_form_view'
+	    view_type="form"/>
+</data>
+</openerp>

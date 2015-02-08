@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="collection_voucher_search_view">
+     <field name="name">collection.voucher.tree</field>
+     <field name="model">collection.voucher</field>
+     <field name="arch" type="xml">
+         <search string="form_string">
+             <field name="name"/>
+             <filter string="草稿" domain="[('state','=','draft')]" name="draft"/>
+             <filter string="已确认" domain="[('state','=','confirmed')]" name="matched"/>
+             <filter string="完成" domain="[('state','=','done')]" name="done"/>
+         </search>
+     </field>
+</record>
+
+<record model="ir.ui.view" id="collection_voucher_tree_view">
+     <field name="name">collection.voucher.tree</field>
+     <field name="model">collection.voucher</field>
+     <field name="arch" type="xml">
+         <tree string="form_string"  colors="grey:state=='done';red:state=='draft';green:state=='confirmed'">
+             <field name="name"/>
+             <field name="platform_so_id"/>
+             <field name="trans_time"/>
+             <field name="payer_account"/>
+             <field name="amount_in" sum="Totaol"/>
+             <field name="amount_out" sum="Totaol"/>
+             <field name="state"/>
+             <field name="so_id"/>
+             <field name="payment"/>
+         </tree>
+     </field>
+</record>
+<record model="ir.ui.view" id="collection_voucher_form_view">
+     <field name="name">collection.voucher.form</field>
+     <field name="model">collection.voucher</field>
+     <field name="type">form</field>
+     <field name="arch" type="xml">
+         <form string="form_string" version="7.0">
+         	<header>
+         		<button name="catch_so" string="自动匹配销售订单" type="object"/>
+         		<button name="action_confirm" string="确认" type="object"/>
+         		<button name="action_done" string="完成" type="object"/>
+         		<button name="action_draft" string="返回草稿" type="object"/>
+         		<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done" statusbar_colors='{"draft":"red","confirmed":"green"}'/>
+         	</header>
+         	<sheet>
+         		<group>
+         		
+         			<group>
+         				<field name="amount_in" attrs="{'readonly':[('state','=','done')],}"/>
+         				<field name="amount_out" attrs="{'readonly':[('state','=','done')],}"/>
+         			</group>
+         			<group>
+         				<field name="payment"/>
+         			</group>
+         			
+         		
+         			<group>
+			             <field name="name" attrs="{'readonly':[('state','=','done')],}"/>
+			             <field name="platform_so_id" attrs="{'readonly':[('state','=','done')],}"/>
+			             
+			             
+			             <field name="trans_time" attrs="{'readonly':[('state','=','done')],}"/>
+			             <field name="payer_account" attrs="{'readonly':[('state','=','done')],}"/>
+         			</group>
+         			<group>
+         				 <field name="so_id" attrs="{'readonly':[('state','=','done')],}"/>
+         				 
+			             <field name="create_uid" attrs="{'readonly':[('state','=','done')],}"/>
+			             <field name="note" attrs="{'readonly':[('state','=','done')],}"/>
+         			</group>
+	             </group>
+             </sheet>
+         </form>
+     </field>
+</record>
+
+<record model="ir.actions.act_window" id="collection_voucher_action">
+      <field name="name">支付宝收款记录</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">collection.voucher</field>
+      <field name="domain">[]</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="collection_voucher_tree_view"/>
+</record>
+
+<menuitem id="collection_voucher_menu" name="支付宝收款记录"  parent="account.menu_finance_receivables" 
+             sequence="0"     action="collection_voucher_action"  groups='account.group_account_user'/>
+                  
+<!--wizard -->                  
+<record model="ir.ui.view" id="wizard_voucher_catch_order_form_view">
+    <field name="name">wizard.voucher.catch.order.form</field>
+    <field name="model">wizard.voucher.catch.order</field>
+    <field name="arch" type="xml">
+        <form string="自动匹配销售单" version="7.0">
+            <group>
+        		<group>
+        			<field name="name" invisible="1"/>
+        		</group>
+        		<group>
+        		</group>
+            </group>
+            <footer>
+                <button name="apply" string="确认" type="object" class="oe_highlight"/>
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window 
+    id="action_wizard_voucher_catch_order"
+    multi="False"
+    key2="client_action_relate"
+    name="自动匹配销售单"
+    src_model="collection.voucher"
+    res_model="wizard.voucher.catch.order"
+    view_mode="form"
+    target="new"
+    view_type="form"/>
+
+
+</data>
+</openerp>

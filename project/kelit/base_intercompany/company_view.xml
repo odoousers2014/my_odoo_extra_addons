@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        
+        <record id="view_intercompany_form" model="ir.ui.view">
+            <field name="name">res.intercompany.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@string='Configuration']" position="before">
+                    <page string="InterCompany" groups="base.group_multi_company">
+                        <field name="intercompany" nolabel="1">
+                            <tree editable="bottom">
+                                <field name="company_to"/>
+                                <field name="so2po"/>
+                                <field name="po2so"/>
+                                <field name="is2do"/>
+                                <field name="do2is"/>
+                                <field name="ci2si"/>
+                                <field name="si2ci"/>
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</openerp>

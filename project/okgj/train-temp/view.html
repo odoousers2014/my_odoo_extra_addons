@@ -1,0 +1,1768 @@
+
+<!DOCTYPE html>
+<!--
+  Copyright 2010 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+  Original slides: Marcin Wichary (mwichary@google.com)
+  Modifications: Ernest Delgado (ernestd@google.com)
+		 Alex Russell (slightlyoff@chromium.org)
+		 Brad Neuberg
+-->
+<html>
+<head>
+<title>欧科ERP界面开发培训</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-03-20 09:06:20 HKT"/>
+<meta name="author" content="聂春应"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; font-size: 30px; }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<style>
+      .notes { display: none; }
+      .stroke {
+	-webkit-text-stroke-color: red;
+	-webkit-text-stroke-width: 1px;
+	-moz-text-stroke-color: red;
+	-moz-text-stroke-width: 1px;
+      }
+
+      body {
+	font: 14px "Lucida Grande", "Trebuchet MS", Verdana, sans-serif;
+	background: #778;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+      }
+
+      div.presentation {
+	position: absolute;
+	width: 100%;
+	display: table-cell;
+	vertical-align: middle;
+	height: 100%;
+	background: inherit;
+      }
+
+      div.slides {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	left: 0;
+	top: 0;
+	position: absolute;
+	display: block;
+	-webkit-transition: -webkit-transform 1s ease-in-out;
+	-moz-transition: -moz-transform 1s ease-in-out;
+	-o-transition: -o-transform 1s ease-in-out;
+      }
+
+      div.slide {
+	display: none;
+	position: absolute;
+	overflow: hidden;
+	width: 900px;
+	height: 700px;
+	left: 50%;
+	top: 50%;
+	margin-top: -350px;
+	background: -webkit-gradient(linear, left bottom, left top, from(#bbd), to(#fff));
+	-webkit-transition: margin 0.25s ease-in-out;
+	background-color: #eee;
+	background: -moz-linear-gradient(bottom, #bbd, #fff);
+	-moz-transition: margin 0.25s ease-in-out;
+	-o-transition: margin 0.25s ease-in-out;
+      }
+
+      div.slide:nth-child(even) {
+	border-top-left-radius: 20px;
+	-moz-border-radius-topleft: 20px;
+	-webkit-border-top-left-radius: 20px;
+	border-bottom-right-radius: 20px;
+	-moz-border-radius-bottomright: 20px;
+	-webkit-border-bottom-right-radius: 20px;
+      }
+
+      div.slide:nth-child(odd) {
+	border-top-right-radius: 20px;
+	-moz-border-radius-topright: 20px;
+	-webkit-border-top-right-radius: 20px;
+	border-bottom-left-radius: 20px;
+	-moz-border-radius-bottomleft: 20px;
+	-webkit-border-bottom-left-radius: 20px;
+      }
+
+      div.slide p {
+	font-size: 30px;
+      }
+
+      section.intro p {
+	font-size: 35px;
+      }
+
+      button {
+	font-size: 20px;
+      }
+
+      .summary {
+       font-size: 30px;
+      }
+
+      .sub-summary {
+       font-size: 25px;
+      }
+
+      .sub-summary li {
+       padding: 5px 0;
+      }
+
+      .bullets {
+       font-size: 40px;
+      }
+
+      .slide.far-past {
+	display: block;
+	margin-left: -2400px;
+      }
+
+      .slide.past {
+	display: block;
+	margin-left: -1400px;
+      }
+
+      .slide.current {
+	display: block;
+	margin-left: -450px;
+      }
+
+      .slide.future {
+	display: block;
+	margin-left: 500px;
+      }
+
+      .slide.far-future {
+	display: block;
+	margin-left: 1500px;
+      }
+
+      body.three-d div.presentation {
+	/*background: -webkit-gradient(radial, 50% 50%, 10, 50% 50%, 1000, from(#333), to(#000));	*/
+      }
+
+      body.three-d div.slides {
+	-webkit-transform: translateX(50px) scale(0.8) rotateY(10deg);
+	-moz-transform: translateX(50px) scale(0.8) rotateY(10deg);
+	-o-transform: translateX(50px) scale(0.8) rotateY(10deg);
+      }
+
+
+      /* Content */
+
+      @font-face { font-family: 'Junction'; src: url(src/Junction02.otf); }
+      @font-face { font-family: 'LeagueGothic'; src: url(src/LeagueGothic.otf); }
+
+      header {
+	font-family: 'Junction';
+	font-weight: normal;
+	font-size: 50px;
+	letter-spacing: -.05em;
+	color: white;
+	color: black;
+	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
+	position: absolute;
+	left: 30px;
+	top: 25px;
+	margin: 0;
+	padding: 0;
+      }
+
+      .intro h1 {
+	color: black;
+	padding: 0;
+	margin: 0;
+	letter-spacing: -2px;
+	font-size: 96px;
+      }
+
+      .intro h2 {
+	color: black;
+	font-family: 'LeagueGothic';
+	padding: 0;
+	margin: 0;
+	margin-top: -5px;
+	font-size: 68px;
+	letter-spacing: -1px;
+      }
+
+      h1 {
+	display: inline;
+	font-size: 100%;
+	font-weight: normal;
+	padding: 0;
+	margin: 0;
+      }
+
+      h2 {
+	font-family: 'Junction';
+	color: black;
+	font-size: 20px;
+	margin-left: 20px;
+	margin-top: 50px;
+      }
+
+      h2:first-child {
+	margin-top: 0;
+      }
+
+      section {
+	font-family: 'Junction';
+	font-size: 50px;
+	color: #3f3f3f;
+	text-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
+	margin-left: 30px;
+	margin-right: 30px;
+	margin-top: 100px;
+	display: block;
+	overflow: hidden;
+      }
+
+      section.no-heading {
+	margin-top: 20px;
+      }
+
+      a {
+	color: inherit;
+	display: inline-block;
+	text-decoration: none;
+	line-height: 110%;
+	border-bottom: 2px solid #3f3f3f;
+      }
+
+      #wmap a {
+	line-height: 100%;
+	border-bottom: none;
+      }
+
+      section.left {
+	float: left;
+	width: 390px;
+      }
+
+      section.small {
+	font-size: 24px;
+      }
+
+      section.small ul {
+	margin: 0 0 0 15px;
+	padding: 0;
+      }
+
+      section.small li {
+	padding-bottom: 0;
+      }
+
+      h2 {
+	padding: 0;
+	margin: 15px 0 5px 0;
+/*	font-family: GG240;*/
+      }
+
+      section.center {
+	line-height: 180%;
+	text-align: center;
+	display: table-cell;
+	vertical-align: middle;
+	height: 700px;
+	width: 900px;
+      }
+
+      pre {
+	text-align: left;
+	font-size: 16px;
+	font-family: Monaco, Courier;
+	padding-bottom: 10px;
+
+	padding: 10px 20px;
+	background: rgba(255, 0, 0, 0.05);
+	border-radius: 8px;
+	border: 1px solid rgba(255, 0, 0, 0.2);
+      }
+      .two-column {
+	-webkit-column-count: 2;
+	-moz-column-count: 2;
+      }
+
+      pre select {
+	font-size: 16px;
+	font-family: Monaco, Courier;
+	border: 1px solid #c61800;
+      }
+
+      input {
+	font-size: 16px;
+	font-family: Helvetica;
+	padding: 3px;
+      }
+      input[type="range"] {
+	width: 100%;
+      }
+
+      button {
+	font-family: Verdana;
+      }
+
+      button.large {
+	font-size: 32px;
+      }
+
+      pre b {
+	font-weight: normal;
+	color: #c61800;
+	text-shadow: #c61800 0 0 1px;
+	/*letter-spacing: -1px;*/
+      }
+      pre em {
+	font-weight: normal;
+	font-style: normal;
+	color: #18a600;
+	text-shadow: #18a600 0 0 1px;
+      }
+      pre input[type="range"] {
+	height: 6px;
+	cursor: pointer;
+	width: auto;
+      }
+      example {
+	font-size: 16px;
+	display: block;
+	padding: 10px 20px;
+	color: black;
+	background: rgba(255, 255, 255, 0.4);
+	border-radius: 8px;
+	margin-bottom: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+      }
+      video {
+	border-radius: 8px;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+      }
+
+      .css,
+      .js,
+      .html,
+      .key {
+	font-family: 'Junction';
+	color: black;
+	display: inline-block;
+	padding: 6px 10px 3px 10px;
+	font-size: 25px;
+	line-height: 30px;
+	text-shadow: none;
+	letter-spacing: 0;
+	bottom: 10px;
+	position: relative;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	background: white;
+	box-shadow: rgba(0, 0, 0, 0.1) 0 2px 5px;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.1) 0 2px 5px;
+	-moz-box-shadow: rgba(0, 0, 0, 0.1) 0 2px 5px;
+      }
+
+      .key { font-family: Arial; }
+
+      :not(header) > .css,
+      :not(header) > .js,
+      :not(header) > .html,
+      :not(header) > .key {
+	margin: 0 5px;
+	bottom: 4px;
+      }
+
+      .css {
+	background: -webkit-gradient(linear, left top, left bottom, from(#ff4), to(#ffa));
+	background-color: #ff4;
+	background: -moz-linear-gradient(left top, #ff4, #ffa);
+      }
+      .js {
+	background: -webkit-gradient(linear, left top, left bottom, from(#4f4), to(#afa));
+	background-color: #4f4;
+	background: -moz-linear-gradient(left top, #4f4, #afa);
+      }
+      .html {
+	background: -webkit-gradient(linear, left top, left bottom, from(#e88), to(#fee));
+	background-color: #e88;
+	background: -moz-linear-gradient(left top, #e88, #fee);
+      }
+
+      li {
+	list-style: none;
+	padding: 10px 0;
+      }
+
+      .summary li::before, .sub-summary li::before, .bullets li::before {
+	content: '· ';
+      }
+
+      info {
+	display: block;
+	font-size: 50%;
+	text-align: center;
+      }
+
+</style>
+<body>
+<div class="presentation">
+<div id="content">
+
+
+<div class="slide">
+  <section class="center intro">
+    <style>
+      span.strike { text-decoration:line-through;}
+    </style>
+    <h2>
+      欧科ERP界面开发培训
+    </h2>
+    <p style="margin-top:100px">
+      聂春应
+    </p>
+    <p style="font-size: 25px; line-height: 180%;">Press <span class="key">&rarr;</span> key to advance.<br />
+    Zoom in/out: <span class="key">Ctrl or Command</span> + <span class="key">+/-</span></p>
+  </section>
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">1</span> 第一部分 菜单 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">menuitem</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">menuitem_id</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#25105;&#26159;&#33756;&#21333;</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">sequence</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">15</span><span style="color: #8b2252;">"</span>/&gt;
+</pre>
+
+<p>
+关联动作后，name默认为动作(Action)的name
+</p>
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">2</span> 添加父级菜单 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">menuitem</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">menuitem_id</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">parent</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">stock.menu_stock_warehouse_mgmt</span><span style="color: #8b2252;">"</span> 
+          <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#25105;&#26159;&#33756;&#21333;</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">sequence</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">15</span><span style="color: #8b2252;">"</span>/&gt;
+</pre>
+
+<p>
+关键字:parent
+</p>
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">3</span> 添加权限 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">menuitem</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">menuitem_id</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">parent</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">stock.menu_stock_warehouse_mgmt</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#25105;&#26159;&#33756;&#21333;</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">groups</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">account.group_account_invoice</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">sequence</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">15</span><span style="color: #8b2252;">"</span>/&gt;
+</pre>
+
+<p>
+关键字:groups
+</p>
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">4</span> 添加菜单关联动作 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">menuitem</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">menuitem_id</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">parent</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">stock.menu_stock_warehouse_mgmt</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#25105;&#26159;&#33756;&#21333;</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">action</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_id</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">groups</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">account.group_account_invoice</span><span style="color: #8b2252;">"</span>
+          <span style="color: #a0522d;">sequence</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">15</span><span style="color: #8b2252;">"</span>/&gt;
+</pre>
+
+<p>
+关键字:action
+</p>
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">5</span> 第二部分 动作 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_okgj_stock_picking_out_more</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.actions.act_window</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;&#22797;&#26680;&#20986;&#24211;&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">res_model</span><span style="color: #8b2252;">"</span>&gt;stock.picking.out&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">type</span><span style="color: #8b2252;">"</span>&gt;ir.actions.act_window&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_type</span><span style="color: #8b2252;">"</span>&gt;form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_mode</span><span style="color: #8b2252;">"</span>&gt;tree,form&lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>name: 动作名称
+</li>
+<li>res_model: 关联模型
+</li>
+<li>view_type:
+<ol class="summary">
+<li>form 可编辑
+</li>
+<li>tree 只可看
+</li>
+</ol>
+
+</li>
+<li>view_mode:
+<ol class="summary">
+<li>tree,form 先打开tree，后打开form
+</li>
+<li>form,tree 先打开form，后打开tree
+</li>
+<li>tree 只有tree
+</li>
+<li>form 只有form
+</li>
+<li>另外还有kanban, calendar, graph
+</li>
+</ol>
+
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">6</span> 指定该菜单的限制条件 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_okgj_stock_picking_out_more</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.actions.act_window</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;&#22797;&#26680;&#20986;&#24211;&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">res_model</span><span style="color: #8b2252;">"</span>&gt;stock.picking.out&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">type</span><span style="color: #8b2252;">"</span>&gt;ir.actions.act_window&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_type</span><span style="color: #8b2252;">"</span>&gt;form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_mode</span><span style="color: #8b2252;">"</span>&gt;tree,form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">domain</span><span style="color: #8b2252;">"</span>&gt;[('type','=','out')]&lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>domain，可以组合
+<ol class="summary">
+<li>&lt;field name="domain"&gt;[('location_dest_id.usage', 'in', ['production']), '|', ('picking_id','=', False), ('picking_id.type', '=', 'internal')]&lt;/field&gt;
+</li>
+<li>&lt;field name="domain"&gt;[('journal_id.type', 'in', ['bank', 'cash']), ('type','=','receipt'), ('partner_id','=',partner_id)]&lt;/field&gt;
+</li>
+</ol>
+
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">7</span> 添加环境 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_okgj_stock_picking_out_more</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.actions.act_window</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;&#22797;&#26680;&#20986;&#24211;&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">res_model</span><span style="color: #8b2252;">"</span>&gt;stock.picking.out&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">type</span><span style="color: #8b2252;">"</span>&gt;ir.actions.act_window&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_type</span><span style="color: #8b2252;">"</span>&gt;form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_mode</span><span style="color: #8b2252;">"</span>&gt;tree,form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">domain</span><span style="color: #8b2252;">"</span>&gt;[('type','=','out')]&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">context</span><span style="color: #8b2252;">"</span>&gt;{}&lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>用于指定默认值
+<ol class="summary">
+<li>&lt;field name="context"&gt;{'default_type':'receipt', 'type':'receipt', 'partner_id': partner_id, 'default_reference':reference}&lt;/field&gt;
+</li>
+</ol>
+
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">8</span> 帮助 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_okgj_stock_picking_out_more</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.actions.act_window</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;&#22797;&#26680;&#20986;&#24211;&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">res_model</span><span style="color: #8b2252;">"</span>&gt;stock.picking.out&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">type</span><span style="color: #8b2252;">"</span>&gt;ir.actions.act_window&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_type</span><span style="color: #8b2252;">"</span>&gt;form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_mode</span><span style="color: #8b2252;">"</span>&gt;tree,form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">domain</span><span style="color: #8b2252;">"</span>&gt;[('type','=','out')]&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">context</span><span style="color: #8b2252;">"</span>&gt;{}&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">help</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">html</span><span style="color: #8b2252;">"</span>&gt;
+      &lt;<span style="color: #0000ff;">p</span> <span style="color: #a0522d;">class</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">oe_view_nocontent_create</span><span style="color: #8b2252;">"</span>&gt;
+        &#28857;&#20987;&#21019;&#24314;&#22797;&#26680;&#20986;&#24211;&#21333;
+      &lt;/<span style="color: #0000ff;">p</span>&gt;
+      &lt;<span style="color: #0000ff;">p</span>&gt;
+          &#22797;&#26680;&#20986;&#24211;&#24110;&#21161;&#65292;&#23558;&#20250;&#20381;&#25454;&#24211;&#20301;&#21152;&#20837;&#26356;&#22810;&#38480;&#21046;&#26368;&#32456;&#21482;&#26174;&#31034;&#22797;&#26680;&#20986;&#24211;&#30340;&#26465;&#30446;&#65281;
+      &lt;/<span style="color: #0000ff;">p</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">9</span> 关联view </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_okgj_stock_picking_out_more</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.actions.act_window</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;&#22797;&#26680;&#20986;&#24211;&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">res_model</span><span style="color: #8b2252;">"</span>&gt;stock.picking.out&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">type</span><span style="color: #8b2252;">"</span>&gt;ir.actions.act_window&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_type</span><span style="color: #8b2252;">"</span>&gt;form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_mode</span><span style="color: #8b2252;">"</span>&gt;tree,form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">search_view_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">ref</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_out_more_search</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">domain</span><span style="color: #8b2252;">"</span>&gt;[('type','=','out')]&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">context</span><span style="color: #8b2252;">"</span>&gt;{}&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">help</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">html</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">p</span>&gt;
+            &#22797;&#26680;&#20986;&#24211;&#24110;&#21161;&#65292;&#23558;&#20250;&#20381;&#25454;&#24211;&#20301;&#21152;&#20837;&#26356;&#22810;&#38480;&#21046;&#26368;&#32456;&#21482;&#26174;&#31034;&#22797;&#26680;&#20986;&#24211;&#30340;&#26465;&#30446;&#65281;
+        &lt;/<span style="color: #0000ff;">p</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>search view关联：&lt;field name="search_view_id" ref="view_okgj_stock_picking_out_more_search"/&gt;
+</li>
+<li>默认打开view关联：&lt;field name="view_id" ref="view_warehouse_orderpoint_tree"/&gt;
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">10</span> 更多view关联方式:反向关联 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">act_view_okgj_stock_picking_out_more_tree</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.actions.act_window.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">1</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">sequence</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_mode</span><span style="color: #8b2252;">"</span>&gt;tree&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">ref</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_out_more_tree</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">act_window_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">ref</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">action_okgj_stock_picking_out_more</span><span style="color: #8b2252;">"</span>/&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">11</span> 第三部分 视图 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>视图类型:form, tree, kanban, calendar, gantt, graph
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">12</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;<span style="color: #0000ff;">newline</span>/&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_qty</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>newline 换行
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">13</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>domain，限制选择范围（关系字段）
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">14</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">groups</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product.group_purchase_pricelist</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>groups，操作权限
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">15</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>  <span style="color: #a0522d;">on_change</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">onchange_pricelist(product_id, context)</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>on_change，该字段变化将调用关联方法，引起其它字段变化
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">16</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">warehouse_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">on_change</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">onchange_warehouse_id(warehouse_id)</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">widget</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">selection</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">groups</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">stock.group_locations</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>widget，指定该字段在该视图上使用哪种widget
+</li>
+<li>常见one2many_list， many2one_list，many2many，many2many_tag, url，email，image，float_time，reference, status_bar……
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">17</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">invisible</span>=<span style="color: #8b2252;">'</span><span style="color: #8b2252;">1</span><span style="color: #8b2252;">'</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>invisible，该字段将不可见
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">18</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">invisible</span>=<span style="color: #8b2252;">'</span><span style="color: #8b2252;">1</span><span style="color: #8b2252;">'</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>invisible，该字段将不可见
+</li>
+</ol>
+
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">19</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#21830;&#21697;</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">nolabel</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">1</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>nolabel="1"，不显示该字段分类
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">20</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">fiscal_position</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">attrs</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">{'readonly': [('invoiced','=', True)]}</span><span style="color: #8b2252;">"</span> /&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>attrs，示例中当条件满足时该字段只读
+</li>
+<li>attrs的属性: readonly, invisible
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">21</span> form视图继承 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_product_supplier_inherit</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;product.normal.supplier.form.inherit&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;product.product&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">inherit_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">ref</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product.product_normal_form_view</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">div</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">options</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">position</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">inside</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">purchase_ok</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">div</span>&gt;
+        &lt;<span style="color: #0000ff;">group</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">procurement</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">position</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">after</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">seller_ids</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">context</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">{'uom_id': uom_id}</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">group</span>&gt;
+        &lt;<span style="color: #0000ff;">xpath</span> <span style="color: #a0522d;">expr</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">//field[@name='supplier_taxes_id']</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">position</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">replace</span><span style="color: #8b2252;">"</span> &gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">supplier_taxes_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">colspan</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">2</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">widget</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">many2many_tags</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">attrs</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">{'readonly':[('purchase_ok','=',0)]}</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">xpath</span>&gt;
+
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>inherit，所继承的视图
+</li>
+<li>position,位置
+<ol class="summary">
+<li>before 分类前
+</li>
+<li>after 分类后
+</li>
+<li>replace 替换分类
+</li>
+<li>inside 分类里
+</li>
+</ol>
+
+</li>
+<li>xpath定位更精准
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">22</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">separator</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#21830;&#21697;</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>separator，分隔线
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">23</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">label</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#21830;&#21697;</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>label，分类
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">24</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">button</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">wkf_send_rfq</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">states</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">draft</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Send by Email</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">object</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">context</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">{'send_rfq':True}</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">class</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">oe_highlight</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>button，按钮
+<ol class="summary">
+<li>states 在state字段属于该状态时显示，其它状态不显示
+</li>
+<li>name  所调用的函数或者工作流
+</li>
+<li>string 按钮上所显示的内容
+</li>
+<li>type为object时该按钮为方法，为workflow时该按钮为工作流
+</li>
+</ol>
+
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">25</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">group</span>&gt;
+                &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>/&gt;
+                &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_qty</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;/<span style="color: #0000ff;">group</span>&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>group，成组
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">26</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">order_line</span><span style="color: #8b2252;">"</span>&gt;
+                &lt;<span style="color: #0000ff;">tree</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Purchase Order Lines</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">editable</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">bottom</span><span style="color: #8b2252;">"</span>&gt;
+                    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">on_change</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)</span><span style="color: #8b2252;">"</span>/&gt;
+                    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>/&gt;
+                &lt;/<span style="color: #0000ff;">tree</span>&gt;
+            &lt;/<span style="color: #0000ff;">field</span>&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>关联字段展开显示
+</li>
+<li>editable：botton或者top，在底部增加或顶部增加
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">27</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">notebook</span>&gt;
+                &lt;<span style="color: #0000ff;">page</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Purchase Order</span><span style="color: #8b2252;">"</span>&gt;
+                    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">amount_total</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">nolabel</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">1</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">class</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">oe_subtotal_footer_separator</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">widget</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">monetary</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">options</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">{'currency_field': 'currency_id'}</span><span style="color: #8b2252;">"</span>/&gt;
+                &lt;/<span style="color: #0000ff;">page</span>&gt;
+                &lt;<span style="color: #0000ff;">page</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Incoming Shipments </span><span style="color: #008b8b;">&amp;</span><span style="color: #008b8b;">amp</span><span style="color: #008b8b;">;</span><span style="color: #8b2252;"> Invoices</span><span style="color: #8b2252;">"</span>&gt;
+                    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">minimum_planned_date</span><span style="color: #8b2252;">"</span>/&gt;
+                &lt;/<span style="color: #0000ff;">page</span>&gt;
+            &lt;/<span style="color: #0000ff;">notebook</span>&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>notebook，页签
+</li>
+<li>page，里面的一个页签
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">28</span> form视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_form</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.form&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">version</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">7.0</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('type','=','consu')]</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">form</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>version="7.0" 添加该属性后，增加了许多定制功能，html中的div，header, footer, sheet
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">29</span> tree视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_tree</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.tree&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">tree</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">tree</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>field, button, 继承等与form类似
+</li>
+<li>editable中属性同上
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">30</span> search视图常见属性 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-xml">&lt;<span style="color: #0000ff;">record</span> <span style="color: #a0522d;">id</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">view_okgj_stock_picking_extra_search</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">model</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">ir.ui.view</span><span style="color: #8b2252;">"</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">name</span><span style="color: #8b2252;">"</span>&gt;view.okgj.stock.picking.extra.search&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">model</span><span style="color: #8b2252;">"</span>&gt;okgj.stock.picking.extra&lt;/<span style="color: #0000ff;">field</span>&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">eval</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">16</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">priority</span><span style="color: #8b2252;">"</span>/&gt;
+    &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">arch</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">xml</span><span style="color: #8b2252;">"</span>&gt;
+        &lt;<span style="color: #0000ff;">search</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">&#22806;&#25346;</span><span style="color: #8b2252;">"</span>&gt;
+            &lt;<span style="color: #0000ff;">field</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">product_id</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;<span style="color: #0000ff;">filter</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Supplier</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[]</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">context</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">{'group_by':'partner_id'}</span><span style="color: #8b2252;">"</span>/&gt;
+            &lt;<span style="color: #0000ff;">filter</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">not_invoiced</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">string</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Not Invoiced</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">domain</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">[('invoice_ids','=', False)]</span><span style="color: #8b2252;">"</span> <span style="color: #a0522d;">help</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">Purchase orders that include lines not invoiced.</span><span style="color: #8b2252;">"</span>/&gt;
+        &lt;/<span style="color: #0000ff;">search</span>&gt;
+    &lt;/<span style="color: #0000ff;">field</span>&gt;
+&lt;/<span style="color: #0000ff;">record</span>&gt;
+</pre>
+
+<ol class="summary">
+<li>field常见过滤
+</li>
+<li>context="{'group_by':'partner_id'}" 按该字段分组
+</li>
+<li>domain="[('invoice_ids','=', False)]" 按该字段过滤
+</li>
+<li>string 该过滤名称
+</li>
+<li>help 该过滤所显示的帮助
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">31</span> 报表 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-python"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">report_crm_case_user</span>(osv.osv):
+    _name = <span style="color: #8b2252;">"report.crm.case.user"</span>
+    _description = <span style="color: #8b2252;">"Cases by user and section"</span>
+    _order = <span style="color: #8b2252;">'name desc, user_id, section_id'</span>
+    _auto = <span style="color: #a020f0;">False</span>
+    _columns = {
+        <span style="color: #8b2252;">'name'</span>: fields.date(<span style="color: #8b2252;">'Month'</span>, readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'user_id'</span>:fields.many2one(<span style="color: #8b2252;">'res.users'</span>, <span style="color: #8b2252;">'User'</span>,
+                                  readonly=<span style="color: #a020f0;">True</span>, relate=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'section_id'</span>:fields.many2one(<span style="color: #8b2252;">'crm.case.section'</span>, <span style="color: #8b2252;">'Section'</span>,
+                                     readonly=<span style="color: #a020f0;">True</span>, relate=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'amount_revenue'</span>: fields.float(<span style="color: #8b2252;">'Est.Revenue'</span>,
+                                       readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'amount_costs'</span>: fields.float(<span style="color: #8b2252;">'Est.Cost'</span>, readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'amount_revenue_prob'</span>: fields.float(<span style="color: #8b2252;">'Est. Rev*Prob.'</span>,
+                                            readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'nbr'</span>: fields.integer(<span style="color: #8b2252;">'# of Cases'</span>, readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'probability'</span>: fields.float(<span style="color: #8b2252;">'Avg. Probability'</span>,
+                                    readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'state'</span>: fields.selection(AVAILABLE_STATES, <span style="color: #8b2252;">'State'</span>,
+                                  size=16, readonly=<span style="color: #a020f0;">True</span>),
+        <span style="color: #8b2252;">'delay_close'</span>: fields.integer(<span style="color: #8b2252;">'Delay to close'</span>,
+                                      readonly=<span style="color: #a020f0;">True</span>),
+        }
+</pre>
+
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">32</span> 报表续一 </h1></header>
+
+<section>
+
+
+
+<pre class="src src-python">    <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">init</span>(<span style="color: #a020f0;">self</span>, cr):
+        cr.execute(<span style="color: #8b2252;">"""</span>
+<span style="color: #8b2252;">     CREATE OR REPLACE VIEW report_crm_case_user AS (</span>
+<span style="color: #8b2252;">     SELECT</span>
+<span style="color: #8b2252;">         min(c.id) as id,</span>
+<span style="color: #8b2252;">         SUBSTRING(c.create_date for 7)||'-01' as name,</span>
+<span style="color: #8b2252;">         c.state,</span>
+<span style="color: #8b2252;">         c.user_id,</span>
+<span style="color: #8b2252;">         c.section_id,</span>
+<span style="color: #8b2252;">         COUNT(*) AS nbr,</span>
+<span style="color: #8b2252;">         SUM(planned_revenue) AS amount_revenue,</span>
+<span style="color: #8b2252;">         SUM(planned_cost) AS amount_costs,</span>
+<span style="color: #8b2252;">         SUM(planned_revenue*probability)::decimal(16,2)</span>
+<span style="color: #8b2252;">              AS amount_revenue_prob,</span>
+<span style="color: #8b2252;">         avg(probability)::decimal(16,2) AS probability,</span>
+<span style="color: #8b2252;">         TO_CHAR(avg(date_closed-c.create_date),</span>
+<span style="color: #8b2252;">                 'DD"</span>d<span style="color: #8b2252;">" `HH24:MI:SS') AS delay_close</span>
+<span style="color: #8b2252;">     FROM</span>
+<span style="color: #8b2252;">         crm_case c</span>
+<span style="color: #8b2252;">     GROUP BY SUBSTRING(c.create_date for 7), c.state,</span>
+<span style="color: #8b2252;">              c.user_id, c.section_id</span>
+<span style="color: #8b2252;">     )"""</span>)
+report_crm_case_user()
+</pre>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">33</span> 报表续二 </h1></header>
+
+<section>
+<ol class="summary">
+<li>定义字段，所有字段都必须添加上readonly=True属性
+</li>
+<li>指定参数 _auto=False，以保证不创建该表
+</li>
+<li>添加方法 init(self, cr) 创建数据库视图，以匹配_columns中定义的字段
+</li>
+<li>创建所需的view与action
+</li>
+</ol>
+
+
+</section>
+
+</div>
+
+<div class="slide">
+<header><h1><span class="section-number-2">34</span> 报表续三 </h1></header>
+
+<section>
+<ol class="summary">
+<li>many2one字段，在many2one字段中添加该字段
+</li>
+<li>one2many取的是many2one的表
+</li>
+<li>many2many会新建一张表，新表中有两个字段ID
+</li>
+<li>function字段与related字段，如果store=True有存储在表中，如果没有store=True，将不在表中存储
+</li>
+</ol>
+
+</section>
+</div>
+
+</div>
+<script>
+  (function() {
+    // Since we don't have the fallback of attachEvent and
+    // other IE only stuff we won't try to run JS for IE.
+    // It will run though when using Google Chrome Frame
+    if (document.all) { return; }
+
+    var currentSlideNo;
+    var notesOn = false;
+    var slides = document.getElementsByClassName('slide');
+    var touchStartX = 0;
+
+    // var slide_hash = window.location.hash.replace(/#/, '');
+    // if (slide_hash) {
+    //   for (var i = 0, len = slides.length; i < len; i++) {
+    //     if (slides[i].id == slide_hash) {
+    //       currentSlideNo = i;
+    //       updateSlideClasses();
+    //     }
+    //   }
+    // }
+
+    var spaces = /\s+/, a1 = [""];
+
+    var str2array = function(s) {
+      if (typeof s == "string" || s instanceof String) {
+	if (s.indexOf(" ") < 0) {
+	  a1[0] = s;
+	  return a1;
+	} else {
+	  return s.split(spaces);
+	}
+      }
+      return s;
+    };
+
+    var trim = function(str) {
+      return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    };
+
+    var addClass = function(node, classStr) {
+      classStr = str2array(classStr);
+      var cls = " " + node.className + " ";
+      for (var i = 0, len = classStr.length, c; i < len; ++i) {
+	c = classStr[i];
+	if (c && cls.indexOf(" " + c + " ") < 0) {
+	  cls += c + " ";
+	}
+      }
+      node.className = trim(cls);
+    };
+
+    var removeClass = function(node, classStr) {
+      var cls;
+      if (classStr !== undefined) {
+	classStr = str2array(classStr);
+	cls = " " + node.className + " ";
+	for (var i = 0, len = classStr.length; i < len; ++i) {
+	  cls = cls.replace(" " + classStr[i] + " ", " ");
+	}
+	cls = trim(cls);
+      } else {
+	cls = "";
+      }
+      if (node.className != cls) {
+	node.className = cls;
+      }
+    };
+
+    var getSlideEl = function(slideNo) {
+      if (slideNo > 0) {
+	return slides[slideNo - 1];
+      } else {
+	return null;
+      }
+    };
+
+    var getSlideTitle = function(slideNo) {
+      var el = getSlideEl(slideNo);
+
+      if (el) {
+	return el.getElementsByTagName('header')[0].innerHTML;
+      } else {
+	return null;
+      }
+    };
+
+    var changeSlideElClass = function(slideNo, className) {
+      var el = getSlideEl(slideNo);
+
+      if (el) {
+	removeClass(el, 'far-past past current future far-future');
+	addClass(el, className);
+      }
+    };
+
+    var updateSlideClasses = function() {
+      window.location.hash = "slide" + currentSlideNo;
+      changeSlideElClass(currentSlideNo - 2, 'far-past');
+      changeSlideElClass(currentSlideNo - 1, 'past');
+      changeSlideElClass(currentSlideNo, 'current');
+      changeSlideElClass(currentSlideNo + 1, 'future');
+      changeSlideElClass(currentSlideNo + 2, 'far-future');
+    };
+
+    var nextSlide = function() {
+      if (currentSlideNo < slides.length) {
+	currentSlideNo++;
+      }
+
+      updateSlideClasses();
+    };
+
+    var prevSlide = function() {
+      if (currentSlideNo > 1) {
+	currentSlideNo--;
+      }
+      updateSlideClasses();
+    };
+
+    var showNotes = function() {
+      var notes = document.querySelectorAll('.notes');
+      for (var i = 0, len = notes.length; i < len; i++) {
+	notes[i].style.display = (notesOn) ? 'none':'block';
+      }
+      notesOn = (notesOn) ? false:true;
+    };
+
+    var switch3D = function() {
+      if (document.body.className.indexOf('three-d') == -1) {
+	document.getElementsByClassName('presentation')[0].style.webkitPerspective = '1000px';
+	document.body.className += ' three-d';
+      } else {
+	window.setTimeout("document.getElementsByClassName('presentation')[0].style.webkitPerspective = '0';", 2000);
+	document.body.className = document.body.className.replace(/three-d/, '');
+      }
+    };
+
+    var handleBodyKeyDown = function(event) {
+      // console.log(event.keyCode);
+      switch (event.keyCode) {
+	case 37: // left arrow
+	  prevSlide();
+	  break;
+	case 39: // right arrow
+	// case 32: // space
+	  nextSlide();
+	  break;
+	case 50: // 2
+	  showNotes();
+	  break;
+	case 51: // 3
+	  switch3D();
+	  break;
+      }
+    };
+
+    var addTouchListeners = function() {
+      document.addEventListener('touchstart', function(e) {
+	touchStartX = e.touches[0].pageX;
+      }, false);
+      document.addEventListener('touchend', function(e) {
+	var pixelsMoved = touchStartX - e.changedTouches[0].pageX;
+	var SWIPE_SIZE = 150;
+	if (pixelsMoved > SWIPE_SIZE) {
+	  nextSlide();
+	}
+	else if (pixelsMoved < -SWIPE_SIZE) {
+	 prevSlide();
+	}
+      }, false);
+    };
+
+    // initialize
+
+    (function() {
+      if (window.location.hash != "") {
+	currentSlideNo = Number(window.location.hash.replace('#slide', ''));
+      } else {
+	currentSlideNo = 1;
+      }
+
+      document.addEventListener('keydown', handleBodyKeyDown, false);
+
+      var els = slides;
+      for (var i = 0, el; el = els[i]; i++) {
+	addClass(el, 'slide far-future');
+      }
+      updateSlideClasses();
+
+      // add support for finger events (filter it by property detection?)
+      addTouchListeners();
+    })();
+  })();
+</script>
+</body>
+</html>

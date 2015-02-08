@@ -1,0 +1,853 @@
+# -*-coding:utf-8 -*-
+import time
+import datetime
+import xlrd
+import base64
+from openerp.osv import fields, osv
+import openerp.addons.decimal_precision as dp
+from openerp.tools.translate import _
+from okgj_tools import check_uid_in_groups
+
+def sale_price_rounding(sale_price):
+    """
+    销售价格尾数策略
+    """
+    ## if isinstance(sale_price, (int, long)):
+    ##     return 0
+    ## def keep_number(n):
+    ##     if (n == '1' or n == '2'):
+    ##         m = 0
+    ##     elif (n == '4'):
+    ##         m = 5
+    ##     elif (n == '7'):
+    ##         m = 6
+    ##     else:
+    ##         m = int(n)
+    ##     return m
+    ## if sale_price > 100:
+    ##     sale_price_str = str(int(sale_price))
+    ## else:
+    ##     sale_price_str = str(float('%0.1f'%sale_price))
+    ## last_number = str(keep_number(sale_price_str[-1]))
+    ## sale_price = float(sale_price_str[0:-2] + last_number) 
+    return sale_price
+
+class base_price_change_order(osv.osv):
+    _name = 'okgj.base.price.change'
+base_price_change_order()
+
+class base_price_change_line(osv.osv):
+    _name = 'okgj.base.price.change.line'
+    _description = 'OKGJ Sale Price Change Line'
+    _order = 'product_id desc, product_qty asc'
+
+    def _price_state_search(self, cr, uid, obj, name, args, domain=None, context=None):
+        if context is None:
+            context = {}
+        if not args:
+            return []
+        res_ids = self.search(cr, uid, [], context=context)
+        price_state = args[0][2]
+        price_data = self._get_price(cr, uid, res_ids, 'price_state', '', context=context)
+        new_ids = [line_id for line_id in price_data if price_data[line_id].get('price_state', '') == price_state]
+        if not new_ids:
+            return [('id', '=', '0')]
+        return [('id', 'in', new_ids)]
+    
+    def _get_price(self, cr, uid, ids, field_names, arg, context=None):
+        if context is None:
+            context = {}
+        result = {}.fromkeys(ids, 0)
+        product_obj = self.pool.get('product.product')
+        for one_line in self.browse(cr, uid, ids, context=context):
+            if one_line.product_id:
+                min_price = one_line.product_id.okgj_cost_price * one_line.product_qty
+                max_price = one_line.product_id.other_price * one_line.product_qty
+                if one_line.product_price < min_price:
+                    price_state = '1'
+                elif one_line.product_price > max_price:
+                    price_state = '2'
+                else:
+                    price_state = '3'
+                result[one_line.id] = {
+                    'min_price':min_price,
+                    'max_price':max_price,
+                    'price_state':price_state,
+                    }
+        return result
+
+    def _get_purchase_price(self, cr, uid, ids, fields_name, arg, context=None):
+        if context is None:
+            context = {}
+        res = {}.fromkeys(ids, 0.0)
+        purchase_line_obj = self.pool.get('purchase.order.line')
+        for record in self.browse(cr, uid, ids, context=context):
+            purchase_line_ids = purchase_line_obj.search(cr , uid, [
+                ('product_id','=', record.product_id.id),
+                ('state', 'in', ['confirmed', 'done'])
+                ], order='create_date DESC', context=context, limit=1)
+            if purchase_line_ids:
+                res[record.id] = purchase_line_obj.browse(cr, uid, purchase_line_ids[0], context=context).price_unit
+        return res
+
+    def _get_warehouse_id(self, cr, uid, context=None):
+        """
+        依用户ID返回用户的第一个物流中心
+        """
+        user_data = self.pool.get('res.users').browse(cr,uid, uid, context=context)
+        warehouse_id = False
+        for one_warehouse in user_data.warehouse_ids:
+            warehouse_id = one_warehouse.id
+            if warehouse_id:
+                break
+        return warehouse_id
+
+    def verify_list_price(self, cr, uid, product_id, new_list_price, warehouse_id=None, context=None):
+        """
+        商品调OK价时验证是否可调
+        """
+        product_obj = self.pool.get('product.product') 
+        cost_price = product_obj.read(cr, uid, product_id, ['standard_price'], context=context)['standard_price']
+        ## 多物流中心上线
+        ## cost_price = product_obj.get_okgj_product_warehouse_cost(cr, uid, warehouse_id, product_id, context=context)[product_id]
+        if warehouse_id:
+            line_ids = self.search(cr, uid, [
+                ('product_id', '=', product_id),
+                ('warehouse_id', '=', warehouse_id)
+                ], order='product_price_unit ASC', context=context)
+        else:
+            line_ids = self.search(cr, uid, [
+                ('product_id', '=', product_id),
+                ], order='product_price_unit ASC', context=context)
+        if line_ids:
+            adjust_ratio = self.read(cr, uid, line_ids[0], ['adjust_ratio'], context=context)['adjust_ratio']
+            lowest_new_unit_price = new_list_price * adjust_ratio
+            if lowest_new_unit_price < cost_price:
+                return False
+        return True
+
+    def update_list_price(self, cr, uid, product_id, new_list_price, warehouse_id=None, context=None):
+        """
+        商品调会员价时自动按比例更新组合价格并上传
+        """
+        product_obj = self.pool.get('product.product') 
+        if warehouse_id:
+            line_ids = self.search(cr, uid, [
+                ('product_id', '=', product_id),
+                ('warehouse_id', '=', warehouse_id)
+                ], context=context)
+        else:
+            line_ids = self.search(cr, uid, [
+                ('product_id', '=', product_id),
+                ], context=context)
+        for one_line in self.browse(cr, uid, line_ids, context=context):
+            adjust_ratio = one_line.adjust_ratio
+            qty = one_line.product_qty
+            new_unit_price = adjust_ratio * new_list_price
+            new_total_price = adjust_ratio * new_list_price * qty
+            self.write(cr, uid, one_line.id, {
+                'product_price_unit':new_unit_price,
+                'product_price':new_total_price,
+                }, context=context)
+            if one_line.state in ['confirmed']:
+                self.action_upload_line(cr, uid, one_line.id, context=context)
+        return True
+
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _columns = {
+        'create_uid':fields.many2one('res.users', u'创建人', readonly=True),
+        'create_date':fields.datetime(u'创建日期', readonly=True),
+
+        'base_price_change_id':fields.many2one('okgj.base.price.change', u'价格调整单号', ondelete='cascade', states={'draft':[('readonly', False)]}, readonly=True),
+        'warehouse_id':fields.many2one('stock.warehouse', u'物流中心', select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'product_id':fields.many2one('product.product', u'商品', select=True, required=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'name_template': fields.related('product_id', 'name_template', type='char', size=128, store=True, select=True, string="Template Name"),
+        'default_code': fields.related('product_id', 'default_code', type='char', size=128, store=True, select=True, string="Product default code"),
+        
+        'list_price':fields.related('product_id', 'list_price', string=u'会员价', type='float', readonly=True),
+        'okkg_price':fields.related('product_id', 'okkg_price', string=u'快购价', type='float', readonly=True),
+        'other_price':fields.related('product_id', 'other_price', string=u'市场价', type='float', readonly=True),
+        'recent_purchase_price':fields.function(_get_purchase_price, type='float', string=u'最近采购价', readonly=True),
+
+        'product_qty':fields.integer(u'数量', required=True, track_visibility='onchange', states={'draft':[('readonly', False)]}, readonly=True),
+        'adjust_ratio':fields.float(u'调价比率',digits_compute=dp.get_precision('Product Price'), states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True, required=True),
+        'product_price_unit':fields.float(u'单位价格', digits_compute=dp.get_precision('Product Price'), required=True, track_visibility='onchange', states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True),
+        'product_price':fields.float(u'总价', digits_compute=dp.get_precision('Product Price'), required=True, track_visibility='onchange', states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True),
+        'state': fields.selection([
+            ('draft', u'草稿'),
+            ('reedit', u'再编辑'),
+            ('confirmed', u'确认'),
+            ('need_reedit', u'驳回'),
+            ], u'状态', required=True, readonly=True, track_visibility='onchange'),
+        'min_price':fields.function(_get_price, type='float', string=u'最低价', digits_compute=dp.get_precision('Product Price'), multi='get_price'),
+        'max_price':fields.function(_get_price, type='float', string=u'最高价', digits_compute=dp.get_precision('Product Price'), multi='get_price'),
+        'price_state':fields.function(_get_price, type='selection', string=u'价格状态', fnct_search=_price_state_search,
+                                             selection=[('1', u'低于成本价'),
+                                                        ('2',u'高于市场价'),
+                                                        ('3',u'正常')], multi='get_price'),
+    }
+
+    def _check_repeat(self, cr, uid, ids, context=None):
+        """
+        一个物流中心内同商品同数量的记录只能有一条
+        """
+        if context is None: context={}
+        for line in self.browse(cr, uid, ids, context=context):
+            has_exist = self.search(cr, uid, [
+                ('warehouse_id', '=', line.warehouse_id.id),
+                ('product_id', '=', line.product_id.id),
+                ('product_qty', '=', line.product_qty),
+                ], context=context)
+            if len(has_exist) > 1:
+                return False
+        return True
+
+    _constraints = [(_check_repeat, u'错误，该物流中心已存在同样数量的商品', [u'商品, 数量, 物流中心'])]
+
+    _defaults = {
+        'warehouse_id': _get_warehouse_id,
+        'adjust_ratio': lambda self, cr, uid, context: 1,
+        'state':lambda self, cr, uid, context:'draft',
+    }
+
+    def create(self, cr, uid, vals, context=None):
+        base_price_change_id = vals.get('base_price_change_id', False)
+        if base_price_change_id:
+            price_change_obj = self.pool.get('okgj.base.price.change')
+            price_change_data = price_change_obj.browse(cr, uid, base_price_change_id, context=context)
+            vals.update({
+                         'product_id':price_change_data.product_id.id,
+                         'warehouse_id':price_change_data.warehouse_id.id,
+                         })
+        return super(base_price_change_line, self).create(cr, uid, vals, context=context)
+
+    def onchange_product_qty_ratio(self, cr, uid, ids, product_id, product_qty, adjust_ratio, context=None):
+        """
+        通过变换商品或数量调整价格
+        """
+        if context is None:
+            context = {}
+        if not (product_id and product_qty):
+            return {}
+        adjust_ratio = adjust_ratio or 1
+        list_price = self.pool.get('product.product').read(cr, uid, product_id, ['list_price'])['list_price']
+        sale_price_unit = list_price * adjust_ratio or 0
+        sale_price = list_price * product_qty * adjust_ratio or 0
+        sale_price = sale_price_rounding(sale_price)
+        res = {'value' : {
+            'product_price_unit': sale_price_unit,
+            'product_price': sale_price} }
+        return res
+
+    def onchange_product_price_unit(self, cr, uid, ids, product_id, product_qty, product_price_unit, context=None):
+        """
+        通过基础调整比例与总价
+        """
+        if context is None:
+            context = {}
+        if not (product_id and product_qty and product_price_unit):
+            return {}
+        list_price = self.pool.get('product.product').read(cr, uid, product_id, ['list_price'])['list_price']
+        if list_price <= 0:
+            return {}
+        adjust_ratio = product_price_unit / list_price
+        sale_price = product_price_unit * product_qty
+        sale_price = sale_price_rounding(sale_price)
+        res = {'value' : {
+            'adjust_ratio': adjust_ratio,
+            'product_price': sale_price} }
+        return res
+
+    def onchange_product_price(self, cr, uid, ids, product_id, product_qty, product_price, context=None):
+        """
+        通过总价调整比率与单价
+        """
+        if context is None:
+            context = {}
+        if not (product_id and product_qty and product_price):
+            return {}
+        list_price = self.pool.get('product.product').read(cr, uid, product_id, ['list_price'])['list_price']
+        if list_price <= 0:
+            return {}
+        adjust_ratio = product_price / (product_qty * list_price)
+        sale_price_unit = product_price / product_qty
+        res = {'value' : {
+            'adjust_ratio': adjust_ratio,
+            'product_price_unit': sale_price_unit,
+            } }
+        return res
+
+    def action_upload_line(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'confirmed'}, context=context)
+        return True
+
+    def action_reedit_line(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'reedit'}, context=context)
+        return True
+
+    def action_need_reedit_line(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'need_reedit'}, context=context)
+        return True
+
+base_price_change_line()
+
+class okgj_base_price_change_line_confirm(osv.osv_memory):
+    """
+    采购促销进价审核
+    """
+    _name = "okgj.base.price.change.line.confirm"
+
+    def do_confirm(self, cr, uid, ids, context=None):
+        '''审核'''
+        line_obj = self.pool.get('okgj.base.price.change.line')
+        line_ids = context.get('active_ids', False)
+        if line_ids:
+            line_obj.action_upload_line(cr, uid, line_ids, context=context)
+        return {'type':'ir.actions.act_window_close'}
+
+okgj_base_price_change_line_confirm()
+
+
+
+class okgj_list_price_change_base_price(osv.osv_memory):
+    """
+    变更list_price
+    """
+    _name = "okgj.list.price.change.base.price"
+    _columns = {
+        'list_price':fields.float(u'会员价', digits_compute=dp.get_precision('Product Price'), required=True),
+    }
+
+    def do_confirm(self, cr, uid, ids, context=None):
+        '''确认新价格'''
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        new_list_price = self.browse(cr, uid, ids[0], context=context).list_price
+        order_obj = self.pool.get('okgj.base.price.change')
+        product_obj = self.pool.get('product.product')
+        order_ids = context.get('active_ids', False)
+        if order_ids:
+            product_ids = [i.product_id.id for i in order_obj.browse(cr, uid, order_ids, context=context)]
+            product_obj.write(cr, uid, product_ids, {'list_price':new_list_price}, context=context)
+        return {'type':'ir.actions.act_window_close'}
+
+okgj_list_price_change_base_price()
+
+class base_price_change_order(osv.osv):
+
+    def do_change_list_price(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        context.update({
+            'active_ids': ids,
+            })
+        return {
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'okgj.list.price.change.base.price',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+            'context': context,
+        }
+
+    def _get_warehouse_id(self, cr, uid, context=None):
+        user_data = self.pool.get('res.users').browse(cr,uid, uid, context=context)
+        warehouse_id = False
+        for one_warehouse in user_data.warehouse_ids:
+            warehouse_id = one_warehouse.id
+            if warehouse_id:
+                break
+        return warehouse_id
+
+    def _get_purchase_price(self, cr, uid, ids, fields_name, arg, context=None):
+        if context is None:
+            context = {}
+        res = {}.fromkeys(ids, 0.0)
+        purchase_line_obj = self.pool.get('purchase.order.line')
+        for record in self.browse(cr, uid, ids, context=context):
+            purchase_line_ids = purchase_line_obj.search(cr , uid, [
+                ('product_id','=', record.product_id.id),
+                ('state', 'in', ['confirmed', 'done'])
+                ], order='create_date DESC', context=context, limit=1)
+            if purchase_line_ids:
+                res[record.id] = purchase_line_obj.browse(cr, uid, purchase_line_ids[0], context=context).price_unit
+        return res
+    
+    def _get_approve_state(self, cr, uid, ids, fields_name, arg, context=None):
+        if context is None:
+            context = {}
+        res = {}.fromkeys(ids, False)
+        line_obj = self.pool.get('okgj.base.price.change.line')
+        for record in self.browse(cr, uid, ids, context=context):
+            if record.price_change_line_ids:
+                res[record.id] = 'done'
+                for one_line in record.price_change_line_ids:
+                    if one_line.state != 'confirmed':
+                        res[record.id] = 'wait_approve'
+                        break
+        return res
+
+    def _approve_state_search(self, cr, uid, obj, name, args, domain=None, context=None):
+        if context is None:
+            context = {}
+        res_ids = self.search(cr, uid, [], context=context)
+        result = self._get_approve_state(cr, uid, res_ids, 'approve_state', '', context)
+        if not args:
+            return [('id', 'in', res_ids)]
+        filter_state = args[0][2]
+        approve_ids = [key for key in result if result[key] == filter_state]
+        if not approve_ids:
+            return [('id', '=', '0')]
+        return [('id', 'in', approve_ids)]
+
+
+    _inherit = 'okgj.base.price.change'
+    _description = 'OKGJ Sale Price Change'
+    _order = 'create_date DESC'
+    _columns = {
+        'create_uid':fields.many2one('res.users', u'创建人', readonly=True),
+        'create_date':fields.datetime(u'创建日期', readonly=True),
+        'write_uid':fields.many2one('res.users', u'修改人', readonly=True),
+        'write_date':fields.datetime(u'修改日期', readonly=True),
+        'warehouse_id':fields.many2one('stock.warehouse', u'物流中心', required=True, select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'product_id':fields.many2one('product.product', u'商品', required=True, select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'standard_price':fields.related('product_id', 'standard_price', string=u'成本价', type='float', readonly=True),
+        'list_price':fields.related('product_id', 'list_price', string=u'会员价', type='float', readonly=True),
+        'okkg_price':fields.related('product_id', 'okkg_price', string=u'快购价', type='float', readonly=True),
+        'other_price':fields.related('product_id', 'other_price', string=u'市场价', type='float', readonly=True),
+        'recent_purchase_price':fields.function(_get_purchase_price, type='float', string=u'最近采购价', readonly=True),
+        ## 'standard_price':fields.float(u'成本价', digits_compute=dp.get_precision('Product Price'), states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True),
+        ## 'okkg_price':fields.float(u'快购价', digits_compute=dp.get_precision('Product Price'), states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True),
+        ## 'other_price':fields.float(u'市场价', digits_compute=dp.get_precision('Product Price'), states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True),
+        ## 'recent_purchase_price':fields.float(u'最近采购价', digits_compute=dp.get_precision('Product Price'), states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True,),
+        'price_change_line_ids':fields.one2many('okgj.base.price.change.line', 'base_price_change_id', u'价格更改明细', states={'draft':[('readonly', False)],'reedit':[('readonly', False)]}, readonly=True),
+        'state':fields.selection([('draft', u'草稿'), ('reedit', u'再编辑'),('confirmed', u'已确认')], u'状态', readonly=True),
+        'approve_state':fields.function(_get_approve_state, fnct_search=_approve_state_search, type='selection', string='审批状态', selection=[('wait_approve', u'待审批'), ('done', u'已审批')]),
+        'name_template': fields.related('product_id', 'name_template', type='char', size=128, store=True, select=True, string="Template Name"),
+        'default_code': fields.related('product_id', 'default_code', type='char', size=128, store=True, select=True, string="Product default code"),
+    }
+
+    _defaults = {
+        'warehouse_id': _get_warehouse_id,
+        'state': lambda *a:'draft',
+    }
+
+    def onchange_product_id(self, cr, uid, ids, product_id, warehouse_id, context=None):
+        if context is None:
+            context = {}
+        res = {}
+        if not (product_id and warehouse_id):
+            return res
+        product_obj = self.pool.get('product.product')
+        purchase_line_obj = self.pool.get('purchase.order.line')
+        change_line_obj = self.pool.get('okgj.base.price.change.line')
+        product_data = product_obj.browse(cr, uid, product_id, context=context) 
+        other_price = product_data.other_price
+        okkg_price = product_data.okkg_price
+        standard_price = product_data.standard_price
+        list_price = product_data.list_price
+        ## 多物流中心
+        ## standard_price = product_obj.get_okgj_product_warehouse_cost(cr, uid, warehouse_id, product_id, context=context)[product_id]
+        #最近采购价
+        purchase_line_ids = purchase_line_obj.search(cr , uid, [
+            ('product_id','=', product_id),
+            ('state', 'in', ['confirmed', 'done'])
+            ], order='create_date DESC', context=context, limit=1)
+        recent_purchase_price = 0
+        if purchase_line_ids:
+            recent_purchase_price = purchase_line_obj.browse(cr, uid, purchase_line_ids[0], context=context).price_unit
+        res = {'value':
+               {'standard_price':standard_price,
+                'list_price':list_price,
+                'other_price': other_price,
+                'okkg_price':okkg_price,
+                'recent_purchase_price':recent_purchase_price,
+                }}
+        return res
+
+    ## 上传
+    def action_upload_all(self, cr, uid, ids, context=None):
+        if context is None:
+            context ={}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        line_obj = self.pool.get('okgj.base.price.change.line')
+        for one_order in self.browse(cr, uid, ids, context=context):
+            for one_line in one_order.price_change_line_ids:
+                line_obj.action_upload_line(cr, uid, one_line.id, context=context)
+        self.write(cr, uid, ids, {'state': 'confirmed'}, context=context)
+        return True
+
+    def action_reedit(self, cr, uid, ids, context=None):
+        if context is None:
+            context ={}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        line_obj = self.pool.get('okgj.base.price.change.line')
+        for one_order in self.browse(cr, uid, ids, context=context):
+            for one_line in one_order.price_change_line_ids:
+                line_obj.action_reedit_line(cr, uid, one_line.id, context=context)
+        self.write(cr, uid, ids, {'state': 'reedit'}, context=context)
+        return True
+
+base_price_change_order()
+
+
+PRICE_CHANGE_TABLE = (u'商品编码（需导入）', u'物流中心（需导入）', u'进价（参考）', 
+                      u'成本价（参考）', u'市场价（参考）', u'原OK价（参考）',
+                      u'原快购价（参考）', u'数量（需导入）', u'调价比率（参考）',
+                      u'阶梯单价（需导入）', u'阶梯总价（参考）')
+
+class price_change_datas_import(osv.osv_memory):
+    _name = 'price.change.datas.import'
+    _columns = {
+        'excel': fields.binary(u'excel文件', filters='*.xls', required=True),
+        'import_address':fields.text(u'请从以下地址下载导入模板', readonly=True),
+        'update_address':fields.text(u'请从以下地址下载更新模板', readonly=True),
+        
+    }    
+    _defaults = {
+        'import_address': "http://192.168.1.199/price_change_import.xls",
+        'update_address': "http://192.168.1.199/price_change_update.xls",
+    }
+
+    def _validate_import_table(self, table, validate_type):
+        """
+                验证模板是否正确
+                验证导入单元格商品编码是否为文本
+        @param table:表
+        @param validate_type: 'template'(validate template), 'text':(validate text)
+        """
+        table_header = [cell.value for cell in table.row(0)] #表头数据
+        if validate_type == 'template':
+            if table.ncols != len(PRICE_CHANGE_TABLE):
+                return False
+            for i in range(0, table.ncols):
+                if not (unicode(table_header[i]).strip() == PRICE_CHANGE_TABLE[i]):
+                    return False
+            return True
+        elif validate_type == 'text':
+            prows = table.nrows
+            pcols = [table_header.index(u'商品编码（需导入）'), 
+                     table_header.index(u'物流中心（需导入）'),
+                     table_header.index(u'数量（需导入）'), 
+                     table_header.index(u'阶梯单价（需导入）'), ]
+            for rx in range(0, prows):
+                for rc in pcols:
+                    if (table.cell(rx, rc).ctype != 1) and (table.cell(rx, rc).ctype != 0):
+                        return False
+            return True
+    
+    def _validate_cell_value(self, cr, uid, table):
+        """
+                验证导入商品是否存在和单元格值不能为空
+        @param table:excle表([u'商品编码', u'物流中心', u'原OK价', u'原快购价',
+                             u'进价', u'成本价', u'市场价',u'数量',
+                             u'调价比率', u'阶梯单价', u'阶梯总价'])
+        """
+        null_info = ""
+        (prows, pcols) = (table.nrows, table.ncols)
+        product_obj = self.pool.get('product.product')
+        warehouse_obj = self.pool.get('stock.warehouse')
+        for rx in range(1, prows):
+            for rp in range(0, pcols):
+                if table.cell(rx, rp).value:
+                    if rp == 0:
+                        product_ser = product_obj.search(cr, uid, [('default_code', '=', table.cell(rx, 0).value)])
+                        if not product_ser:
+                            null_info += u'第 %s行编号为 "%s" 的商品不存在! \n' %(rx+1, table.cell(rx, 0).value)
+                    if rp == 1 :
+                        warehouse_ser = warehouse_obj.search(cr, uid, [('name', '=', table.cell(rx, 1).value)])
+                        if not warehouse_ser:
+                            null_info += u'第 %s行 "%s" 不存在! \n' %(rx+1, table.cell(rx, 1).value)
+                else:
+                    if rp in [0, 1, 7, 9]:
+                        null_info += u'第 %s行 "%s" 不能为空! \n'% (rx+1, PRICE_CHANGE_TABLE[rp])
+                    
+        return null_info
+
+    def _validate_cell_type(self, table, cols_number):
+        """
+                验证导入单元格(数量, 原OK价, 原快购价, 调价比率)值类型是否正确
+        @param table:excel表
+        @param cols_number:表列号 (顺序:[u'商品编码', u'物流中心', u'原OK价', u'原快购价',
+                                        u'进价', u'成本价', u'市场价',u'数量',
+                                         u'调价比率', u'阶梯单价', u'阶梯总价'])
+        """
+        numerical_info = ''
+        prows = table.nrows
+        pcols = [cols_number[7], cols_number[9]] #数量和阶梯单价
+        for rx in range(1, prows):
+            for rl in pcols:
+                try:
+                    cell_type = float(table.cell(rx, rl).value) #float
+                except ValueError:
+                    numerical_info += u'第%s行"%s" 的单元格格式错误! \n' %(rx + 1, PRICE_CHANGE_TABLE[rl])
+                else:
+                    if rl == cols_number[7]:
+                        qty = float(table.cell(rx, rl).value) #数量
+                        if qty != int(qty): # int
+                            numerical_info += u'第%s行"%s" 的单元格格式错误! \n' %(rx + 1, PRICE_CHANGE_TABLE[rl])
+        return numerical_info
+    
+    def _validate_update(self, cr, uid, table, cols_number):
+        """
+                基础价更新验证
+        @param table:表 
+        @param cols_number:表列号 (顺序:[u'商品编码', u'物流中心', u'原OK价', u'原快购价',
+                                        u'进价', u'成本价', u'市场价',u'数量',
+                                         u'调价比率', u'阶梯单价', u'阶梯总价'])
+        """
+        info = ''
+        change_line_datas = {}
+        change_line_obj = self.pool.get('okgj.base.price.change.line')
+        product_obj = self.pool.get('product.product')
+        warehouse_obj = self.pool.get('stock.warehouse')
+        
+        for rx in range(1, table.nrows):
+            row_data = [cell.value for cell in table.row(rx)]
+            default_code = row_data[cols_number[0]]
+            product_qty = float(row_data[cols_number[7]])
+            product_price_unit = float(row_data[cols_number[9]])
+            product_ids = product_obj.search(cr, uid, [('default_code', '=', default_code)])
+            warehouse_ids = warehouse_obj.search(cr, uid, [('name', '=', row_data[cols_number[1]])])
+            warehouse_id = warehouse_ids and warehouse_ids[0]
+        
+            line_ids = change_line_obj.search(
+                cr, uid, [('product_id', '=', product_ids[0]),
+                ('warehouse_id', '=', warehouse_id),
+                ('product_qty', '=', product_qty)])
+            if line_ids:
+                change_line_datas[line_ids[0]] =  (product_ids[0], product_qty, product_price_unit)
+            else:
+                info += u'excel中第 %s行编号为 "%s" 的商品：基础价明细表中不存在! \n' % (rx+1, default_code)
+                
+        return info, change_line_datas
+    
+    def test_repeat_excel(self, cr, uid, table, cols_number):
+        """
+                验证excel表中商品是否重复
+        @param table:表 
+        @param cols_number:表列号 (顺序:[[u'商品编码', u'物流中心', u'原OK价', u'原快购价',
+                                        u'进价', u'成本价', u'市场价',u'数量',
+                                         u'调价比率', u'阶梯单价', u'阶梯总价'])
+        """
+        rep_info_excel = ''
+        excel_info, repeat_info_dict = {}, {}
+        warehouse_obj =self.pool.get('stock.warehouse')
+        for rx in range(1, table.nrows):
+            row_data = [cell.value for cell in table.row(rx)]
+            default_code = row_data[cols_number[0]]
+            product_qty = float(row_data[cols_number[7]])
+            warehouse_ids = warehouse_obj.search(cr, uid, [('name', '=', row_data[cols_number[1]])])
+            warehouse_id = warehouse_ids and warehouse_ids[0]
+
+            repeat_key = (default_code, product_qty, warehouse_id)
+            if repeat_key in repeat_info_dict:
+                temp_info = u'excel中第 %s行编号为 "%s" 的商品数量重复! \n'
+                if repeat_info_dict[repeat_key]:
+                    rep_info_excel += (temp_info % (repeat_info_dict[repeat_key].pop(), default_code))
+                rep_info_excel += (temp_info % (rx+1, default_code))
+            else:
+                repeat_info_dict[repeat_key] = [rx+1]
+                excel_info[repeat_key] = [rx+1] 
+        return rep_info_excel, excel_info
+        
+    def test_repeat_table(self, cr, uid, excel_info):
+        """
+                验证excel表与erp中的商品是否重复
+        @param excel_info:excel表信息
+        """
+        rep_info_table = ''
+        change_line_obj = self.pool.get('okgj.base.price.change.line')
+        product_obj = self.pool.get('product.product')
+        for key in excel_info:
+            #default_code: key[0], product_qty: key[1], warehouse_id: key[2]
+            product_ser = product_obj.search(cr, uid, [('default_code', '=', key[0])])
+            line_ids = change_line_obj.search(
+                cr, uid, [('product_id', '=', product_ser[0]),
+                ('warehouse_id', '=', key[2]),
+                ('product_qty', '=', key[1])])
+                                                    
+            if line_ids:
+                rep_info_table += u'excel中第 %s行编号为 "%s" 的商品与基础价明细表中的商品重复! \n' % (excel_info[key][0], key[0])
+        return rep_info_table
+
+    def prepare_import_datas(self, cr, uid, ids, table, line_number, cols_number, context=None):
+        """导入数据处理:
+            @param table:表 
+            @param line_number:行号
+            @param cols_number:表列号 (顺序:[[u'商品编码', u'物流中心', u'原OK价', u'原快购价',
+                                        u'进价', u'成本价', u'市场价',u'数量',
+                                         u'调价比率', u'阶梯单价', u'阶梯总价'])
+        """
+        row_data = [cell.value for cell in table.row(line_number)]
+        product_qty, product_price_unit = float(row_data[cols_number[7]]), float(row_data[cols_number[9]])
+        product_obj = context.get('product_obj')
+        warehouse_obj = context.get('warehouse_obj')
+        product_ids = product_obj.search(cr, uid, [('default_code', '=', row_data[cols_number[0]])])
+        list_price = product_obj.read(cr, uid, product_ids[0], ['list_price'], context=context)['list_price'] #销售价
+        
+        warehouse_ids = warehouse_obj.search(cr, uid, [('name', '=', row_data[cols_number[1]])])
+        warehouse_id = warehouse_ids and warehouse_ids[0] 
+        one_line_data = {
+            'product_id':product_ids[0],
+            'warehouse_id':warehouse_id,
+            'product_price_unit': product_price_unit, #单位价格,
+            'product_qty':product_qty,
+            'adjust_ratio':list_price and (product_price_unit / list_price) or 1,
+            'product_price':product_price_unit * product_qty,
+        }
+        return one_line_data
+
+    def action_update(self, cr, uid, ids, change_line_datas, context=None):
+        """
+                基础价更新
+        """
+        change_line_obj = self.pool.get('okgj.base.price.change.line')
+        product_obj = self.pool.get('product.product')
+        for line_id in change_line_datas:
+            product_id = change_line_datas[line_id][0]
+            product_qty = change_line_datas[line_id][1]
+            product_price_unit = change_line_datas[line_id][2]
+            list_price = product_obj.read(cr, uid, product_id, ['list_price'], context=context)['list_price']
+            change_line_obj.write(cr, uid, line_id, {
+                'adjust_ratio': list_price and (product_price_unit / list_price) or 1,
+                'product_price_unit': product_price_unit ,
+                'product_price': product_price_unit * product_qty,
+                'state':'reedit',
+                }, context=context)
+        
+        return True
+
+    def action_import(self, cr, uid, ids, context=None):
+        """
+                基础价导入
+        """
+        product_obj = self.pool.get('product.product') 
+        warehouse_obj = self.pool.get('stock.warehouse')
+        price_change_obj = self.pool.get('okgj.base.price.change.line')
+        base_price_obj = self.pool.get('okgj.base.price.change')
+        action_type = context.get('action', False)
+        if not action_type:
+            raise osv.except_osv(_('Error:'), _(u"无效的动作!")) # view of context error
+        
+        for excel_data in self.browse(cr, uid, ids):   
+            if not excel_data.excel: 
+                raise osv.except_osv(_(u'警告!'), _(u'请上传表格!'))          
+            excel = xlrd.open_workbook(file_contents=base64.decodestring(excel_data.excel))    
+            try:
+                table_product = excel.sheet_by_index(0)
+            except:
+                raise osv.except_osv(_(u'警告!'), _(u'请在模板里创建一个工作表!'))                     
+            if table_product:
+                ##验证模板是否准确
+                if not self._validate_import_table(table_product, 'template'):
+                    raise osv.except_osv(_('Error:'), _(u'execl表格式错误!'))
+                
+                ##验证导入单元格格式是否为文本
+                if not self._validate_import_table(table_product, 'text'):
+                    raise osv.except_osv(_('Error:'), _(u'请将(需导入)列的单元格格式设置为文本'))
+                
+                ##验证数量单元格是否为空值
+                null_info = self._validate_cell_value(cr, uid, table_product)
+                if null_info:
+                    raise osv.except_osv(_('Error:'), _(null_info))
+                
+                table_header = [cell.value for cell in table_product.row(0)]
+                cols_number = [table_header.index(i) for i in PRICE_CHANGE_TABLE] #表列号
+                ##验证数量单元格格式是否正确
+                numerical_info = self._validate_cell_type(table_product, cols_number)
+                if numerical_info:
+                    raise osv.except_osv(_('Error:'), _(numerical_info))
+                
+                ##验证excel表商品数量是否重复
+                rep_info_excel, excel_info = self.test_repeat_excel(cr, uid, table_product, cols_number)                                                                                                                                                                                                                                                                                                                                                   
+                if rep_info_excel:
+                    raise osv.except_osv(_('Error:'), _(rep_info_excel))
+                
+                ##根据动作类型来执行相应动作
+                if action_type == 'import':
+                    ##验证excel表与erp中的商品数量是否重复
+                    rep_info_table = self.test_repeat_table(cr, uid, excel_info)
+                    if rep_info_table:
+                        raise osv.except_osv(_('Error:'), _(rep_info_table))
+                    
+                    ##导入数据处理
+                    context['product_obj'] = product_obj
+                    context['warehouse_obj'] = warehouse_obj
+                    for line_number in range(1, table_product.nrows):
+                        one_line_data = self.prepare_import_datas(cr, uid, ids, table_product, line_number, cols_number, context=context)
+                        base_price_ids = base_price_obj.search(cr, uid, 
+                            [('product_id', '=', one_line_data['product_id']),
+                            ('warehouse_id', '=', one_line_data['warehouse_id'])])
+                        if base_price_ids:
+                            base_price_id = base_price_ids[0]
+                        else:
+                            base_price_id = base_price_obj.create(cr, uid,{
+                                'product_id': one_line_data['product_id'],
+                                'warehouse_id': one_line_data['warehouse_id'],
+                                })
+                        one_line_data.update({'base_price_change_id': base_price_id})
+                        price_change_obj.create(cr, uid, one_line_data, context=context)
+                elif action_type == 'update':
+                    ##基础价更新验证
+                    validate_info, change_line_datas = self._validate_update(cr, uid, table_product, cols_number)
+                    if validate_info:
+                        raise osv.except_osv(_('Error:'), _(validate_info))
+                    if change_line_datas:
+                        self.action_update(cr, uid, ids, change_line_datas, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+price_change_datas_import()
+
+class okgj_product_product_price_mgt(osv.osv):
+
+    def _check_negative_profit_set(self, cr, uid, ids, context=None):
+        """
+        check product.price;
+        check base.price.change
+        makesure any sale price low 
+        """
+        return True
+        
+        group_name = self.pool.get("ir.config_parameter").get_param(cr, uid, "negative.profit.set", context=context) or ''
+        
+        if check_uid_in_groups(self, cr, uid, group_name, context=context):
+            return True
+
+        change_pool=self.pool.get('okgj.base.price.change')
+        for p in self.browse(cr, uid, ids, context=context,):
+            if p.list_price < p.standard_price or p.other_price < p.standard_price or p.okkg_price < p.standard_price:
+                return False
+            change_ids=change_pool.search( cr, uid, [('product_id','=',p.id)]  )
+            if change_ids:
+                for change in change_pool.browse(cr, uid, change_ids, context=context):
+                    for line in change.price_change_line_ids:
+                        if line.product_price_unit < p.standard_price:
+                            return False
+        return True
+
+    _inherit = "product.product"
+    #===========================================================================
+    # _constraints = [
+    #     (_check_negative_profit_set, u'错误价格导致负利润，请先修改调价单或者联系运营经理', ['list_price','other_price','okkg_price']),
+    # ]
+    #===========================================================================
+    
+    def write(self, cr, uid, ids, vals, context=None):
+        """
+        自动更新组合价，检查销售价格是否低于成本价格,
+        """
+        if vals.get('list_price', False):
+            price_line_obj = self.pool.get('okgj.base.price.change.line')
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            for one_product_id in ids:
+                can_update = price_line_obj.verify_list_price(cr, uid, one_product_id, vals.get('list_price'), context=context)
+                if can_update:
+                    price_line_obj.update_list_price(cr,uid, one_product_id, vals.get('list_price'), context=context)
+                else:
+                    raise osv.except_osv(_('警告'), _("所调OK价将导致该商品组合后销售价低于成本价!")) 
+        return super(okgj_product_product_price_mgt, self).write(cr, uid, ids, vals, context=context)
+

@@ -1,0 +1,253 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	
+	<record id="view_okgj_adjust_sale_price_form" model="ir.ui.view">
+	    <field name="name">view.okgj.adjust.sale.price.form</field>
+	    <field name="model">okgj.adjust.price</field>
+	    <field eval="16" name="priority"/>
+	    <field name="arch" type="xml">
+		<form string="销售调价单" version="7.0">
+		    <header>
+			<button name="action_topurchase" states="draft" string="提交" type="object" class="oe_highlight"/>
+			<button name="action_tofinance" states="topurchase" string="采购审核" type="object" class="oe_highlight"/>			 
+			<button name="action_wait" states="tofinance" string="财务审核" type="object" class="oe_highlight"/>
+			<button name="action_cancel" string="取消" type="object" states="draft,topurchase,tofinance"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,topurchase,tofinance,wait,done"/>
+		    </header>
+		    <sheet>
+			<div class="oe_title">
+			    <h1>
+				<label string="销售调价单"/>
+			    </h1>
+			</div>
+			<group>
+			    <group>						 
+				<field name="name"/>
+				<field name="validate_type"/>
+				<field name="user_id"/>
+				<field name="next_user_id"/>	
+				<field name="type" invisible="1"/>
+			    </group>				
+			    <group> 
+				<field name="date_apply"/>
+				<field name="date_now"/>
+				<field name="date_approval"/>	
+			    </group>	 			 
+			</group>		
+			<h2>
+			    <label for="line_ids" string="调价明细"/>
+			</h2>
+			<field name="line_ids" colspan="4">
+			    <tree string="价格行" editable="bottom"  colors="red:(purchase_price &gt;= new_list_price)">
+				<field name="product_id" on_change="onchange_product_id(product_id)"/>
+				<field name="purchase_price" readonly="1"/>
+				<field name="list_price" readonly="1"/>
+				<field name="new_list_price"/>	
+			    </tree>
+			</field>
+		    </sheet>
+		</form>
+	    </field>
+	</record>
+
+	<record id="view_okgj_adjust_sale_price_tree" model="ir.ui.view">
+	    <field name="name">view.okgj.adjust.sale.price.tree</field>
+	    <field name="model">okgj.adjust.price</field>
+	    <field eval="16" name="priority"/>
+	    <field name="arch" type="xml">
+		<tree string="销售价格调整">
+		    <field name="name"/>
+		    <field name="date_apply"/>
+		    <field name="user_id"/>
+		    <field name="date_now"/>
+		    <field name="next_user_id"/>
+		    <field name="date_approval"/>
+		    <field name="state"/>				 	
+		</tree>
+	    </field>
+	</record>
+
+	<record id="view_okgj_adjust_sale_price_search" model="ir.ui.view">
+	    <field name="name">view.okgj.adjust.sale.price.search</field>
+	    <field name="model">okgj.adjust.price</field>
+	    <field eval="16" name="priority"/>
+	    <field name="arch" type="xml">
+		<search string="销售价格调整">
+		    <field name="name"/>
+		    <field name="date_apply"/>
+		    <field name="user_id"/>
+		    <field name="date_now"/>
+		    <field name="next_user_id"/>
+		    <field name="date_approval"/>
+		    <field name="state"/>		
+		</search>
+	    </field>
+	</record>
+
+        <record id="action_okgj_adjust_sale_price" model="ir.actions.act_window">
+            <field name="name">销售价格调整</field>
+            <field name="res_model">okgj.adjust.price</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_adjust_sale_price_search"/>
+            <field name="domain">[('type','=','sale')]</field>
+            <field name="context">{'default_type': 'sale'}</field>
+	    <field name="help" type="html">
+		<p class="oe_view_nocontent_create">
+		    点击新建一个销售调价单
+		</p>
+	    </field>
+        </record>
+
+        <record id="act_view_okgj_adjust_sale_price_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_adjust_sale_price_tree"/>
+            <field name="act_window_id" ref="action_okgj_adjust_sale_price"/>
+        </record>
+        <record id="act_view_okgj_adjust_sale_price_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_adjust_sale_price_form"/>
+            <field name="act_window_id" ref="action_okgj_adjust_sale_price"/>
+        </record>
+
+	<!--采购调价单-->
+	<record id="view_okgj_adjust_purchase_price_form" model="ir.ui.view">
+	    <field name="name">view.okgj.adjust.purchase.price.form</field>
+	    <field name="model">okgj.adjust.price</field>
+	    <field eval="16" name="priority"/>
+	    <field name="arch" type="xml">
+		<form string="采购调价单" version="7.0">
+		    <header>
+			<button name="action_topurchase" states="draft" string="提交" type="object" class="oe_highlight"/>
+			<button name="action_tofinance" states="topurchase" string="采购审核" type="object" class="oe_highlight"/>			 
+			<button name="action_wait" states="tofinance" string="财务审核" type="object" class="oe_highlight"/>
+			<button name="action_cancel" string="取消" type="object" states="draft,topurchase,tofinance"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,topurchase,tofinance,wait,done"/>
+		    </header>
+		    <sheet>
+			<div class="oe_title">
+			    <h1>
+				<label string="采购调价单"/>
+			    </h1>
+			</div>
+
+			<group>
+			    <field name="type" invisible="1"/>
+			    <group>						 
+				<field name="name"/>
+				<field name="supplier_id" required="1"/>
+				<field name="validate_type"/>
+				<field name="user_id"/>
+				<field name="next_user_id"/>
+			    </group>				
+			    <group> 
+				<field name="date_apply"/>
+				<field name="date_now"/>
+				<field name="date_approval"/>	
+			    </group>	 			 
+			</group>		
+			<h2>
+			    <label for="line_ids" string="调价明细"/>
+			</h2>
+			<field name="line_ids" colspan="4">
+			    <tree string="价格行" editable="bottom"  colors="red:(new_purchase_price&gt;= list_price)">
+				<field name="product_id" on_change="onchange_product_id(product_id)"/>
+				<field name="purchase_price" readonly="1"/>
+				<field name="list_price" readonly="1"/>
+				<field name="new_purchase_price"/>	
+			    </tree>
+			</field>
+		    </sheet>
+		</form>
+	    </field>
+	</record>
+
+	<record id="view_okgj_adjust_purchase_price_tree" model="ir.ui.view">
+	    <field name="name">view.okgj.adjust.purchase.price.tree</field>
+	    <field name="model">okgj.adjust.price</field>
+	    <field eval="16" name="priority"/>
+	    <field name="arch" type="xml">
+		<tree string="采购价格调整">
+		    <field name="name"/>
+		    <field name="date_apply"/>
+		    <field name="user_id"/>
+		    <field name="date_now"/>
+		    <field name="next_user_id"/>
+		    <field name="date_approval"/>
+		    <field name="state"/>				 	
+		</tree>
+	    </field>
+	</record>
+
+	<record id="view_okgj_adjust_purchase_price_search" model="ir.ui.view">
+	    <field name="name">view.okgj.adjust.purchase.price.search</field>
+	    <field name="model">okgj.adjust.price</field>
+	    <field eval="16" name="priority"/>
+	    <field name="arch" type="xml">
+		<search string="采购价格调整">
+		    <field name="name"/>
+		    <field name="date_apply"/>
+		    <field name="user_id"/>
+		    <field name="date_now"/>
+		    <field name="next_user_id"/>
+		    <field name="date_approval"/>
+		    <field name="state"/>		
+		</search>
+	    </field>
+	</record>
+
+        <record id="action_okgj_adjust_purchase_price" model="ir.actions.act_window">
+            <field name="name">采购价格调整</field>
+            <field name="res_model">okgj.adjust.price</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_okgj_adjust_purchase_price_tree"/>
+            <field name="search_view_id" ref="view_okgj_adjust_purchase_price_search"/>
+
+            <field name="domain">[('type','=','purchase')]</field>
+            <field name="context">{'default_type': 'purchase'}</field>
+	    <field name="help" type="html">
+		<p class="oe_view_nocontent_create">
+		    点击新建一个采购调价单
+		</p>
+	    </field>
+
+        </record>
+
+
+        <record id="act_view_okgj_adjust_purchase_price_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_adjust_purchase_price_tree"/>
+            <field name="act_window_id" ref="action_okgj_adjust_purchase_price"/>
+        </record>
+        <record id="act_view_okgj_adjust_purchase_price_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_adjust_purchase_price_form"/>
+            <field name="act_window_id" ref="action_okgj_adjust_purchase_price"/>
+        </record>
+
+<!-- product promotion price information -->
+ <record id="okgj_product_product_promotion_tree" model="ir.ui.view">
+      <field name="name">okgj.product.product.promotion.tree.view</field>
+      <field name="model">product.product</field>
+      <field name="inherit_id" ref="product.product_product_tree_view"/>
+      <field name="arch" type="xml">
+          <field name="lst_price" position="after">
+              <field name="promotion_price"/>
+              <field name="promotion_start_time" groups='base.group_system'/>
+              <field name="promotion_end_time" groups='base.group_system'/>
+          </field>
+      </field>
+ </record>
+        
+
+	
+</data>
+</openerp>

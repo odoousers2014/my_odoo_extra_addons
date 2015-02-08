@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="0">
+
+
+<!-- SALE -->
+        <record id="ir_rule_sale_order_multi_shop" model="ir.rule">
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids])]</field>
+            <field name="name">Sale Order Multi Shop</field>
+            <field eval="1" name="global"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+
+        <record id="ir_rule_sale_shop_multi_shop" model="ir.rule">
+            <field name="model_id" ref="sale.model_sale_shop"/>
+            <field name="domain_force">[('id','in',[x.id for x in user.shop_ids])]</field>
+            <field name="name">Sale Shop Multi Shop</field>
+            <field eval="1" name="global"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+
+        <record id="ir_rule_sale_shop_multi_shop_manager" model="ir.rule">
+            <field name="model_id" ref="sale.model_sale_shop"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+            <field name="name">Sale Shop Multi Shop Manager</field>
+            <field name="groups" eval="[(4, ref('base.group_sale_manager'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+
+<!-- STOCK -->
+<!-- OUT -->
+       <!-- Dami rule for stock_picking OUT limit by shop_ids -->             
+        <record id="ir_rule_stock_picking_group_stock_user_limit_by_shop_ids" model="ir.rule">
+            <field name="model_id" ref="stock.model_stock_picking_out"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids])]</field>
+            <field name="name">DAMI Stock Picking Multi Shop OUT</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+<!-- LIST -->    
+       <!-- Dami rule for stock_picking_LIST limit by shop_ids -->             
+        <record id="ir_rule_stock_picking_list_group_stock_user_limit_by_shop_ids" model="ir.rule">
+            <field name="model_id" ref="stock_quick_entry.model_stock_picking"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids])]</field>
+            <field name="name">DAMI Stock Picking List Multi Shop</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+        
+<!-- IN -->       
+       	<record id="ir_rule_stock_picking_in_group_stock_user_limit_by_purchase_id_shop_ids" model="ir.rule">
+            <field name="model_id" ref="stock.model_stock_picking_in"/>
+            <field name="domain_force"> ['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids])]</field>
+            <field name="name">DAMI Stock Picking Multi Shop IN</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>                
+        
+ <!-- old picking rules -->       
+       <!-- jon rule of stock_picking limit by sale_id/user.shop_ids -->   
+       <!-- <record id="ir_rule_stock_picking_out_group_stock_user_limit_by_shop_ids" model="ir.rule">
+            <field name="model_id" ref="stock.model_stock_picking_out"/>
+            <field name="domain_force">[('sale_id.shop_id.id' ,'in', [line.id for line in user.shop_ids])]</field>
+            <field name="name">Delivery Order Multi Shop</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record> -->
+        
+        <!-- jon rule of stock_picking limit by purchase_id/user.shop_ids        
+       	<record id="ir_rule_stock_picking_group_stock_user_limit_by_purchase_id_shop_ids" model="ir.rule">
+            <field name="model_id" ref="stock.model_stock_picking_in"/>
+            <field name="domain_force">[('purchase_id.shop_id.id' ,'in', [line.id for line in user.shop_ids])]</field>
+            <field name="name">Stock Picking Multi Shop IN</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+       	<record id="ir_rule_stock_picking_in_group_stock_user_limit_by_purchase_id_shop_ids" model="ir.rule">
+            <field name="model_id" ref="stock.model_stock_picking_in"/>
+            <field name="domain_force">[('purchase_id.shop_id.id' ,'in', [line.id for line in user.shop_ids])]</field>
+            <field name="name">Purchase Picking Multi Shop</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record> -->
+
+<!-- PURCHASE -->     
+        <!-- jon rule of purchase order limit by user.shop_ids -->  
+        <record id="ir_rule_pruchase_order_group_purchase_user_limit_by_shop_ids" model="ir.rule">
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="domain_force">[('shop_id.id' ,'in', [line.id for line in user.shop_ids])]</field>
+            <field name="name">Purchase Order Multi Shop</field>
+            <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+     
+<!-- PARTNER -->   
+        <!-- jon rule of res.partner limit by user.shop_ids -->  
+        <record id="kelit_data.ir_rule_own_customers" model="ir.rule">
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids]),'|',('user_id', '=', user.id),('user_id', '=', False)]</field>
+            <field name="name">Partner: access for own partners and limit by shop_ids</field>
+            <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+
+        <!-- jon   Partner: limit by shop_ids -->  
+        <record id="ir_rule_all_customers" model="ir.rule">
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids])]</field>
+            <field name="name">Partner: limit by shop_ids</field>
+            <field name="groups" eval="[(4, ref('base.group_sale_salesman_all_leads'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+        
+        <!-- jon   Partner: access for own partners and limit by shop_ids -->  
+        <record id="ir_rule_own_customers" model="ir.rule">
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids]),'|',('user_id', '=', user.id),('user_id', '=', False)]</field>
+            <field name="name">Partner: access for own partners and limit by shop_ids</field>
+            <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+
+<!-- Invoice -->        
+        <!-- jon rule of account.invoice limit by user.shop_ids -->  
+        <record id="account_invoice_limit_by_user_shop_ids" model="ir.rule">
+            <field name="model_id" ref="account.model_account_invoice"/>
+            <field name="domain_force">['|',('shop_id','=',False),('shop_id','in',[x.id for x in user.shop_ids])] </field>
+            <field name="groups" eval="[(4, ref('account.group_account_invoice')), (4, ref('stock.group_stock_user'))]"/>            
+            <field name="name">Invoice Multi Shop</field>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+        
+                <!-- Dami rule of account.invoice limit by own invoice -->  
+        <record id="account_invoice_limit_by_own_shop_ids" model="ir.rule">
+            <field name="model_id" ref="account.model_account_invoice"/>
+            <field name="domain_force">[('user_id','=',user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>            
+            <field name="name">Own Invoice</field>
+            <field eval="1" name="perm_unlink"/>
+            <field eval="1" name="perm_write"/>
+            <field eval="1" name="perm_read"/>
+            <field eval="1" name="perm_create"/>
+        </record>
+        
+
+        
+        
+        
+        
+        
+    </data>
+</openerp>
+

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+
+<data noupdate="1">
+<record id="model_sync_api_sale_man" model="ir.rule">
+    <field name="name">yks.sync.api.saleman</field>
+    <field ref="model_sync_api" name="model_id"/>
+    <field name="domain_force">[('user_id','=',user.id)]</field>
+    <field name="groups" eval="['|',('user_id','=',user.id),('section_id','=',user.default_section_id.id)]"/>
+</record>
+<record id="model_sync_api_all_lead" model="ir.rule">
+    <field name="name">yks.sync.api.all.lead</field>
+    <field ref="model_sync_api" name="model_id"/>
+    <field name="domain_force">[(1,'=',1)]</field>
+    <field name="groups" eval="[(6,0, [ref('base.group_sale_salesman_all_leads'),])]"/>
+</record>
+</data>
+
+<data>
+<record model="ir.ui.view" id="yks_sync_api_form_view">
+     <field name="name">yks.sync.api.form</field>
+     <field name="model">sync.api</field>
+     <field name="arch" type="xml">
+
+         <form string="sync api" version='7.0'>
+        <header>       
+            <button name="sync_this_api"   string="同步订单" type="object" />
+            <button name="get_all_dict"   string="get_all_dict" type="object"   groups='base.group_system'/>
+            <button name="report_dict_info"   string="Print Dict-Info to Log" type="object"   groups='base.group_system'/>
+            <button name="scheduler_sync_api"   string="Get Order All" type="object"   groups='base.group_system'/>
+            <button name="connection_test"   string="测试连接" type="object" />
+            <button name="alibaba_refresh_token"   string="refresh access token" type="object"  attrs="{ 'invisible':[('type', '!=', 'alibaba')]}"/>
+            <button name='update_platform_stcok_qty' string='同步库存' type='object' attrs="{ 'invisible':[('type', '!=', 'suning')]}" />
+            <button name="get_onsale_product" string='获取在售商品' type='object' attrs="{ 'invisible':[('type', '!=', 'suning')]}" groups="base.group_sale_salesman_all_leads"/>
+        </header>
+        <sheet>
+            <h2  attrs="{ 'invisible':[('type', 'not in', ['taobao','tmall'])]}">
+                <a href='http://api.taobao.com/apitools/sessionPage.htm'  target="_blank">点击刷新Session-Key</a>
+            </h2>
+            <group>
+                <group>
+                     <field name="type" on_change="onchange_type(type)" attrs="{'readonly':[('state','=','done')], 'required':1}"/>
+                     <field name="name" attrs="{'readonly':[('state','=','done')], 'required':1}"/>
+                     <field name="app_key" attrs="{'readonly':[('state','=','done')]}" required="1"/>
+                     <field name="key_secret"  groups='base.group_system' attrs="{'readonly':[('state','=','done')]}"/>
+                     <field name="refresh_token" groups='base.group_system' attrs="{ 'invisible':[('type', '!=', 'alibaba')]}"/>
+                     <field name="member_id" groups='base.group_system' attrs="{'invisible':[('type', '!=', 'alibaba')]}"/>
+                     <field name="deliver_name"/>
+                     <field name="deliver_city_id"/>
+                     <field name="deliver_company_name"/>
+                     <field name="deliver_tel"/>
+                     <field name="deliver_address"/>
+                     <field name="address_format" groups="base.group_system" attrs="{'readonly':[('state','=','done')]}"/>
+                     <field name="state" groups="base.group_system"/>
+                </group>
+                <group>
+	                 <field name="user_id"/>
+	                 <field name='shop_id' required='1'/>
+	                 <field name="is_multi_user" groups="base.group_system" attrs="{'readonly':[('state','=','done')]}"/>
+	                 <field name="carrier_id"/>
+	                 <field name="partner_id" attrs="{'readonly':[('state','=','done')]}"/>
+	                 <field name="section_id"  attrs="{'readonly':[('state','=','done')], 'required':1}"/>
+	                 <field name="currency_id" attrs="{'readonly':[('state','=','done')]}"/>
+	                 <field name="offset_time"/>
+	                 <field name="state_filter" required="1"/>
+	                 <field name="active" groups="base.group_system"/>
+                </group>
+                <group colspan='2'>
+	                <field name="session_key" attrs="{'required':[('type','!=','suning')], 'invisible':[('type','=','suning')]}"/>
+	                <field name="connection_error" />
+                </group>
+            </group> 
+            <notebook>
+	         	<page string='在售商品' attrs="{ 'invisible':[('type', '!=', 'suning')]}">
+	         		<button name="onsale_stock_available" string="查看库存" type="object" />
+	         		<field name="product_ids" readonly="1">
+	         			<tree string="在售商品">
+                             <field name="default_code"/>
+                             <field name='name'/>
+                             <field name="brand_id"/>
+                         </tree>
+	         		</field>
+	         	</page>
+         	</notebook>
+         </sheet>
+         </form>
+     </field>
+</record>
+<record model="ir.ui.view" id="yks_sync_api_tree_view">
+     <field name="name">yks.sync.api.tree</field>
+     <field name="model">sync.api</field>
+     <field name="arch" type="xml">
+         <tree string="sync api">
+             <field name="name" select="1"/>
+             <field name="type" />
+             <field name="user_id"/>
+             <field name="is_multi_user"/>
+             <field name="partner_id"/>
+             <field name="carrier_id"/>
+             <field name="section_id"/>
+             <field name="offset_time"/>
+             <field name="address_format" groups="base.group_system"/>
+             <field name="currency_id"/>
+             <field name="state"/>
+             <field name="state_filter"/>
+             
+         </tree>
+     </field>
+</record>
+<record model="ir.actions.act_window" id="yks_sync_api_action">
+      <field name="name">平台同步帐号</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">sync.api</field>
+      <field name="domain">[]</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="yks_sync_api_tree_view"/>
+</record>
+
+<menuitem id="yks_sync_api_menu" name="平台同步帐号"  parent="base.menu_base_config" 
+                  action="yks_sync_api_action"  groups='base.group_system'/>
+
+</data>
+</openerp>

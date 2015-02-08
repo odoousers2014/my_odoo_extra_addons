@@ -1,0 +1,5 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink,active
+account.access_account_analytic_account,account.analytic.account,analytic.model_account_analytic_account,base.group_user,False,False,False,False,True
+sale.access_account_analytic_account_salesman,account_analytic_account salesman,analytic.model_account_analytic_account,base.group_sale_salesman,False,True,True,False,True
+portal_project.access_account_analytic_account,account_analytic_account,analytic.model_account_analytic_account,portal.group_portal,False,False,False,False,True
+portal_project.access_account_analytic_account_anonymous,account_analytic_account,analytic.model_account_analytic_account,portal.group_anonymous,False,False,False,False,True

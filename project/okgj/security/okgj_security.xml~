@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+
+    <!--采购部-->
+    <record id="group_okgj_purchase_user" model="res.groups">
+        <field name="name">采购助理</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+    </record>
+    
+    <record id="group_okgj_purchase_manager" model="res.groups">
+        <field name="name">采购经理</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+    </record>
+
+    <record id="group_okgj_purchase_dep_manager" model="res.groups">
+        <field name="name">采购部经理</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_purchase_management"/>
+    </record>
+
+    <!--物流中心-->
+    <record id="group_okgj_logisitcs_manager" model="res.groups">
+        <field name="name">物流部经理</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+    </record>
+
+    <record id="group_okgj_logistics_keeper" model="res.groups">
+        <field name="name">收货部仓管</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+    </record>
+
+    <record id="group_okgj_logistics_assist" model="res.groups">
+        <field name="name">物流文员</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+    </record>
+
+    <record id="group_okgj_logistics_picking" model="res.groups">
+        <field name="name">拣货员</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+    </record>
+    
+    <record id="group_okgj_logistics_verify" model="res.groups">
+        <field name="name">拣货复核</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+    </record>
+
+    <record id="group_okgj_logistics_dispatcher" model="res.groups">
+        <field name="name">物流调度</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+    </record>
+
+    <!--财务-->
+    <record id="group_okgj_finance_user" model="res.groups">
+        <field name="name">财务核算</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+    </record>
+
+    <!--客服-->
+    <record id="group_okgj_service_user" model="res.groups">
+        <field name="name">客服专员</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_customer_relationship_management"/>
+    </record>
+
+    <record id="group_okgj_service_manager" model="res.groups">
+        <field name="name">客服经理</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_customer_relationship_management"/>
+    </record>
+
+    <!--万商汇-->
+    <record id="group_okgj_partner_user" model="res.groups">
+        <field name="name">万商汇用户</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_sales_management"/>
+    </record>
+    
+    <!--运营-->
+    <record id="group_okgj_market_user" model="res.groups">
+        <field name="name">运营用户</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_marketing"/>
+    </record>
+
+    <!--ERP维护-->
+    <record id="group_okgj_system_user" model="res.groups">
+        <field name="name">ERP维护</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_administration"/>
+    </record>
+
+</data>
+
+</openerp>

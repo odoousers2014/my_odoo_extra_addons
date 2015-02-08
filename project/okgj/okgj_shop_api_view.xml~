@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	<record id="view_okgj_sale_order_form" model="ir.ui.view">
+            <field name="name">view.okgj.sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+		<!--客户信息-->
+		<field name="partner_id" position="after">
+		    <field name="okgj_user_id"/>
+		    <field name="mobile"/>
+		    <field name="okgj_tel"/>
+		    <field name="bonus"/>
+		    <field name="recharge_bonus"/>
+		</field>
+		<!--订单信息-->
+		<field name="date_order" position="replace">
+		    <field name="date_order"/>
+		    <field name="best_time"/>
+		    <field name="okgj_city"/>
+		    <field name="consignee"/>
+		    <field name="region_name"/>
+		    <field name="okgj_address"/>
+		    <field name="reconment"/>
+		    <field name="send_time_content"/>
+		    <field name="send_time"/>
+		</field>
+		<field name="client_order_ref" position="replace"/>
+		<!--付款与发票信息-->
+		<notebook position="before">
+		    <group>
+		    <group>
+			<field name="goods_amount"/>
+			<field name="shipping_fee"/>
+			<field name="ship_fee"/>
+			<field name="weight_fee"/>
+			<field name="coupon_pay"/>
+			<field name="bonus_pay"/>
+			<field name="money_paid"/>
+			<field name="order_amount"/>
+			<field name="pay_id"/>
+			<field name="pay_time"/>
+			<field name="pay_status"/>
+		    </group>
+		    <group>
+			<field name="inv_state"/>
+			<field name="inv_type"/>
+			<field name="inv_payee"/>
+			<field name="inv_content"/>
+			<field name="inv_amount"/>
+			<field name="order_weight"/>
+		    </group>
+		    </group>
+		</notebook>
+		
+                <xpath expr="//notebook/page[@string='Order Lines']/field[@name='order_line']/tree[@string='Sales Order Lines']/field[@name='name']" position="replace">
+		    <field name="name" invisible="1"/>
+		</xpath>
+		    <!--field name="variant"/-->
+            </field>
+        </record>
+
+        <record id="view_okgj_sale_order_tree" model="ir.ui.view">
+            <field name="name">view.okgj.sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree" />
+            <field name="arch" type="xml">
+                <field name="date_order" position="after">
+                    <field name="create_date"/>
+                </field>
+		<field name="partner_id" position="replace"/>
+		<field name="user_id" position="replace"/>
+
+            </field>
+        </record>
+	
+        <record id="action_okgj_sale_orders" model="ir.actions.act_window">
+            <field name="name">销售订单</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,graph</field>
+            <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+        </record>
+
+        <record id="action_okgj_sale_orders_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="okgj.view_okgj_sale_order_form"/>
+            <field name="act_window_id" ref="action_okgj_sale_orders"/>
+        </record>
+
+        <record id="action_okgj_sale_orders_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_sale_order_tree"/>
+            <field name="act_window_id" ref="action_okgj_sale_orders"/>
+        </record>
+
+	<!--Cron定时执行-->
+        <record forcecreate="True" id="ir_cron_okgj_sale_order_cron" model="ir.cron">
+            <field name="name">Get Sale Orders</field>
+            <field eval="True" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'sale.order'" name="model"/>
+            <field eval="'okgj_sale_order_cron'" name="function"/>
+            <field eval="'(False,)'" name="args"/>
+        </record>
+
+        <record forcecreate="True" id="ir_cron_okgj_sale_order_cancel_cron" model="ir.cron">
+            <field name="name">Get Canceled Sale Orders</field>
+            <field eval="True" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'sale.order'" name="model"/>
+            <field eval="'okgj_sale_order_cancel_cron'" name="function"/>
+            <field eval="'(False,)'" name="args"/>
+        </record>
+
+        <record forcecreate="True" id="ir_cron_okgj_sale_return_order_cron" model="ir.cron">
+            <field name="name">Get Return Orders</field>
+            <field eval="True" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'sale.sale.order'" name="model"/>
+            <field eval="'okgj_sale_return_order_cron'" name="function"/>
+            <field eval="'(False,)'" name="args"/>
+        </record>
+
+   </data>
+</openerp>

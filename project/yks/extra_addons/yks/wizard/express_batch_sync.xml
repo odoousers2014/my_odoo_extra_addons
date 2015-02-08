@@ -1,0 +1,51 @@
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="yks_express_batch_sync_form_view">
+    <field name="name">yks.express.batch.sync.form</field>
+    <field name="model">express.batch.sync</field>
+    <field name="arch" type="xml">
+        <form string="批量上传快递单号" version="7.0">
+            <group>
+        		<group>
+        			<field name="type"/>
+        		</group>
+        		<group>
+        		</group>
+            </group>
+           	<group>
+                <field name="lines">
+                	<tree editable="bottom">
+                		 <field name="api_id"/>
+                	</tree>
+                </field>
+           	</group>
+            <footer>
+                <button name="apply" string="确认" type="object" class="oe_highlight"/>
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window 
+    id="action_wizard_express_batch_sync"
+    multi="False"
+    key2="client_action_relate"
+    name="批量上传快递单号"
+    res_model="express.batch.sync"
+    view_mode="form"
+    target="new"
+    view_type="form"/>
+
+<menuitem id="menu_wizard_express_batch_sync" name="批量上传快递单号"
+	parent="base.menu_sales" action="action_wizard_express_batch_sync"
+	groups="base.group_sale_salesman"/>
+
+
+
+
+
+</data>
+</openerp>

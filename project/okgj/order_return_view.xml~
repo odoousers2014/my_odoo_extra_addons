@@ -1,0 +1,566 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+         <!-- 采购退货单  -->
+	 <record id="view_okgj_purchase_return_form" model="ir.ui.view">
+	     <field name="name">view.okgj.purchase.return.form</field>
+	     <field name="model">okgj.purchase.return</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <form string="采购退货" version="7.0">
+		     <header>
+			 <button name="action_confirm" states="draft" string="确认" type="object" class="oe_highlight"/>
+			 <field name="state" widget="statusbar" readonly="1" statusbar_visible="draft,confirmed"/>
+		     </header>
+		     <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="采购退货"/>
+			     </h1>
+			 </div>
+			 <group>
+			     <group>
+				 <field name="name"/>
+				 <field name="partner_id"  on_change="onchange_partner_id(partner_id)"/>
+				 <field name="pricelist_id"/>
+				 <button name="action_import_product"  string="选择商品" type="object" states="draft"/>
+			     </group>
+			     <group>
+				 <field name="date_planned"/>
+				 <field name="invoice_state" invisible="1"/>
+				 <field name="warehouse_id"/>
+			     </group>
+			 </group>
+			 <h2>
+			     <label for="line_ids" string="商品明细"/>
+			 </h2>
+			 <field name="line_ids" colspan="4">
+			     <tree string="货位" editable="top">
+				 <field name="product_id" on_change="onchange_product_id(parent.pricelist_id, product_id, product_qty, product_uom, parent.partner_id, price_unit, context)"/>
+				 <field name="product_qty"  widget="integer"/>
+				 <field name="product_uom"/>
+				 <field name="price_unit"/>
+				 <field name="price_subtotal" sum="Total"/>
+			     </tree>
+			 </field>
+			 <field name="note"/>
+		     </sheet>
+		 </form>
+	     </field>
+	 </record>
+
+	 <record id="view_okgj_purchase_return_tree" model="ir.ui.view">
+	     <field name="name">view.okgj.purchase.return.tree</field>
+	     <field name="model">okgj.purchase.return</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <tree string="采购退货">
+		     <field name="partner_id"/>
+		     <field name="name"/>
+		     <field name="create_uid"/>
+		     <field name="create_date"/>
+		     <field name="date_planned"/>
+		     <field name="invoice_state"/>
+		     <field name="line_ids"/>
+		     <field name="state"/>
+		     <field name="note"/>
+		 </tree>
+	     </field>
+	 </record>
+
+	 <record id="view_okgj_purchase_return_search" model="ir.ui.view">
+	     <field name="name">view.okgj.purchase.return.search</field>
+	     <field name="model">okgj.purchase.return</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <search string="采购退货">
+		     <field name="state"/>
+		     <field name="partner_id"/>
+		     <field name="name"/>
+		     <field name="date_planned"/>
+		     <field name="invoice_state"/>
+		     <field name="line_ids"/>
+		 </search>
+	     </field>
+	 </record>
+
+        <record id="action_okgj_purchase_return" model="ir.actions.act_window">
+            <field name="name">采购退货</field>
+            <field name="res_model">okgj.purchase.return</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_okgj_purchase_return_tree"/>
+            <field name="search_view_id" ref="view_okgj_purchase_return_search"/>
+            <field name="context">{}</field>
+        </record>
+
+        <menuitem action="action_okgj_purchase_return" id="menu_action_okgj_purchase_return" parent="purchase.menu_procurement_management"/>
+
+	<!--采购退货出库-->
+        <record id="view_okgj_picking_purchase_return_tree" model="ir.ui.view">
+            <field name="name">view.okgj.picking.purchase.return.tree</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <tree  string="采购退货出库">
+                    <field name="purchase_return_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="partner_id" string="供应商"/>
+                    <!--field name="stock_journal_id"/-->
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_picking_purchase_return_form" model="ir.ui.view">
+            <field name="name">view.okgj.picking.purchase.return.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <form string="采购退货出库" version="7.0">
+		    <header>
+			<button name="draft_validate" states="draft" string="审批通过" type="object" class="oe_highlight"/>
+			<button name="action_assign" states="confirmed" string="检测可用" type="object" class="oe_highlight"/>
+			<button name="force_assign" states="confirmed" string="强制可用" type="object" class="oe_highlight" groups="base.group_user"/>
+			<button name="action_process" states="assigned" string="确认出库" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="采购退货出库"/>
+			     </h1>
+			 </div>
+			<group>
+			    <field name="type" invisible="1"/>
+			    <field name="okgj_type" invisible="1"/>
+			    <group>
+				<field name="purchase_return_id"/>
+				<field name="partner_id"/>
+			    </group>
+			    <group>
+				<field name="name"/>
+				<field name="date_done"/>
+				<!--field name="stock_journal_id"/-->
+			    </group>
+			</group>
+			<h2>
+			    <label for="move_lines" string="商品明细"/>
+			</h2>
+			<field name="move_lines" string="商品" colspan="4"  context="{'form_view_ref':'view_move_picking_form', 'tree_view_ref':'view_move_picking_tree', 'picking_type': 'out'}">
+			    <!--tree string="商品" editable="top">
+				<field name="product_id"/>
+				<field name="variant"/>
+				<field name="product_qty" widget="integer"/>
+				<field name="product_uom"/>
+				<field name="prodlot_id" domain="[('product_id','=',product_id)]"/>
+				<field name="pick_rack_id" readonly="1"/>
+				<field name="store_rack_id" readonly="1"/>
+				<field name="state" invisible="1"/>
+			    </tree>
+			    <form string="商品">
+				<field name="product_id"/>
+				<field name="variant"/>
+				<field name="product_qty" widget="integer"/>
+				<field name="product_uom"/>
+				<field name="prodlot_id" domain="[('product_id','=',product_id)]"/>
+				<field name="pick_rack_id" readonly="1"/>
+				<field name="store_rack_id" readonly="1"/>
+				<field name="state" invisible="1"/>
+			    </form-->
+			</field>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_picking_purchase_return_search" model="ir.ui.view">
+            <field name="name">view.okgj.picking.purchase.return.search</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <search string="采购退货出库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="create_date"/>
+                    <field name="partner_id" string="供应商"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <!--filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/-->
+                </search>
+            </field>
+        </record>
+
+
+        <record id="action_okgj_picking_purchase_return" model="ir.actions.act_window">
+            <field name="name">采购退货出库</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_picking_purchase_return_search"/>
+            <field name="domain">[('type','=','out'),('okgj_type', '=', 'okgj_purchase_out')]]</field>
+            <field name="context">{'default_type': 'out', 'default_okgj_type': 'okgj_purchase_out'}</field>
+            <field name="help" type="html">
+              <p>
+		  采购退货出库帮助
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_picking_purchase_return_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_picking_purchase_return_tree"/>
+            <field name="act_window_id" ref="action_okgj_picking_purchase_return"/>
+        </record>
+        <record id="act_view_okgj_picking_purchase_return_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_picking_purchase_return_form"/>
+            <field name="act_window_id" ref="action_okgj_picking_purchase_return"/>
+        </record>
+
+
+	<!--销售退货-->
+	 <record id="view_okgj_sale_return_form" model="ir.ui.view">
+	     <field name="name">view.okgj.sale.return.form</field>
+	     <field name="model">okgj.sale.return</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <form string="销售退货" version="7.0">
+		     <header>
+			 <button name="action_confirm" states="draft" string="确认" type="object" class="oe_highlight"/>
+			 <field name="state" widget="statusbar" readonly="1" statusbar_visible="draft,confirmed"/>
+		     </header>
+		     <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="销售退货单"/>
+			     </h1>
+			 </div>
+			 <group>
+			     <group>
+				 <field name="name"/>
+				 <field name="sale_order_id" on_change="onchange_order_id(sale_order_id, context)"/>
+				 <field name="date_planned"/>
+				 <field name="warehouse_id"/>
+			     </group>
+			     <group>
+				 <field name="okgj_tel"/>
+				 <field name="consignee"/>
+				 <field name="best_time"/>
+				 <field name="address"/>
+			     </group>
+			     <group>
+				 <field name="action_note"/>
+				 <field name="shipping_fee"/>
+				 <field name="refund_amount"/>
+			     </group>
+			     <group>
+				 <field name="return_info"/>
+			     </group>
+			 </group>
+			 <h2>
+			     <label for="old_line_ids" string="退货商品"/>
+			 </h2>
+			 <field name="old_line_ids" colspan="4" string="退货商品">
+			     <tree string="退货" editable="top">
+				 <field name="product_id" on_change="onchange_product_id(product_id)"/>
+				 <field name="variant"/>
+				 <field name="product_qty"/>
+				 <field name="product_uom"/>
+				 <field name="price_unit"/>
+				 <field name="price_subtotal" sum="总退货金额"/>
+			     </tree>
+			 </field>
+			 <h2>
+			     <label for="new_line_ids" string="换货商品"/>
+			 </h2>
+			 <field name="new_line_ids"  colspan="4" string="换货明细">
+			     <tree string="换货" editable="top">
+				 <field name="product_id" on_change="onchange_product_id(product_id)"/>
+				 <field name="variant"/>
+				 <field name="product_qty"/>
+				 <field name="product_uom"/>
+				 <field name="price_unit"/>
+				 <field name="price_subtotal"  sum="总换货金额"/>
+			     </tree>
+			 </field>
+		     </sheet>
+		 </form>
+	     </field>
+	 </record>
+
+	 <record id="view_okgj_sale_return_tree" model="ir.ui.view">
+	     <field name="name">view.okgj.sale.return.tree</field>
+	     <field name="model">okgj.sale.return</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <tree string="销售退货">
+		     <field name="sale_order_id"/>
+		     <field name="name"/>
+		     <field name="create_uid"/>
+		     <field name="create_date"/>
+		     <field name="date_planned"/>
+		     <field name="okgj_tel"/>
+		     <field name="consignee"/>
+		     <field name="state"/>
+		 </tree>
+	     </field>
+	 </record>
+
+	 <record id="view_okgj_sale_return_search" model="ir.ui.view">
+	     <field name="name">view.okgj.sale.return.search</field>
+	     <field name="model">okgj.sale.return</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <search string="销售退货">
+		     <field name="state"/>
+		     <field name="sale_order_id"/>
+		     <field name="name"/>
+		     <field name="date_planned"/>
+		 </search>
+	     </field>
+	 </record>
+
+        <record id="action_okgj_sale_return" model="ir.actions.act_window">
+            <field name="name">销售退货</field>
+            <field name="res_model">okgj.sale.return</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_okgj_sale_return_tree"/>
+            <field name="search_view_id" ref="view_okgj_sale_return_search"/>
+            <field name="context">{}</field>
+        </record>
+
+	<!--销售退货出库单-->
+        <record id="view_okgj_picking_saleout_return_tree" model="ir.ui.view">
+            <field name="name">view.okgj.picking.saleout.return.tree</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <tree  string="销售退货出库">
+                    <!--field name="origin"/-->
+                    <field name="sale_return_id"/>
+		    <field name="sale_return_sale"/>
+                    <field name="name"/>
+                    <field name="create_date"/>
+                    <field name="sale_return_consignee"/>
+                    <field name="sale_return_tel"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_picking_saleout_return_form" model="ir.ui.view">
+            <field name="name">view.okgj.picking.saleout.return.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <form string="销售退货出库" version="7.0">
+		    <header>
+			<button name="draft_validate" states="draft" string="审批通过" type="object" class="oe_highlight"/>
+			<button name="action_assign" states="confirmed" string="检测可用" type="object" class="oe_highlight"/>
+			<button name="force_assign" states="confirmed" string="强制可用" type="object" class="oe_highlight" groups="base.group_user"/>
+			<button name="action_process" states="assigned" string="确认出库" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="销售退货出库"/>
+			     </h1>
+			 </div>
+			<group>
+			    <field name="type" invisible="1"/>
+			    <field name="okgj_type" invisible="1"/>
+			    <group>
+				<field name="origin"/>
+				<field name="partner_id"/>
+			    </group>
+			    <group>
+				<field name="name"/>
+				<field name="date_done"/>
+				<!--field name="stock_journal_id"/-->
+			    </group>
+			</group>
+			<h2>
+			    <label for="move_lines" string="商品明细"/>
+			</h2>
+			<field name="move_lines" string="商品" colspan="4"  context="{'form_view_ref':'view_move_picking_form', 'tree_view_ref':'view_move_picking_tree', 'picking_type': 'out'}">
+			    <!--tree string="商品">
+				<field name="product_id"/>
+				<field name="variant"/>
+				<field name="product_qty"  widget="integer"/>
+				<field name="product_uom"/>
+				<field name="prodlot_id"/>
+				<field name="pick_rack_id" readonly="1"/>
+				<field name="store_rack_id"  readonly="1"/>
+				<field name="state" invisible="1"/>
+			    </tree-->
+			</field>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_picking_saleout_return_search" model="ir.ui.view">
+            <field name="name">view.okgj.picking.saleout.return.search</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <search string="销售退货出库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="date"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <!--filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/-->
+                </search>
+            </field>
+        </record>
+
+
+        <record id="action_okgj_picking_saleout_return" model="ir.actions.act_window">
+            <field name="name">销售退货出库</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_picking_saleout_return_search"/>
+            <field name="domain">[('type','=','out'),('okgj_type', '=', 'okgj_sale_out')]]</field>
+            <field name="context">{'default_type': 'out', 'default_okgj_type': 'okgj_sale_out'}</field>
+            <field name="help" type="html">
+              <p>
+		  销售退货出库帮助
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_picking_saleout_return_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_picking_saleout_return_tree"/>
+            <field name="act_window_id" ref="action_okgj_picking_saleout_return"/>
+        </record>
+        <record id="act_view_okgj_picking_saleout_return_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_picking_saleout_return_form"/>
+            <field name="act_window_id" ref="action_okgj_picking_saleout_return"/>
+        </record>
+
+
+	<!--销售退货入库单-->
+        <record id="view_okgj_picking_salein_return_tree" model="ir.ui.view">
+            <field name="name">view.okgj.picking.salein.return.tree</field>
+            <field name="model">stock.picking.in</field>
+            <field name="arch" type="xml">
+                <tree string="销售退货入库">
+                    <!--field name="origin"/-->
+                    <field name="sale_return_id"/>
+		    <field name="sale_return_sale"/>
+                    <field name="name"/>
+                    <field name="create_date"/>
+                    <field name="sale_return_consignee"/>
+                    <field name="sale_return_tel"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_picking_salein_return_form" model="ir.ui.view">
+            <field name="name">view.okgj.picking.salein.return.form</field>
+            <field name="model">stock.picking.in</field>
+            <field name="arch" type="xml">
+                <form string="销售退货入库" version="7.0">
+		    <header>
+			<button name="action_process" states="assigned" string="确认入库" type="object" class="oe_highlight"/>
+			<button name="action_assign" states="confirmed" string="检测可用" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="销售退货入库"/>
+			     </h1>
+			 </div>
+			<group>
+			    <field name="type" invisible="1"/>
+			    <field name="okgj_type" invisible="1"/>
+			    <group>
+				<field name="origin"/>
+				<field name="partner_id"/>
+			    </group>
+			    <group>
+				<field name="name"/>
+				<field name="date_done"/>
+				<!--field name="stock_journal_id"/-->
+			    </group>
+			</group>
+			<h2>
+			    <label for="move_lines" string="商品明细"/>
+			</h2>
+			<field name="move_lines" string="商品" colspan="4"  context="{'form_view_ref':'view_move_picking_form', 'tree_view_ref':'view_move_picking_tree', 'picking_type': 'in'}">
+			    <!--tree string="商品">
+				<field name="product_id"/>
+				<field name="variant"/>
+				<field name="product_qty"  widget="integer"/>
+				<field name="product_uom"/>
+				<field name="pick_rack_id"/>
+				<field name="store_rack_id"/>
+				<field name="state" invisible="1"/>
+			    </tree-->
+			</field>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_picking_salein_return_search" model="ir.ui.view">
+            <field name="name">view.okgj.picking.salein.return.search</field>
+            <field name="model">stock.picking.in</field>
+            <field name="arch" type="xml">
+                <search string="销售退货入库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="date"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <!--filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/-->
+                </search>
+            </field>
+        </record>
+
+
+        <record id="action_okgj_picking_salein_return" model="ir.actions.act_window">
+            <field name="name">销售退货入库</field>
+            <field name="res_model">stock.picking.in</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_picking_salein_return_search"/>
+            <field name="domain">[('type','=','in'),('okgj_type', '=', 'okgj_sale_in')]]</field>
+            <field name="context">{'default_type': 'in', 'default_okgj_type': 'okgj_sale_in'}</field>
+            <field name="help" type="html">
+              <p>
+		  销售退货入库帮助
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_picking_salein_return_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_picking_salein_return_tree"/>
+            <field name="act_window_id" ref="action_okgj_picking_salein_return"/>
+        </record>
+        <record id="act_view_okgj_picking_salein_return_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_picking_salein_return_form"/>
+            <field name="act_window_id" ref="action_okgj_picking_salein_return"/>
+        </record>
+
+
+   </data>
+</openerp>

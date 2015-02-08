@@ -1,0 +1,7 @@
+#. module: purchase
+#: model:process.node,name:purchase.process_node_approvepurchaseorder0
+#: view:purchase.order:0
+#: selection:purchase.order,state:0
+#: selection:purchase.report,state:0
+msgid "Approved"
+msgstr "Auftrag ..."

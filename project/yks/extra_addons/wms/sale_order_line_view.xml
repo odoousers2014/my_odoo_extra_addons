@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="wms_inherit_view_order_form">
+    <field name="name">sale.order.line.form.wms</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/tree" position="inside">
+            <button name='get_stock_available' string='Stock Available for multi Location' type='object' icon='terp-stock_zoom'/>
+        </xpath>
+    </field>
+</record>
+
+</data>
+</openerp>

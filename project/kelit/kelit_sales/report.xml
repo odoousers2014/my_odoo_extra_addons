@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+<report
+	auto="False"
+	id="account.account_invoices"
+	model="account.invoice"
+	name="account.invoice.kelit"
+	rml="kelit_sales/report/account_print_invoice.rml"
+	string="Invoice"
+	attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+	attachment_use="True"
+	usage="default"
+	/>
+    
+    
+<report id="stock_move_sample_webkit_report" 
+		name="stock_move_sample" 
+		auto="True" 
+		model="stock.move" 
+		file="kelit_sales/report/stock_move_sample.mako"  
+        string="Sample Report" 
+        report_type="webkit"/>
+
+    
+    
+</data>
+</openerp>
+

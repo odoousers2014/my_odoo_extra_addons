@@ -1,0 +1,177 @@
+#+startup:indent
+#+title:表结构
+
+* string 到json的转换
+#+begin_src python
+   import json                     
+   m = {'id': 2, 'name': 'hussain'}  
+   n = json.dumps(m)               
+   o = json.loads(n)               
+   print o['id'], o['name']        
+#+end_src
+
+* 操作，主键Set/Done_Set, 表列Hash
+* 商品
+** 新建商品
+1. do_product_new_set
+2. do_product_new_done_set
+3. do_product_new_hash 
+   | goods_no | goods_name |
+   |----------+------------|
+   | 主键     |            |
+
+** 商品改名表 
+1. do_product_name_change_set
+2. do_product_name_change_done_set
+3. do_product_name_change_hash
+   | goods_no | goods_name |
+   |----------+------------|
+   | 主键     |            |
+备注：如何处理多次改名?用SISMEMBER判断一次或用SREM直接移除一次
+可能的Bug及其它处理方式:两次改名时间过短，系统未返回又提交新的改名。goods_no后添上uuid以保证唯一性
+
+** 表 do_price_change
+   商品调价 
+  | goods_no | shop_price | market_price | package_price |
+  |----------+------------+--------------+---------------|
+  | 主键     |            |              |               |
+
+** combine_product_new
+   新建组合品
+   | parent_goods_no | sub_goods_dict            |
+   |-----------------+---------------------------|
+   | 主键            | '{"B":2,"C":1}'形式字符串 |
+
+** combine_product_update
+   更新组合品
+   | parent_goods_no | sub_goods_dict            |
+   |-----------------+---------------------------|
+   | 主键            | '{"B":2,"C":1}'形式字符串 |
+
+** combine_product_remove
+   删除组合品
+   | parent_goods_no |
+   |-----------------|
+   | 主键            |
+
+** do_customer_sign 
+订单签收
+   | order_no |
+   |----------|
+   | 主键     |
+
+** do_change_order_status 
+订单状态
+   | order_no |
+   |----------|
+   | 主键     |
+
+* 销售订单
+** get_order_queue
+获取订单队列
+无参数
+get_order_queue_set
+get_order_queue_done_set
+** get_order_detail
+获取销售订单详情
+   | order_no | answer |
+   |----------+--------|
+   | 主键     |        |
+
+** do_order_queue_remove
+do_order_queue_remove_set 
+do_order_queue_remove_done_set 
+移除销售订单队列
+   | order_id |
+   |----------|
+   | 主键     |
+
+* 已取消订单
+** get_order_cancel_list
+获取已取消订单队列
+无参数
+
+** do_order_cancel_queue_remove
+   移除订单取消队列
+   | order_id |
+   |----------|
+   | 主键     |
+
+* 退换货订单
+** get_order_cancel_list
+获取已取消订单队列
+无参数
+
+** get_order_return_detail
+退换货订单详情
+   | back_id |
+   |---------|
+   | 主键    |
+
+** get_return_order_list
+获取订单退换货队列
+
+** get_return_order_product_list
+退换货订单商品详情
+   | back_id |
+   |---------|
+   | 主键    |
+
+** do_order_cancel_queue_remove
+移除退换货队列
+   | back_id  |
+   |----------|
+   | 主键     |
+
+* 库存
+** do_release_order_stock 
+订单库存释放
+   | order_no |
+   |----------|
+   | 主键     |
+
+** do_stock_change 
+库存核对
+   | goods_no | total_count |
+   |----------+-------------|
+   | 主键     |             |
+
+** do_stock_out 
+商品出库 （从存储仓出）
+   | goods_no | out_count |
+   |----------+-----------|
+   | 主键     |           |
+
+** do_stock_in 
+商品入库 （入到存储仓）
+   | goods_no | in_count |
+   |----------+----------|
+   | 主键     |          |
+
+** do_order_shipping 
+订单发货
+   | order_no |
+   |----------|
+   | 主键     |
+
+* 用户
+** get_user_info 
+用户信息
+   | userid |
+   |--------|
+   | 主键   | 
+  
+* 其它
+** get_product_stock 
+获取网站商品库存
+   | goods_no |
+   |----------|
+   | 主键     |
+
+** get_product_price 
+获取网站商品价格
+   | goods_no |
+   |----------|
+   | 主键     |
+
+

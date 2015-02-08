@@ -1,0 +1,262 @@
+#-*- coding:utf-8 -*-
+#===============================================================================
+# 日期：2014-11-3
+# 作者：cloudy
+# 描述：统一快递功能，便于维护
+#===============================================================================
+
+import time
+from openerp.report import report_sxw
+#from openerp.tools.translate import _
+
+
+class stock_express_print(report_sxw.rml_parse,):  
+    def __init__(self, cr, uid, name, context):
+        super(stock_express_print, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'get_user_name': self._get_user_name,
+            'get_user_address': self._get_user_address,
+            'get_user_company': self._get_user_company,
+            'get_user_phone': self._get_user_phone,
+            'get_user_signature': self._get_user_signature,
+        })
+    """
+    sent_info保存不同平台的统一发货信息，默认情况下(sent_flag对应平台的值为True)填写各个订单业务员的信息
+    若使用统一地址，统一信息中寄件人为空，寄件人签名为业务员
+    默认(False)为业务员的信息，若需要使用统一信息，将对应平台的值改为:True
+    """
+    sent_info = {
+        'taobao': {
+            'flag': False,
+            'user_name': '',
+            'user_address': '',
+            'user_company': '',
+            'user_phone': '',
+            'user_signature': '',
+        },
+        'tmall': {
+            'flag': False,
+            'user_name': '',
+            'user_address': '',
+            'user_company': '',
+            'user_phone': '',
+            'user_signature': '',
+        },
+        'yhd': {
+            'flag': False,
+            'user_name': '',
+            'user_address': '',
+            'user_company': '',
+            'user_phone': '',
+            'user_signature': '',
+        },
+        'alibaba': {
+            'flag':False,
+            'user_name': '',
+            'user_address': '',
+            'user_company': '',
+            'user_phone': '',
+            'user_signature': '',
+        },
+        'suning': {
+            'flag': True,
+            'user_name': u'苏宁倍速优',
+            'user_address': u'广东一仓',
+            'user_company': '',
+            'user_phone': '4008-839-345',
+            'user_signature': '',
+        },
+    }
+    
+    def _get_user_name(self, picking_out_obj):
+        res = ''
+        if  picking_out_obj.sale_id.is_drop_shopping:
+            res = picking_out_obj.partner_id.name or ''
+        else:
+            if picking_out_obj.sale_id.api_id.type == 'taobao':
+                if self.sent_info['taobao']['flag']:
+                    res = self.sent_info['taobao']['user_name'] or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'tmall':
+                if self.sent_info['tmall']['flag']:
+                    res = self.sent_info['tmall']['user_name'] or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'yhd':
+                if self.sent_info['yhd']['flag']:
+                    res = self.sent_info['yhd']['user_name'] or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'alibaba':
+                if self.sent_info['alibaba']['flag']:
+                    res = self.sent_info['alibaba']['user_name'] or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'suning':
+                if self.sent_info['suning']['flag']:
+                    res = self.sent_info['suning']['user_name'] or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            else:
+                res = picking_out_obj.create_uid.name  or ''
+        return res
+
+    def _get_user_address(self, picking_out_obj):
+        res = ''
+        if  picking_out_obj.sale_id.is_drop_shopping:
+            res = picking_out_obj.partner_id.street or ''
+        else:
+            if picking_out_obj.sale_id.api_id.type == 'taobao':
+                if self.sent_info['taobao']['flag']:
+                    res = self.sent_info['taobao']['user_address'] or ''
+                else:
+                    res = picking_out_obj.deliver_address or ''
+            elif picking_out_obj.sale_id.api_id.type == 'tmall':
+                if self.sent_info['tmall']['flag']:
+                    res = self.sent_info['tmall']['user_address'] or ''
+                else:
+                    res = picking_out_obj.deliver_address or ''
+            elif picking_out_obj.sale_id.api_id.type == 'yhd':
+                if self.sent_info['yhd']['flag']:
+                    res = self.sent_info['yhd']['user_address'] or ''
+                else:
+                    res = picking_out_obj.deliver_address or ''
+            elif picking_out_obj.sale_id.api_id.type == 'alibaba':
+                if self.sent_info['alibaba']['flag']:
+                    res = self.sent_info['alibaba']['user_address'] or ''
+                else:
+                    res = picking_out_obj.deliver_address or ''
+            elif picking_out_obj.sale_id.api_id.type == 'suning':
+                if self.sent_info['suning']['flag']:
+                    res = self.sent_info['suning']['user_address'] or ''
+                else:
+                    res = picking_out_obj.deliver_address or ''
+            else:
+                res = picking_out_obj.deliver_address or ''
+        return res
+
+    def _get_user_company(self, picking_out_obj):
+        res = ''
+        if  picking_out_obj.sale_id.is_drop_shopping:
+            res =  ''
+        else:
+            if picking_out_obj.sale_id.api_id.type == 'taobao':
+                if self.sent_info['taobao']['flag']:
+                    res = self.sent_info['taobao']['user_company'] or ''
+                else:
+                    res = picking_out_obj.deliver_company_name or ''
+            elif picking_out_obj.sale_id.api_id.type == 'tmall':
+                if self.sent_info['tmall']['flag']:
+                    res = self.sent_info['tmall']['user_company'] or ''
+                else:
+                    res = picking_out_obj.deliver_company_name or ''
+            elif picking_out_obj.sale_id.api_id.type == 'yhd':
+                if self.sent_info['yhd']['flag']:
+                    res = self.sent_info['yhd']['user_name'] or ''
+                else:
+                    res = picking_out_obj.deliver_company_name or ''
+            elif picking_out_obj.sale_id.api_id.type == 'alibaba':
+                if self.sent_info['alibaba']['flag']:
+                    res = self.sent_info['alibaba']['user_company'] or ''
+                else:
+                    res = picking_out_obj.deliver_company_name or ''
+            elif picking_out_obj.sale_id.api_id.type == 'suning':
+                if self.sent_info['suning']['flag']:
+                    res = self.sent_info['suning']['user_company'] or ''
+                else:
+                    res = picking_out_obj.deliver_company_name or ''
+            else:
+                res = picking_out_obj.deliver_company_name or ''
+        return res
+    
+    def _get_user_phone(self, picking_out_obj):
+        res = ''
+        if  picking_out_obj.sale_id.is_drop_shopping:
+            res = picking_out_obj.partner_id.mobile or ''
+        else:
+            if picking_out_obj.sale_id.api_id.type == 'taobao':
+                if self.sent_info['taobao']['flag']:
+                    res = self.sent_info['taobao']['user_phone']
+                else:
+                    res = picking_out_obj.deliver_tel or ''
+            elif picking_out_obj.sale_id.api_id.type == 'tmall':
+                if self.sent_info['tmall']['flag']:
+                    res = self.sent_info['tmall']['user_phone']
+                else:
+                    res = picking_out_obj.deliver_tel or ''
+            elif picking_out_obj.sale_id.api_id.type == 'yhd':
+                if self.sent_info['yhd']['flag']:
+                    res = self.sent_info['yhd']['user_phone']
+                else:
+                    res = picking_out_obj.deliver_tel or ''
+            elif picking_out_obj.sale_id.api_id.type == 'alibaba':
+                if self.sent_info['alibaba']['flag']:
+                    res = self.sent_info['alibaba']['user_phone']
+                else:
+                    res = picking_out_obj.deliver_tel or ''
+            elif picking_out_obj.sale_id.api_id.type == 'suning':
+                if self.sent_info['suning']['flag']:
+                    res = self.sent_info['suning']['user_phone']
+                else:
+                    res = picking_out_obj.deliver_tel or ''
+            else:
+                res = picking_out_obj.deliver_tel or ''
+        return res
+    
+    def _get_user_signature(self, picking_out_obj):
+        res = ''
+        if  picking_out_obj.sale_id.is_drop_shopping:
+            res = picking_out_obj.partner_id.name or ''
+        else:
+            if picking_out_obj.sale_id.api_id.type == 'taobao':
+                if self.sent_info['taobao']['flag']:
+                    res = self.sent_info['taobao']['user_signature'] or picking_out_obj.create_uid.name  or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'tmall':
+                if self.sent_info['tmall']['flag']:
+                    res = self.sent_info['tmall']['user_signature'] or picking_out_obj.create_uid.name  or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'yhd':
+                if self.sent_info['yhd']['flag']:
+                    res = self.sent_info['yhd']['user_signature'] or picking_out_obj.create_uid.name  or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'alibaba':
+                if self.sent_info['alibaba']['flag']:
+                    res = self.sent_info['alibaba']['user_signature'] or picking_out_obj.create_uid.name  or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            elif picking_out_obj.sale_id.api_id.type == 'suning':
+                if self.sent_info['suning']['flag']:
+                    res = self.sent_info['suning']['user_signature'] or picking_out_obj.create_uid.name  or ''
+                else:
+                    res = picking_out_obj.create_uid.name  or ''
+            else:
+                res = picking_out_obj.create_uid.name  or ''
+        return res
+#连续打印
+report_sxw.report_sxw('report.stock_express_qf', 'stock.picking.out',
+    'addons/yks/report/express_qf_continuously.rml', parser=stock_express_print, header="Express")
+
+report_sxw.report_sxw('report.stock_express_zto', 'stock.picking.out',
+    'addons/yks/report/express_zto_continuously.rml', parser=stock_express_print, header="Express")
+
+report_sxw.report_sxw('report.stock_xpress_yunda', 'stock.picking.out',
+    'addons/yks/report/express_yunda_continuously.rml', parser=stock_express_print, header="Express")
+
+
+# 单页打印
+report_sxw.report_sxw('report.stock_express_qf_continuously', 'stock.picking.out',
+    'addons/yks/report/express_qf.mako', parser=stock_express_print, header="Express")
+
+report_sxw.report_sxw('report.stock_express_zto_continuously', 'stock.picking.out',
+    'addons/yks/report/express_zto.mako', parser=stock_express_print, header="Express")
+
+report_sxw.report_sxw('report.stock_express_yunda_continuously', 'stock.picking.out',
+    'addons/yks/report/express_yunda.mako', parser=stock_express_print, header="Express")
+
+##############################################################

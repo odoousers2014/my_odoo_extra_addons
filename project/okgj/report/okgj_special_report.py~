@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+
+import time
+from openerp.report import report_sxw
+from openerp.osv import osv
+from openerp import pooler
+from openerp import pooler
+
+class okgj_purchase_order(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(okgj_purchase_order, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'user': self.pool.get('res.users').browse(cr, uid, uid, context)
+        })
+report_sxw.report_sxw('report.okgj.purchase.order','purchase.order','addons/okgj/report/okgj_purchase_order.rml',parser=okgj_purchase_order, header=None)
+
+class okgj_purchase_stock_picking_in(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(okgj_purchase_stock_picking_in, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+        })
+
+report_sxw.report_sxw('report.okgj.purchase.stock.picking.in','stock.picking.in','addons/okgj/report/okgj_special_purchase_stock_in_report.rml',parser=okgj_purchase_stock_picking_in, header=None)
+
+
+class okgj_purchase_return_report(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(okgj_purchase_return_report, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+        })
+
+report_sxw.report_sxw('report.okgj.purchase.return.report','okgj.purchase.return','addons/okgj/report/okgj_purchase_return.rml',parser=okgj_purchase_return_report, header=None)
+
+
+class okgj_sale_return_report(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(okgj_sale_return_report, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+        })
+
+report_sxw.report_sxw('report.okgj.sale.return.report','okgj.sale.return','addons/okgj/report/okgj_sale_return.rml',parser=okgj_sale_return_report, header=None)

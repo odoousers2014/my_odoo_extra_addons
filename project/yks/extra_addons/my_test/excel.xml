@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+<menuitem id="menu_yks_sale_express_express" name="导入" parent="base.menu_sales" action="action_yks_express_express"/>
+
+    
+    
+    
+</data>
+</openerp>

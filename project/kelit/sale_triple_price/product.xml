@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1"> 
+		<!-- Create 2 new price types: shop + distributor price -->      
+        <record id="product_shop_price" model="product.price.type">
+            <field name="name">Shop Price</field>
+            <field eval="True" name="active"/>
+            <field name="field" eval="'shop_price'"/>
+            <field name="currency_id" eval="25"/>
+        </record>
+        
+        <record id="product_distrib_price" model="product.price.type">
+            <field name="name">Distributor Price</field>
+            <field eval="True" name="active"/>
+            <field name="field" eval="'distrib_price'"/>
+            <field name="currency_id" eval="25"/>
+        </record>
+     </data>
+     
+     <data>
+		<!-- Edit product views: Tree, Form, Kanban -->      
+		<record model="ir.ui.view" id="product_normal_form_view_triple_price">
+			<field name="name">product.form_normal_view_triple_price</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+			    <xpath expr="//field[@name='list_price']" position="replace">
+			<field name="distrib_price"/>
+			<field name="shop_price"/>
+			<field name="list_price" string="Restaurant Price"/>
+				</xpath>
+            </field>
+        </record>
+       
+        <record model="ir.ui.view" id="product_normal_tree_view_triple_price">
+			<field name="name">product.tree_normal_view_triple_price</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_product_tree_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='lst_price']" position="replace">
+				    <field name="distrib_price"/>
+					<field name="shop_price"/>
+				    <field name="list_price" string="Restaurant Price"/>
+		        </xpath>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="product_normal_kanban_view_triple_price">
+			<field name="name">product.tree_normal_kanban_triple_price</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_kanban_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='tags']" position="after">
+                    <ul>
+	                    <li>Distrib Price: <field name="distrib_price"></field></li>
+	                    <li>Shop price: <field name="shop_price"></field></li>
+	                    <li>Restaurant Price: <field name="list_price"></field></li>
+                    </ul>
+		        </xpath>
+            </field>
+        </record>
+
+<!-- Add company_id field in Price Type form view -->
+        <record id="product_price_type_view_triple" model="ir.ui.view">
+            <field name="name">product.price.type.form.triple</field>
+            <field name="model">product.price.type</field>
+            <field name="inherit_id" ref="product.product_price_type_view" />
+            <field name="arch" type="xml">
+            	<xpath expr="//field[@name='currency_id']" position="after">
+            		<field name="company_id"/>
+            	</xpath>
+            </field>
+        </record>
+
+<!-- Add rule for multicompany access to price types -->        
+        <record id="ir_rule_own_price_type" model="ir.rule">
+            <field name="name">price_type: access for own price type</field>
+            <field eval="True" name="active"/>
+            <field name="model_id" ref="product.model_product_price_type"/>
+            <field name="domain_force">['|',('company_id', '=', user.company_id.id),('company_id', '=', False)]</field> 
+            <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+        </record>
+         
+    </data>
+</openerp>

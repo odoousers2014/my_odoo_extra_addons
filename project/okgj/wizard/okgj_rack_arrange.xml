@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	
+	<record id="view_okgj_rack_arrange_form" model="ir.ui.view">	
+	    <field name="name">okgj.rack.arrange.form</field>
+	    <field name="model">okgj.rack.arrange</field>
+	    <field name="arch" type="xml">
+		<form string="批量生成货位">
+		    <group>
+			<field name="warehouse_id" colspan="2"/>
+		    </group>
+		    <group colspan="4" col="6">
+			<field name="group_one_1"/>	
+			<field name="group_one_2"/>
+			<field name="group_one_3"/>	
+			<separator colspan="6"/>													
+			<field name="group_two_1"/>	
+			<field name="group_two_2"/>	
+			<field name="group_two_3"/>	
+			<separator colspan="6"/>
+			<field name="group_three_1"/>
+			<field name="group_three_2"/>
+			<field name="group_three_3"/>	
+			<separator colspan="6"/>											
+			<field name="group_four_1"/>
+			<field name="group_four_2"/>
+		    </group>
+		    <separator colspan="4"/>
+		    <group>
+			<button name="create_rack" string="生成" type="object" class="oe_highlight"/>				
+			<button string="取消" special="cancel"/>
+		    </group>
+		</form>
+	    </field>
+	</record>
+	
+        <record id="action_view_okgj_rack_arrange" model="ir.actions.act_window">
+            <field name="name">批量生成货位</field>
+            <field name="res_model">okgj.rack.arrange</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</openerp>

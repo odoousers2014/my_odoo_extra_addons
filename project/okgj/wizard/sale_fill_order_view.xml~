@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+           <record id="view_okgj_sale_fill_order" model="ir.ui.view">
+            <field name="name">导入商品</field>
+            <field name="model">okgj.sale.fill.order</field>
+            <field name="arch" type="xml">
+            <form string="商品">
+		<separator string="Import Product"/>
+                <field name="line_ids" >
+                        <tree string="Line Number" editable="bottom">
+                            <field name="product_id"/>
+                            <field name="product_qty"/> 
+			    <field name="uom_id"/>
+			    <field name="qty_avail"/>
+                            <field name="last_week"/>          
+                            <field name="last_month"/>
+                        </tree>
+                    </field>                    
+                  <footer>
+                      <button name="do_import" string="完成" type="object" class="oe_highlight"/>
+                      <button string="Cancel" class="oe_link" special="cancel" />
+                  </footer>
+              </form>
+            </field>
+        </record>
+
+        <record id="action_okgj_view_sale_fill_order" model="ir.actions.act_window">
+            <field name="name">导入商品</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.sale.fill.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_sale_fill_order"/>
+            <field name="target">new</field>
+        </record>
+            
+    </data>
+</openerp>

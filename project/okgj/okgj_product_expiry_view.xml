@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <!--act_window
+            context="{'prodlot_id': active_id}"
+            id="act_okgj_stock_prodlot_location_open"
+            name="按仓库的库存"
+            res_model="stock.location"
+            src_model="stock.production.lot"/-->
+
+         <!--  Form  -->
+        <record id="view_okgj_product_expiry_form" model="ir.ui.view">
+            <field name="name">view.okgj.product.expiry.form</field>
+            <field name="model">stock.production.lot</field>
+            <field name="arch" type="xml">
+                <form string="保质期">
+			<field name="product_id"/>
+			<field name="name"/>
+			<field name="stock_available"/>
+			<field name="state"/>
+			<field name="life_date" />
+			<field name="use_date" />
+			<field name="removal_date" />
+			<field name="alert_date" />
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_expiry_tree" model="ir.ui.view">
+            <field name="name">view.okgj.product.expiry.tree</field>
+            <field name="model">stock.production.lot</field>
+            <field name="arch" type="xml">
+                <tree string="保质期"  colors="red:state == 'remove'">
+		    <field name="product_id"/>
+		    <field name="name"/>
+		    <field name="stock_available"/>
+		    <field name="state"/>
+		    <field name="life_date" />
+		    <field name="use_date" />
+		    <field name="removal_date" />
+		    <field name="alert_date" />
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_expiry_search" model="ir.ui.view">
+            <field name="name">view.okgj.product.expiry.search</field>
+            <field name="model">stock.production.lot</field>
+            <field name="arch" type="xml">
+                <search string="保质期">
+		    <filter string="商品" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'product_id'}"/>
+		    <filter string="安全" icon="terp-accessories-archiver" domain="[('state', '=', 'life')]"/>
+		    <filter string="可食" icon="terp-accessories-archiver" domain="[('state', '=', 'use')]"/>
+		    <filter string="移除" icon="terp-accessories-archiver" domain="[('state', '=', 'remove')]"/>
+		    <filter string="警报" icon="terp-accessories-archiver" domain="[('state', '=', 'alert')]"/>
+                    <field name="name"/>
+		    <field name="product_id"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_expiry_action" model="ir.actions.act_window">
+            <field name="name">保质期</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.production.lot</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+	    <field name="view_id" ref="view_okgj_product_expiry_tree"/>
+            <field name="domain">[('stock_available','&lt;&gt;',0)]</field>
+            <field name="help" type="html">
+            </field>
+        </record>
+
+        <!--menuitem name="保质期"
+            id="menu_okgj_product_expiry"
+            parent="stock.menu_traceability"
+            action="view_okgj_product_expiry_action"
+            sequence="5"/-->
+
+        <record id="okgj_stock_partial_picking_form" model="ir.ui.view">
+	    <field name="name">okgj.stock.partial.picking.form</field>
+	    <field name="model">stock.partial.picking</field>
+	    <field name="inherit_id" ref="stock.stock_partial_picking_form"/>
+	    <field eval="10" name="priority"/>
+	    <field name="arch" type="xml">
+		<field name="quantity" position="replace">
+		    <field name="quantity" on_change="onchange_product_qty(quantity, purchase_price_unit)" sum="Total"/>
+		    <field name="purchase_price_unit"/>
+		    <field name="picking_price_subtotal" sum="Total"/>
+		</field>
+		<field name="prodlot_id" position="replace">
+		    <field name="okgj_lot_name" />
+		    <field name="in_lot_need"  string="需录生产日期"/>
+		</field>
+	    </field>
+        </record>
+
+        <record id="okgj_stock_partial_picking_line_list" model="ir.ui.view">
+	    <field name="name">okgj.stock.partial.picking.line.list</field>
+	    <field name="model">stock.partial.picking.line</field>
+	    <field name="inherit_id" ref="stock.stock_partial_picking_line_list"/>
+	    <field eval="10" name="priority"/>
+	    <field name="arch" type="xml">
+		<field name="quantity" position="replace">
+		    <field name="quantity" on_change="onchange_product_qty(quantity, purchase_price_unit)" sum="Total"/>
+		    <field name="purchase_price_unit"/>
+		    <field name="picking_price_subtotal" sum="Total"/>
+		</field>
+		<field name="prodlot_id" position="replace">
+		    <field name="okgj_lot_name" />
+		    <field name="in_lot_need"  string="需录生产日期"/>
+		</field>
+	    </field>
+	</record>
+
+        <record id="okgj_stock_partial_picking_line_form" model="ir.ui.view">
+	    <field name="name">okgj.stock.partial.picking.line.form</field>
+	    <field name="model">stock.partial.picking.line</field>
+	    <field name="inherit_id" ref="stock.stock_partial_picking_line_form"/>
+	    <field eval="10" name="priority"/>
+	    <field name="arch" type="xml">
+		<field name="quantity" position="replace">
+		    <field name="quantity" on_change="onchange_product_qty(quantity, purchase_price_unit)" sum="Total"/>
+		    <field name="purchase_price_unit"/>
+		    <field name="picking_price_subtotal" sum="Total"/>
+		</field>
+
+		<field name="prodlot_id" position="replace">
+		    <field name="okgj_lot_name" />
+		    <field name="in_lot_need" string="需录生产日期"/>
+		    <field name="purchase_price_unit" />
+		</field>
+	    </field>
+        </record>
+
+   </data>
+</openerp>

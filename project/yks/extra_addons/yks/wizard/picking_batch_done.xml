@@ -1,0 +1,47 @@
+<openerp>
+<data>
+
+<!-- wizard of SWO -->
+<record model="ir.ui.view" id="yks_picking_batch_done_form_view">
+    <field name="name">yks.picking.batch.done.form</field>
+    <field name="model">picking.batch.done</field>
+    <field name="sequnece">0</field>
+    <field name="arch" type="xml">
+        <form string="批量出库" version="7.0">
+            <group>
+                <group>
+                <field name="lines" nolabel="1">
+                	<tree>
+                		<field name="pick_id"/>
+                		<field name="so_id"/>
+                		<field name="state"/>
+                		<field name="platform_so_id"/>
+                		<field name="receive_user"/>
+                		<field name="receive_address"/>
+                	</tree>
+                </field>
+                </group>
+            </group>
+            <footer>
+                <button name="apply" string="确认出库" type="object" class="oe_highlight" />
+                or
+                <button string="Cancel" class="oe_link" special="cancel"/>
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window
+    id="yks_picking_batch_done"
+    multi="True"
+    key2="client_action_relate"
+    name="批量出库"
+    res_model='picking.batch.done'
+    src_model='stock.picking.out'
+    view_mode="form"
+    target='new'
+    view_type="form"/>
+
+
+</data>
+</openerp>

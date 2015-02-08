@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="yks_germany_sale_template_tree_view">
+    <field name="name">yks.germany.sale.template.tree</field>
+    <field name="model">yks.germany.sale.template</field>
+    <field name="arch" type="xml">
+        <tree string="yks.germany.sale.template"  colors="red:bpost==False;">
+<field name="name"/>
+<field name="create_date"/>
+<field name='bpost' /> 
+<field name='dest_department'/>
+<field name='dest_contact'/> 
+<field name='dest_street'/> 
+<field name='dest_place'/> 
+<field name='dest_house_nr'/> 
+<field name='dest_box_nr'/> 
+<field name='dest_zip_code'/> 
+<field name='dest_city'/> 
+<field name='dest_state'/> 
+<field name='dest_country'/> 
+<field name='dest_phone'/> 
+<field name='dest_mobile'/> 
+<field name='weight'/> 
+<field name='description'/> 
+<field name='category'/> 
+<field name='non_delivery'/> 
+<field name='value'/> 
+<field name='value_currency'/> 
+<field name='export_flage'/> 
+<field name='customer_reference'/> 
+<field name='number_of_items'/> 
+<field name='value_of_items'/> 
+<field name='currence'/> 
+<field name='item_description'/> 
+<field name='netto_weight'/> 
+<field name='hs_tarrif_code'/> 
+<field name='origin_of_goods'/> 
+<field name='cn_name' /> 
+<field name='cn_street' /> 
+<field name='cn_zip' /> 
+<field name='cn_phone' /> 
+<field name='cn_date' /> 
+<field name='cn_product' /> 
+<field name='need_receipt' /> 
+<field name='new_newspaper' /> 
+<field name='need_bage' /> 
+        </tree>
+    </field>
+</record>
+
+<record model="ir.ui.view" id="yks_germany_sale_template_form_view">
+    <field name="name">yks.germany.sale.template.form</field>
+    <field name="model">yks.germany.sale.template</field>
+    <field name="arch" type="xml">
+        <form string="Sale Data" version="7.0">
+		<goup col='6' colspan='4'>
+			<div style="color:#0088FF">
+				<h2>
+				     <label for="bpost"/>
+				     <field name="bpost" />
+				</h2>
+			</div>
+		</goup>
+        <group>
+            <group>
+				<field name="name"/>
+				<field name='dest_department'/>
+				<field name='dest_contact'/> 
+				<field name='dest_street'/> 
+				<field name='dest_place'/> 
+				<field name='dest_house_nr'/> 
+				<field name='dest_box_nr'/> 
+				<field name='dest_zip_code'/> 
+				<field name='dest_city'/> 
+				<field name='dest_state'/> 
+				<field name='dest_country'/> 
+				<field name='dest_phone'/> 
+				<field name='dest_mobile'/> 
+				<field name='origin_of_goods'/> 
+            </group>
+            <group>
+                <field name='weight'/> 
+                <field name='description'/> 
+                <field name='category'/> 
+                <field name='non_delivery'/> 
+                <field name='value'/> 
+                <field name='value_currency'/> 
+                <field name='export_flage'/> 
+                <field name='customer_reference'/> 
+                <field name='number_of_items'/> 
+                <field name='value_of_items'/> 
+                <field name='currence'/> 
+                <field name='item_description'/> 
+                <field name='netto_weight'/> 
+                <field name='hs_tarrif_code'/> 
+            </group>
+            <group>
+				<field name='cn_name' /> 
+				<field name='cn_street' /> 
+				<field name='cn_zip' /> 
+				<field name='cn_phone' /> 
+				<field name='cn_date' /> 
+				<field name='cn_product' /> 
+				<field name='need_receipt' /> 
+				<field name='new_newspaper' /> 
+				<field name='need_bage' /> 
+            </group>
+        </group>
+        </form>
+    </field>
+</record>
+
+ <record id="yks_germany_sale_templatename_search_view" model="ir.ui.view">
+     <field name="name">yks.germany.sale.template.search</field>
+     <field name="model">yks.germany.sale.template</field>
+     <field name="arch" type="xml">
+         <search string="Search">
+	         <filter string="TODO" name="todo" domain="[('bpost','=',False)]" />
+        </search>
+     </field>
+</record>
+
+ <record model="ir.actions.act_window" id="action_yks_germany_sale_template">
+       <field name="name">yks.germany.sale.template</field>
+       <field name="type">ir.actions.act_window</field>
+       <field name="res_model">yks.germany.sale.template</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="yks_germany_sale_template_tree_view"/>
+      <field name="context">{'search_default_todo':1}</field>
+ </record>
+
+<!--  
+<menuitem id="menu_yks_germany_sale_template" name="德国直邮模板"  parent="yks_outer_user_menu_sale" action="action_yks_germany_sale_template"/>
+-->
+
+
+    
+</data>
+</openerp>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<!--  
+    	<record id="yks_procurement_search" model="ir.ui.view">
+    		<field name="name">yks.procurement.order.search</field>
+			<field name="model">stock.warehouse.orderpoint</field>
+			<field name="inherit_id" ref="procurement.warehouse_orderpoint_search"/>
+			<field name="arch" type="xml">
+				<xpath expr="//filter[@string='Location']" position="before">
+	               <field name="product_id"/>
+		   		</xpath>
+			</field>
+    	</record>
+		<record id="yks_procurement_form_view" model="ir.ui.view">
+			<field name="name">yks.procurement.order.form</field>
+			<field name="model">stock.warehouse.orderpoint</field>
+			<field name="inherit_id" ref="procurement.view_warehouse_orderpoint_form"/> 
+			<field name="arch" type="xml">
+				<field name="product_id" position="after">
+					<field name="qty_available"/>
+				</field>
+				<field name="location_id" position="after">
+					<field name="virtual_available"/>
+				</field>
+			</field>
+		</record>
+
+		<record id="yks_procurement_tree_view" model="ir.ui.view">
+			<field name="name">yks.procurement.order.tree</field>
+			<field name="model">stock.warehouse.orderpoint</field>
+			<field name="inherit_id" ref="procurement.view_warehouse_orderpoint_tree"/> 
+			<field name="arch" type="xml">
+			<tree position="replace">
+				<tree string="Reordering Rules" colors="blue:(virtual_available &lt; product_min_qty and qty_available &gt; product_min_qty);red:qty_available &lt; product_min_qty;">
+                    <field name="name" invisible="1"/>
+                    <field name="warehouse_id" groups="stock.group_locations" invisible="1"/>
+                    <field name="product_id"/>
+                    <field name="product_min_qty"/>
+                    <field name="virtual_available"/>
+					<field name="qty_available"/>
+                    <field name="location_id" groups="stock.group_locations"/>
+                    <field name="product_uom" groups="product.group_uom"/>
+                    <field name="product_max_qty" invisible="1"/>
+                </tree>
+       		</tree>
+			</field>
+		</record>
+
+		<act_window
+			id='yks_stock_warehouse_orderpoint_action'
+			multi="False"
+			key2="client_action_relate"
+			name="库存预警设置"
+			res_model="stock.warehouse.orderpoint"
+			view_mode="tree,form"
+			view_type="form"/>
+			
+
+<record model="ir.ui.view" id="yks_wizard_swo_form_view">
+    <field name="name">yks.wizard.swo.form</field>
+    <field name="model">wizard.swo</field>
+    <field name="sequnece">0</field>
+    <field name="arch" type="xml">
+        <form string="库存预警" version="7.0">
+            <group>
+                <group>
+                <field name="safe_section" required="1"/>
+                </group>
+                <group>
+                </group>
+            </group>
+            <footer>
+                <button name="apply" string="确认" type="object" class="oe_highlight" />
+                or
+                <button string="Cancel" class="oe_link" special="cancel"/>
+            </footer>
+        </form>
+    </field>
+</record>
+<act_window
+    id="yks_wizard_swo_action"
+    multi="False"
+    key2="client_action_relate"
+    name="库存预警"
+    res_model='wizard.swo'
+    view_mode="form"
+    target='new'
+    context="{}"
+    view_type="form"/>
+    
+<menuitem id="yks_wizard_swo_menu" name="库存预警"  parent="stock.menu_stock_warehouse_mgmt"  
+		sequence="21" action="yks_wizard_swo_action"/>
+
+<menuitem id="yks_wizard_swo_menu_purchase" name="库存预警"  parent="purchase.menu_procurement_management"  
+		sequence="10" action="yks_wizard_swo_action"/>
+ -->
+
+ <record id="yks_stock_warehouse_orderpoint_report_search_view" model="ir.ui.view">
+	<field name="name">stock.warehouse.orderpoint.report.search</field>
+	<field name="model">stock.warehouse.orderpoint.report</field>
+	<field name="arch" type="xml">
+	    <search string="Search">
+		    <field name="product_id" string="SKU" filter_domain="[('product_id','ilike',self)]"/>
+		    <separator/>
+		    <filter string="实际库存预警" name="yes_warn_qty" domain="[('warn_qty','=',True)]"/>
+		    <filter string="在途库存预警" name="yes_warn_qty_v" domain="[('warn_qty_v','=',True)]"/>
+		    <filter string="可用库存预警" name="yes_warn_qty_a" domain="[('warn_qty_a','=',True)]"/>
+		</search>
+	</field>
+</record>
+<record model="ir.ui.view" id="yks_stock_warehouse_orderpoint_report_tree_view">
+     <field name="name">stock.warehouse.orderpoint.report.tree</field>
+     <field name="model">stock.warehouse.orderpoint.report</field>
+     <field name="arch" type="xml">
+         <tree string="库存预警" colors="red:warn_qty is True;">
+             <field name="product_id"/>
+             <field name="product_min_qty"/>
+             <field name="product_qty"/>
+             <field name="ratio_qty"/>
+             <field name="product_qty_l"/>
+             <field name="product_qty_a"/>
+             <field name="product_qty_v"/>
+             <field name="warn_qty"/>
+             <field name="warn_qty_v"/>
+             <field name="warn_qty_a"/>
+             <field name="location_id" invisible="1"/>
+         </tree>
+     </field>
+ </record>
+<record model="ir.actions.act_window" id="action_stock_warehouse_orderpoint_report">
+    <field name="name">库存预警</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">stock.warehouse.orderpoint.report</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="yks_stock_warehouse_orderpoint_report_tree_view"/>
+    <field name="search_view_id" ref="yks_stock_warehouse_orderpoint_report_search_view"/>
+    <field name="context">{'search_default_yes_warn_qty':1}</field>
+</record>
+<menuitem id="menu_stock_warehouse_orderpoint_report" name="库存预警"  parent="stock.menu_stock_warehouse_mgmt"  
+		sequence="21" action="action_stock_warehouse_orderpoint_report"/>
+<menuitem id="menu_stock_warehouse_orderpoint_report_for_purchase" name="库存预警"  parent="purchase.menu_procurement_management"  
+		sequence="10" action="action_stock_warehouse_orderpoint_report"/>
+
+
+			
+</data>
+</openerp>

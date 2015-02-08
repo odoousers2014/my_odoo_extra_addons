@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<!--jon add field  'company_id'  to  SaleTeam  crm.case.section  -->
+    	<record id="inherit_crm_case_section_view_form" model="ir.ui.view">
+			<field name="name">crm.case.section.form</field>
+			<field name="model">crm.case.section</field>
+			<field name="inherit_id" ref="crm.crm_case_section_view_form" />
+			<field name="arch" type="xml">
+				<field name="code" position='replace'>
+					<field name="company_id"/>
+				</field>
+            </field>
+        </record>
+
+    </data>
+</openerp>
+
+

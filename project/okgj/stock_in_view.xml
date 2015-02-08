@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="view_warehouse_okgj_shop_id" model="ir.ui.view">
+            <field name="name">stock.warehouse.okgj.shop.id</field>
+            <field name="model">stock.warehouse</field>
+            <field name="inherit_id" ref="stock.view_warehouse" />
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <label for="okgj_warehouse_id"/>
+                    <h1><field name="okgj_warehouse_id"/></h1>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_warehouse_tree_okgj_shop_id" model="ir.ui.view">
+            <field name="name">stock.warehouse.tree.okgj.shop.id</field>
+            <field name="model">stock.warehouse</field>
+            <field name="inherit_id" ref="stock.view_warehouse_tree" />
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="okgj_warehouse_id"/>
+            </field>
+            </field>
+        </record>
+
+        <record id="view_warehouse_tree" model="ir.ui.view">
+            <field name="name">stock.warehouse.tree</field>
+            <field name="model">stock.warehouse</field>
+            <field name="arch" type="xml">
+                <tree string="Warehouse">
+                    <field name="name"/>
+                    <field name="lot_input_id" groups="stock.group_locations"/>
+                    <field name="lot_stock_id" groups="stock.group_locations"/>
+                    <field name="lot_output_id" groups="stock.group_locations"/>
+                    <field name="partner_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--仓库增加物流中心关联-->
+        <record id="okgj_view_location_form" model="ir.ui.view">
+            <field name="name">okgj.stock.location.form</field>
+            <field name="model">stock.location</field>
+	    <field name="inherit_id" ref="stock.view_location_form" />
+            <field name="arch" type="xml">
+		<field name="location_id" position="after">
+		    <label for="warehouse_id" class="oe_edit_only"/>
+ 		    <h2><field name="warehouse_id"/></h2>
+		    <label for="is_presale"/>
+ 		    <h2><field name="is_presale"/></h2>
+		</field>
+	    </field>
+	</record>
+	
+        <record id="okgj_view_location_tree2" model="ir.ui.view">
+            <field name="name">okgj.stock.location.tree</field>
+            <field name="model">stock.location</field>
+            <field name="priority" eval="2"/>
+	    <field name="inherit_id" ref="stock.view_location_tree2" />
+            <field name="arch" type="xml">
+		<field name="complete_name" position="after">
+		    <field name="warehouse_id"/>
+            <field name="is_presale"/>
+		</field>
+            </field>
+        </record>
+
+	<!--库存调整单-->
+	<record id="view_okgj_stock_inventory_form" model="ir.ui.view">
+            <field name="name">view.okgj.stock.inventory.form</field>
+            <field name="model">stock.inventory</field>
+            <field name="inherit_id" ref="stock.view_inventory_form" />
+            <field name="arch" type="xml">
+		<notebook position="after">
+                    <field name="note"/>
+		</notebook>
+            </field>
+        </record>
+	
+        <record id="action_okgj_inventory_form" model="ir.actions.act_window">
+            <field name="name">库存调整单</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.inventory</field>
+            <field name="view_type">form</field>
+	    <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="stock.view_inventory_tree"/>
+            <field name="search_view_id" ref="stock.view_inventory_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to start an inventory. 
+              </p><p>
+                Periodical Inventories are used to count the number of products
+                available per location. You can use it once a year when you do
+                the general inventory or whenever you need it, to adapt the
+                current inventory level of a product.
+              </p>
+            </field>
+        </record>
+
+        <record id="okgj_action_inventory_form_view" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_stock_inventory_form"/>
+            <field name="act_window_id" ref="action_okgj_inventory_form"/>
+        </record>
+
+	
+	<record id="view_okgj_move_picking_tree" model="ir.ui.view">
+            <field name="name">view.okgj.move.picking.tree</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_picking_tree" />
+            <field name="arch" type="xml">
+                    <field name="product_id" position="after">
+			<field name="variant"/>
+		    </field>
+                    <field name="location_dest_id" position="replace">
+			<field name="pick_rack_id"/>
+			<field name="store_rack_id"/>
+			<field name="location_dest_id" invisible="1"/>
+		    </field>
+            </field>
+        </record>
+
+
+	<record id="view_okgj_purchase_picking_in_form" model="ir.ui.view">
+            <field name="name">view.okgj.purchase.picking.in.form</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_form" />
+            <field name="arch" type="xml">
+		<xpath expr="//button[@name='action_process']" position="replace">
+		    <button name="action_process" states="assigned" string="收货" type="object" class="oe_highlight"/>
+		</xpath>
+            </field>
+        </record>
+
+	
+        <record id="view_okgj_purchase_picking_in_tree" model="ir.ui.view">
+            <field name="name">view.okgj.purchase.picking.in.tree</field>
+            <field name="model">stock.picking.in</field>
+	    <field name="inherit_id" ref="stock.view_picking_in_tree" />
+            <field name="arch" type="xml">
+		<field name="name" position="before">
+		    <field name="purchase_id"/>
+		</field>
+		<field name="origin" position="replace"/>
+            </field>
+        </record>
+
+
+	<!--采购收货单-->
+        <record id="action_okgj_purchase_picking" model="ir.actions.act_window">
+            <field name="name">采购收货单</field>
+            <field name="res_model">stock.picking.in</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="domain">[('type','=','in'),('okgj_type','=', False)]</field>
+            <field name="context">{'default_type': 'in'}</field>
+            <field name="search_view_id" ref="stock.view_picking_in_search"/>
+        </record>
+        <record id="okgj_action_invoice_tree5_view1" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_purchase_picking_in_tree"/>
+            <field name="act_window_id" ref="action_okgj_purchase_picking"/>
+        </record>
+        <record id="okgj_action_invoice_tree5_view2" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_purchase_picking_in_form"/>
+            <field name="act_window_id" ref="action_okgj_purchase_picking"/>
+        </record>
+        <record id="okgj_action_invoice_tree5_view2_cal" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">calendar</field>
+            <field name="view_id" ref="stock.stock_picking_in_calendar"/>
+            <field name="act_window_id" ref="action_okgj_purchase_picking"/>
+        </record>
+
+
+        <record forcecreate="True" id="ir_cron_okgj_close_partial_picking_cron" model="ir.cron">
+            <field name="name">Close Purchase Picking</field>
+            <field eval="True" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">10</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+            <field eval="'stock.picking.in'" name="model"/>
+            <field eval="'okgj_close_partial_picking_cron'" name="function"/>
+            <field eval="'(False,)'" name="args"/>
+        </record>
+
+
+	<!--采购入库-->
+        <!--record id="view_okgj_stock_picking_in_more_tree" model="ir.ui.view">
+            <field name="name">view.stock.picking.in.more.tree</field>
+            <field name="model">stock.picking</field>
+            <field name="arch" type="xml">
+                <tree colors="blue:state == 'draft';grey:state == 'done';red:state not in ('cancel', 'done') and date &lt; current_date" string="采购入库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="partner_id" string="供应商"/>
+                    <field name="stock_journal_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_stock_picking_in_more_form" model="ir.ui.view">
+            <field name="name">view.stock.picking.in.more.form</field>
+            <field name="model">stock.picking</field>
+            <field name="arch" type="xml">
+                <form string="采购入库" version="7.0">
+		    <header>
+			<button name="action_process" states="assigned" string="确认入库" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			<group>
+			    <group>
+				<field name="origin"/>
+				<field name="partner_id"/>
+			    </group>
+			    <group>
+				<field name="name"/>
+				<field name="date_done"/>
+				<field name="stock_journal_id"/>
+			    </group>
+			</group>
+			<field name="move_lines" string="商品" colspan="4">
+			    <tree string="商品">
+				<field name="product_id"/>
+				<field name="variant"/>
+				<field name="product_qty"/>
+				<field name="product_uom"/>
+				<field name="prodlot_id"/>
+				<field name="pick_rack_id"/>
+				<field name="store_rack_id"/>
+				<field name="state" invisible="1"/>
+			    </tree>
+			</field>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_stock_picking_in_more_search" model="ir.ui.view">
+            <field name="name">view.stock.picking.in.more.search</field>
+            <field name="model">stock.picking</field>
+            <field name="arch" type="xml">
+                <search string="采购入库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="partner_id" string="供应商"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_okgj_stock_picking_in_more" model="ir.actions.act_window">
+            <field name="name">采购入库单</field>
+            <field name="res_model">stock.picking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_stock_picking_in_more_search"/>
+            <field name="domain">[('type','=','in')]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+              <p>
+		  采购入库帮助，将会依据仓库加入更多限制最终只显示采购入库的条目！
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_in_more_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_stock_picking_in_more_tree"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_in_more"/>
+        </record>
+        <record id="act_view_okgj_stock_picking_in_more_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_stock_picking_in_more_form"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_in_more"/>
+        </record>
+
+        <menuitem action="action_okgj_stock_picking_in_more" id="menu_action_okgj_stock_picking_in_more" parent="stock.menu_stock_warehouse_mgmt" sequence="2"/-->
+    </data>
+</openerp>

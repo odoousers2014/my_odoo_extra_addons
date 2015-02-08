@@ -1,0 +1,97 @@
+id	city	comment	mobile	date	is_company	state_id/id	title/id	ref	website	street	lang	zip	company_id/id	name	code	country/id	country_id/id	customer	function	tz	ean13	category_id/id	birthdate	phone	email	user_id/id	section_id/id
+__export__.res_partner_yks_001		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|^(10|11)[0-9]{11}$|^(50|51)[0-9]{11}$			True									EMS	EMS												
+__export__.res_partner_yks_002		^[A-Za-z0-9]{2}[0-9]{10}$|^[A-Za-z0-9]{2}[0-9]{8}$|^(8800)[0-9]{14}$			True									圆通速递	YTO												
+__export__.res_partner_yks_003		^[a-zA-Z0-9]{10}$|^(42)[0-9]{8}$			True									宅急送	ZJS												
+__export__.res_partner_yks_004		^[0-9]{12}$			True									顺丰速运	SF												
+__export__.res_partner_yks_005		^VIP[0-9]{9}|V[0-9]{11}|[0-9]{12}$|^LBX[0-9]{15}-[2-9AZ]{1}-[1-9A-Z]{1}$|^(9001)[0-9]{8}$			True									优速快递	UC												
+__export__.res_partner_yks_006		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}			True									燕文国际	YANWENINTE												
+__export__.res_partner_yks_007		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}			True									燕文上海	YANWENSH												
+__export__.res_partner_yks_008		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}			True									燕文深圳	YANWENSZ												
+__export__.res_partner_yks_009		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}			True									燕文北京	YANWENBJ												
+__export__.res_partner_yks_010		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}			True									燕文义乌	YANWENYW												
+__export__.res_partner_yks_011		^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}			True									燕文广州	YANWENGZ												
+__export__.res_partner_yks_012		1.11111111111111E+019			True									ZTOGZ	ZTOGZ												
+__export__.res_partner_yks_013		1.11111111111111E+019			True									RUSTON	RUSTON												
+__export__.res_partner_yks_014		1.11111111111111E+019			True									ZTOSH	ZTOSH												
+__export__.res_partner_yks_015		^[0-9]{12}$			True									凡宇速递	GZFY												
+__export__.res_partner_yks_016		^[0-9]{9,12}$			True									联昊通	LTS												
+__export__.res_partner_yks_017		^[0-9]{12}$|^[0-9]{15}$			True									全峰快递	QFKD												
+__export__.res_partner_yks_018		^\d{12}|\d{11}$			True									全一快递	UAPEX												
+__export__.res_partner_yks_019		^(CS[0-9]{13})$|^([0-9]{13})$|^([0-9]{9})$			True									城市100	BJCS												
+__export__.res_partner_yks_020		^[a-zA-Z]{2}[0-9]{9}[a-zA-Z]{2}$			True									广东EMS	GDEMS												
+__export__.res_partner_yks_021		^[0-9]{11}[0-9]{1}$			True									速尔	SURE												
+__export__.res_partner_yks_022		^(50|51)[0-9]{11}$			True									EMS经济快递	EYB												
+__export__.res_partner_yks_023		^((751|358|618|680|778|768|688|689|618|828|988|118|888|571|518|010|628|205|880|717|718|728|738|761|762|763|701|757)[0-9]{9})$|^((2008|2010|8050|7518)[0-9]{8})$|^((36)[0-9]{10})$			True									中通快递	ZTO												
+__export__.res_partner_yks_024		^[0-9]{10,11}$|^T[0-9]{10}$|^FYPS[0-9]{12}$|^LBX[0-9]{15}-[2-9AZ]{1}-[1-9A-Z]{1}$			True									飞远(爱彼西)配送	HZABC												
+__export__.res_partner_yks_025		^(10|11|12|13|14|15|16|17|19|18|50|55|58|80|88|66|31)[0-9]{11}$			True									韵达快递	YUNDA												
+__export__.res_partner_yks_026		^[0-9]{12}$			True									天天快递	TTKDEX												
+__export__.res_partner_yks_027		^[0-9,C]{9,10}$			True									佳吉快递	CNEX												
+__export__.res_partner_yks_028		^[0-9]{11,12}$			True									百世物流	BEST												
+__export__.res_partner_yks_029		^[0-9]{12}$			True									联邦快递	FEDEX												
+__export__.res_partner_yks_030		^[A-Za-z0-9]*[0|2|4|6|8]$			True									华强物流	SHQ												
+__export__.res_partner_yks_031		^(A|B|C|D|E|H|0)(D|X|[0-9])(A|[0-9])[0-9]{10}$|^(21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|37|38|39|61)[0-9]{10}$|^(369|639|649|630|360)[0-9]{9}$|^(50|51)[0-9]{12}$|^(7)[0-9]{13}$			True									百世汇通	HTKY												
+__export__.res_partner_yks_032		^K[0-9]{13}$|^K[0-9]{11}$			True									中铁快运	CRE												
+__export__.res_partner_yks_033		^1[38]{1}[7-9]{1}[0-9]{9}$			True									信丰物流	XFWL												
+__export__.res_partner_yks_034		^(11|22|33|268|888|588|688|368|468|568|668|768|868|968)[0-9]{9}$|^(11|22|33|268|888|588|688|368|468|568|668|768|868|968)[0-9]{10}$|^(STO)[0-9]{10}$|^(33)[0-9]{11}$			True									申通快递	STO												
+__export__.res_partner_yks_035		^[0-9]{12}$|^LBX[0-9]{15}-[2-9AZ]{1}-[1-9A-Z]{1}$|^[0-9]{15}$|^[0-9]{15}-[1-9A-Z]{1}-[1-9A-Z]{1}$			True									龙邦速递	LB												
+__export__.res_partner_yks_036		^[A-Za-z0-9]{8,9}$			True									天地华宇	HOAU												
+__export__.res_partner_yks_037		^[0-9]{11,13}$|^(P330[0-9]{8})$|^(D[0-9]{11})$|^(319)[0-9]{11}$			True									快捷快递	FAST												
+__export__.res_partner_yks_038		^[GA]{2}[0-9]{9}([2-5][0-9]|[1][1-9]|[6][0-5])$|^[99]{2}[0-9]{11}$			True									邮政国内小包	POSTB												
+__export__.res_partner_yks_039		^[0-9]{12}$			True									黑猫宅急便	YCT												
+__export__.res_partner_yks_040		[0-9]{8}			True									新邦物流	XB												
+__export__.res_partner_yks_041		^((88|)[0-9]{10})$|^((1|2|3|5|)[0-9]{9})$|^(90000[0-9]{7})$			True									能达速递	NEDA												
+__export__.res_partner_yks_042		^[0-9]{12}$			True									增益速递	QRT												
+__export__.res_partner_yks_043		^(2|3|8|5|6|7)[0-9]{9}$			True									国通快递	GTO												
+__export__.res_partner_yks_044		^[0-9]{8,10}$			True									德邦物流	DBL												
+__export__.res_partner_yks_045		[0-9a-zA-Z-]{5,20}			True									E速宝	ESB												
+__export__.res_partner_yks_046					True									居无忧	JWY												
+__export__.res_partner_yks_047					True									贝业新兄弟	BOYOL												
+__export__.res_partner_yks_048					True									合众阳晟	YS												
+__export__.res_partner_delivery_yhd_001					True									贝海国际速递	23489												
+__export__.res_partner_delivery_yhd_002					True									TNT快递(标准)	17328												
+__export__.res_partner_delivery_yhd_003					True									DPD	24882												
+__export__.res_partner_delivery_yhd_004					True									晋越	25492												
+__export__.res_partner_delivery_yhd_005					True									中邮速递	25966												
+__export__.res_partner_delivery_yhd_006					True									德国邮政	26360												
+__export__.res_partner_delivery_yhd_007					True									上海邮政	24746												
+__export__.res_partner_delivery_yhd_008					True									Bpost	24752												
+__export__.res_partner_delivery_yhd_009					True									荷兰皇家邮政	26338												
+__export__.res_partner_delivery_yhd_010					True									dhl快递	26384												
+__export__.res_partner_delivery_yhd_011					True									AOL	25111												
+__export__.res_partner_delivery_suning_001					True									AAE-中国	A01												
+__export__.res_partner_delivery_suning_002					True									BHT	B01												
+__export__.res_partner_delivery_suning_003					True									百福东方	B02												
+__export__.res_partner_delivery_suning_004					True									中国邮政国内包裹/挂号信	B03												
+__export__.res_partner_delivery_suning_005					True									D速快递	D02												
+__export__.res_partner_delivery_suning_006					True									大田物流	D03												
+__export__.res_partner_delivery_suning_007					True									FedEx(国外)	F02												
+__export__.res_partner_delivery_suning_008					True									共速达	G04												
+__export__.res_partner_delivery_suning_009					True									佳怡物流	J02												
+__export__.res_partner_delivery_suning_010					True									京广速递	J03												
+__export__.res_partner_delivery_suning_011					True									全晨快递	Q02												
+__export__.res_partner_delivery_suning_012					True									全日通快递	Q04												
+__export__.res_partner_delivery_suning_013					True									三态速递	S04												
+__export__.res_partner_delivery_suning_014					True									UC优速物流	U03												
+__export__.res_partner_delivery_suning_015					True									远成物流	Y06												
+__export__.res_partner_delivery_suning_016					True									元智捷运	Y07												
+__export__.res_partner_delivery_suning_017					True									运通速运	Y08												
+__export__.res_partner_delivery_suning_018					True									越丰快递	Y09												
+__export__.res_partner_delivery_suning_019					True									中铁物流	Z05												
+__export__.res_partner_delivery_suning_020					True									飞康达物流	F01												
+__export__.res_partner_delivery_suning_021					True									急先达	J04												
+__export__.res_partner_delivery_suning_022					True									如风达快递	R01												
+__export__.res_partner_delivery_suning_023					True									UPS	U02												
+__export__.res_partner_delivery_suning_024					True									亚风快递	Y03												
+__export__.res_partner_delivery_suning_025					True									其他	Q00												
+__export__.res_partner_delivery_suning_026					True									当当	DD1												
+__export__.res_partner_delivery_suning_027					True									中粮	ZL1												
+__export__.res_partner_delivery_suning_028					True									威时沛运	W01												
+__export__.res_partner_delivery_alibaba_001														汇通快运													
+__export__.res_partner_delivery_alibaba_002														CCES快递													
+__export__.res_partner_delivery_alibaba_003														苏粤货运													
+__export__.res_partner_delivery_alibaba_004														贵平物流													
+__export__.res_partner_delivery_alibaba_005														盛辉物流													
+__export__.res_partner_delivery_alibaba_006														城市之星													
+__export__.res_partner_delivery_alibaba_007														新时代通成													
+__export__.res_partner_delivery_alibaba_008														港中能达													
+__export__.res_partner_delivery_alibaba_009														卡行天下													

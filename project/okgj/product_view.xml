@@ -1,0 +1,394 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="okgj_product_category_more_form_view" model="ir.ui.view">
+            <field name="name">okgj.product.category.more.form</field>
+            <field name="model">product.category</field>
+	    <field name="inherit_id" ref="product.product_category_form_view"/>
+            <field name="arch" type="xml">
+		<field name="name" position="after">
+		    <field name="okgj_code"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="okgj_product_category_more_list_view" model="ir.ui.view">
+            <field name="name">okgj.product.category.more.list</field>
+            <field name="model">product.category</field>
+	    <field name="inherit_id" ref="product.product_category_list_view"/>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+		<field name="complete_name" position="after">
+		    <field name="okgj_code"/>
+                </field>
+            </field>
+        </record>
+	
+        <record id="view_okgj_product_rack_form" model="ir.ui.view">
+            <field name="name">view.okgj.product.rack.form</field>
+            <field name="model">okgj.product.rack</field>
+            <field name="arch" type="xml">
+                <form string="货位">
+		    <field name="name"/>
+		    <field name="warehouse_id"/>
+		    <!--field name="pick_product_ids" widget="many2many_tags" />
+		    <field name="store_product_ids" widget="many2many_tags"/-->
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_rack_tree" model="ir.ui.view">
+            <field name="name">view.okgj.product.rack.tree</field>
+            <field name="model">okgj.product.rack</field>
+            <field name="arch" type="xml">
+                <tree string="货位">
+		    <field name="name"/>
+		    <field name="warehouse_id"/>
+		    <!--field name="pick_product_ids"/>
+		    <field name="store_product_ids"/-->
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_rack_search" model="ir.ui.view">
+            <field name="name">view.okgj.product.rack.search</field>
+            <field name="model">okgj.product.rack</field>
+            <field name="arch" type="xml">
+                <search string="货位">
+		    <field name="name"/>
+		    <field name="warehouse_id"/>
+		    <!--field name="pick_product_ids"/>
+		    <field name="store_product_ids"/-->
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_product_rack" model="ir.actions.act_window">
+            <field name="name">货位</field>
+            <field name="res_model">okgj.product.rack</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_okgj_product_rack_tree"/>
+            <field name="search_view_id" ref="view_okgj_product_rack_search"/>
+            <field name="context">{}</field>
+        </record>
+
+	<!--关联与维护-->
+        <record id="view_okgj_product_rack_usage_form" model="ir.ui.view">
+            <field name="name">view.okgj.product.rack.usage.form</field>
+            <field name="model">okgj.product.rack.usage</field>
+            <field name="arch" type="xml">
+                <form string="货位">
+		    <field name="warehouse_id"/>
+		    <newline/>
+		    <field name="rack_id" domain="[('warehouse_id', '=', warehouse_id)]"/>
+		    <newline/>
+		    <field name="usage"/>
+		    <newline/>
+		    <field name="product_id">
+			<!--tree string="拣存商品">
+			    <field name="name"/>
+			    <field name="qty_available"/>
+			</tree-->
+		    </field>
+
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_rack_usage_tree" model="ir.ui.view">
+            <field name="name">view.okgj.product.rack.usage.tree</field>
+            <field name="model">okgj.product.rack.usage</field>
+            <field name="arch" type="xml">
+                <tree string="货位">
+		    <field name="warehouse_id"/>
+		    <field name="rack_id"/>
+		    <field name="usage"/>
+		    <field name="product_id"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_rack_usage_search" model="ir.ui.view">
+            <field name="name">view.okgj.product.rack.usage.search</field>
+            <field name="model">okgj.product.rack.usage</field>
+            <field name="arch" type="xml">
+                <search string="货位">
+		    <field name="warehouse_id"/>
+		    <field name="rack_id"/>
+		    <field name="product_id"/>
+		    <filter string="按状态" name="groupby_usage" domain="[]"  context="{'group_by':'usage'}"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_product_rack_usage" model="ir.actions.act_window">
+            <field name="name">货位维护</field>
+            <field name="res_model">okgj.product.rack.usage</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_okgj_product_rack_usage_tree"/>
+            <field name="search_view_id" ref="view_okgj_product_rack_usage_search"/>
+            <field name="context">{}</field>
+        </record>
+
+        <!--menuitem action="action_okgj_product_rack" id="menu_action_okgj_product_rack" parent="stock.menu_warehouse_config" sequence="15"/-->
+
+        <record id="view_okgj_product_brand_form" model="ir.ui.view">
+            <field name="name">view.okgj.product.brand.form</field>
+            <field name="model">okgj.product.brand</field>
+            <field name="arch" type="xml">
+                <form string="品牌">
+		    <field name="name"/>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_product_brand_tree" model="ir.ui.view">
+            <field name="name">view.okgj.product.brand.tree</field>
+            <field name="model">okgj.product.brand</field>
+            <field name="arch" type="xml">
+                <tree string="品牌">
+		    <field name="name"/>
+                </tree>
+            </field>
+       </record>
+
+
+        <record id="view_okgj_product_brand_search" model="ir.ui.view">
+            <field name="name">view.okgj.product.brand.search</field>
+            <field name="model">okgj.product.brand</field>
+            <field name="arch" type="xml">
+                <search string="品牌">
+		    <field name="name"/>
+                </search>
+            </field>
+       </record>
+
+
+       <record id="action_okgj_product_brand" model="ir.actions.act_window">
+	   <field name="name">品牌</field>
+	   <field name="res_model">okgj.product.brand</field>
+	   <field name="type">ir.actions.act_window</field>
+	   <field name="view_type">form</field>
+	   <field name="view_mode">tree,form</field>
+	   <field name="context">{}</field>
+        </record>
+
+	<!--增加供应商与物流中心对应-->
+        <record id="product_supplierinfo_warehouse_form_view" model="ir.ui.view">
+            <field name="name">product.supplierinfo.warehouse.form.view</field>
+            <field name="model">product.supplierinfo</field>
+	    <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+            <field name="arch" type="xml">
+                <field name="min_qty" position="before">
+                    <field name="warehouse_id"/>
+		</field>
+	    </field>
+	</record>
+
+        <record id="product_supplierinfo_warehouse_tree_view" model="ir.ui.view">
+            <field name="name">product.supplierinfo.warehouse.tree.view</field>
+            <field name="model">product.supplierinfo</field>
+	    <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="min_qty" position="before">
+                    <field name="warehouse_id"/>
+		</field>
+	    </field>
+	</record>
+	
+        <record id="okgj_product_product_more_search_view" model="ir.ui.view">
+            <field name="name">okgj.product.product.more.search.view</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="brand_id"/>
+		    <filter string="普通商品" icon="terp-accessories-archiver" domain="[('is_group_product','=', False)]"/>
+		    <filter string="组合品" icon="terp-accessories-archiver" domain="[('is_group_product','=', True)]"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="okgj_product_product_more_form_view_sellerids" model="ir.ui.view">
+            <field name="name">okgj.product.product.more.form.view.sellerids</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
+            <field name="arch" type="xml">
+                <field name="seller_ids" position="replace">
+		    <field name="warehouse_sprice_ids">
+			<tree string="成本">
+                            <field name="warehouse_id"/>
+                            <field name="standard_price"/>
+                        </tree>
+                        <form>
+			    <field name="warehouse_id"/>
+                            <field name="standard_price"/>
+                        </form>
+		    </field>
+		    <field name="seller_ids" context="{'uom_id': uom_id}"  attrs="{'invisible':[('is_group_product','=', True)]}"/>
+                </field>
+	    </field>
+	</record>
+
+
+        <record id="okgj_product_product_more_form_view_groups" model="ir.ui.view">
+            <field name="name">okgj.product.product.more.form.view.groups</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="procurement.product_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@string='Request Procurement']" position="replace" />
+                <xpath expr="//button[@string='Orderpoints']" position="replace">
+                    <button string="Request Procurement" name="%(procurement.act_make_procurement)d" type="action"  attrs="{'invisible':[('is_group_product','=', True),('okgj_type','=','oem')]}"/>
+                    <button string="Orderpoints" name="%(procurement.product_open_orderpoint)d" type="action"  attrs="{'invisible':[('is_group_product','=', True),('okgj_type','=','oem')]}"/>
+		</xpath>
+	    </field>
+	</record>
+
+        <record id="okgj_product_product_more_form_view_trackinglot" model="ir.ui.view">
+            <field name="name">okgj.product.product.more.form.view.trackinglot</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="arch" type="xml">
+		<field name="track_production" position="replace"/>
+		<field name="track_incoming" position="replace">
+		    <field name="track_incoming"/>
+		</field>
+		<field name="track_outgoing"  position="replace">
+		    <field name="track_outgoing"/>
+		</field>
+	    </field>
+	</record>
+
+        <record model="ir.ui.view" id="okgj_product_product_more_form_view_bom">
+            <field name="name">okgj.product.product.more.form.view.bom</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="mrp.product_form_view_bom_button"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@string='Bill of Materials']" position="replace">
+                    <button string="Bill of Materials" name="%(mrp.product_open_bom)d" type="action"  attrs="{'invisible':[('is_group_product','=', False),('okgj_type','!=','oem')]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="okgj_product_product_more_form_view" model="ir.ui.view">
+            <field name="name">okgj.product.product.more.form.view</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+	            <field name="type" position="after">
+	            	<field name="okgj_type" groups="base.group_system"/>
+	            	<field name="rebate"/>
+			    	<field name="is_group_product"/>
+			    	<field name="is_okkg"/>
+	            </field>
+				<field name="list_price"  position="after">
+			    	<field name="other_price"/>
+			    	<field name="okkg_price"/>
+			    	<field name="okgj_cost_price"/>
+				</field>
+	            <field name="default_code" position="after">
+			    	<field name="brand_id" />
+	            </field>
+				<field name="uom_po_id" position="after">
+			    	<field name="min_qty" />
+				</field>
+	            <group name="inventory" position="after">
+	            	<group string="货位信息" attrs="{'invisible': ['|', ('type','=','service'), ('is_group_product', '=', True)]}">
+						<field name="product_pick_rack_ids"/>
+	                	<field name="product_store_rack_ids"/>
+	             	</group>
+				</group>
+            </field>
+        </record>
+
+        <record id="okgj_product_product_more_tree_view" model="ir.ui.view">
+            <field name="name">okgj.product.product.more.tree.view</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="variants" position="after">
+                   <field name="categ_id"/>
+                   <field name="brand_id"/>
+		   <field name="is_group_product"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="okgj_product_product_tree_view_standardprice" model="ir.ui.view">
+            <field name="name">okgj.product.product.tree.view.standardprice</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+		<field name="lst_price" position="after">
+                    <field name="other_price"/>
+		</field>
+                <field name="standard_price" position="replace">
+		    <field name="okgj_cost_price"/>
+		    <!--field name="standard_price"/-->
+                </field>
+	    </field>
+	</record>
+
+	<!--组合关系-->
+        <record model="ir.actions.act_window" id="mrp.product_open_bom">
+            <field name="context">{'default_type': 'phantom','default_product_id': active_id, 'search_default_product_id': active_id}</field>
+            <field name="name">Bill of Materials</field>
+            <field name="domain">[('bom_id','=',False)]</field>
+            <field name="res_model">mrp.bom</field>
+        </record>
+
+        <record id="okgj_product_combine_form_view" model="ir.ui.view">
+            <field name="name">okgj.product.combine.form.view</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <field name="type" position="replace">
+		    <field name="type" invisible="0" groups="okgj.group_okgj_purchase_user,okgj.group_okgj_finance_user" context='{"default_type":"phantom"}'/>
+                 </field>
+            </field>
+        </record>
+
+        <record id="okgj_product_combine_tree_view" model="ir.ui.view">
+            <field name="name">okgj.product.combine.tree.view</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_component_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="type" position="replace">
+		    <field name="type" invisible="1"/>
+                 </field>
+            </field>
+        </record>
+        
+<!--#jon only gourp:purcase_user can visible the field supplier_taxes_id -->
+<record id="okgj_inehrit_view_product_account_purchase_ok_form" model="ir.ui.view">
+    <field name="name">okgj.product.account.purchase.ok.form.inherit</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="purchase.view_product_account_purchase_ok_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='supplier_taxes_id']" position="attributes" >
+             <attribute name="groups">okgj.group_okgj_purchase_user,okgj.group_okgj_finance_user</attribute>
+        </xpath>
+    </field>
+</record>
+<!--#jon only gourp:account_manager can visible the field taxes_id   okgj.group_okgj_finance_user -->
+<record id="okgj_product_normal_form_view_for_tax" model="ir.ui.view">
+    <field name="name">okgj.product.account.tax</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="account.product_normal_form_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='taxes_id']" position="attributes" >
+             <attribute name="groups">okgj.group_okgj_finance_user</attribute>
+        </xpath>
+    </field>
+</record>
+
+
+
+
+   </data>
+</openerp>

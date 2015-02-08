@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="inherit_view_intercompany_form" model="ir.ui.view">
+            <field name="name">res.intercompany.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@string='Configuration']" position="before">
+                    <page string="InterCompany" groups="base.group_multi_company">
+                    	<label for='intercompany_uid' string='Internal Company User'/>
+                    	<field name='intercompany_uid' />
+                        <group string='Inter company set'>
+	                        <field name="res_ic_ids" nolabel="1">
+	                            <tree editable="bottom">
+	                                <field name="company_to"/>
+	                                <field name='intercompany_uid'/>
+	                                <field name="o2o"/>
+	                                <field name="status"/>
+	                                <field name="modify_mode"/>
+	                                <field name="auto_confirm"/>
+	                                <field name='sync_cancel'/>
+	                                <field name='sync_confirm'/>
+	                            </tree>
+	                        </field>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>

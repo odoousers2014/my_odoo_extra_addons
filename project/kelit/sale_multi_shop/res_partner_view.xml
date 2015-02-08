@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+
+	<!-- jon shop_id for res.partner form view -->
+	<record model="ir.ui.view" id="inherit_view_partner_form">
+           <field name="name">inherit.res.partner.form</field>
+           <field name="model">res.partner</field>
+           <field name="type">form</field>
+           <field name="inherit_id" ref="base.view_partner_form"/>
+           <field name="arch" type="xml">
+               <xpath expr="//field[@name='company_id']" position="after">
+                   <field name="shop_id"/>
+               </xpath>
+              <xpath  expr="//form/sheet/notebook/page/field[@name='child_ids']/form/sheet/group/field[@name='mobile']" position="after"> 
+               		<field name='shop_id'/>
+               		<field name='user_id'/>
+              </xpath>
+               
+               
+           </field>
+       </record>
+       
+        <!--jon res partner tree add shop  -->
+        <record model="ir.ui.view" id="inherit_view_partner_tree">
+			<field name="name">inherit_normal_tree_view_kelit</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_tree" />
+			<field name="arch" type="xml">
+		        <xpath expr="//field[@name='is_company']" position="after">
+                    <field name="shop_id" string="Shop"/>
+		        </xpath>
+            </field>
+        </record> 
+        
+        
+        
+        
+        <!--jon Partner Search Group by shop -->           
+        <record model="ir.ui.view" id="shop_view_res_partner_filter">
+			<field name="name">shop_normal_search_view_kelit</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_res_partner_filter" />
+			<field name="arch" type="xml">
+                <xpath expr="//filter[@string='Company']" position="after">
+                    <filter string="Shop" icon="terp-personal" domain="[]" context="{'group_by' : 'shop_id'}" />
+                </xpath>
+                <xpath  expr="//field[@name='name']" position="after">
+                	<field name="shop_id"/>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        
+
+        
+        
+
+       
+
+
+    
+</data>
+</openerp>

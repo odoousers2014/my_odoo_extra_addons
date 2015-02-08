@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_picking_out_intercompany_form" model="ir.ui.view">
+            <field name="name">stock.picking.out.intercompany.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='stock_journal_id']" position="after">
+                    <field name="is_locked" groups="base.group_multi_company" attrs="{'invisible': [('is_locked','=',False)]}"/>
+                    <field name="picking_ic_id" readonly="1" attrs="{'invisible': [('picking_ic_id','=',False)]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_picking_in_intercompany_form" model="ir.ui.view">
+            <field name="name">stock.picking.in.intercompany.form</field>
+            <field name="model">stock.picking.in</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="stock.view_picking_in_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='stock_journal_id']" position="after">
+                    <field name="is_locked" groups="base.group_multi_company" attrs="{'invisible': [('is_locked','=',False)]}"/>
+                    <field name="picking_ic_id" readonly="1" attrs="{'invisible': [('picking_ic_id','=',False)]}"/>
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</openerp>

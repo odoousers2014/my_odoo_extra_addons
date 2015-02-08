@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report auto="False" 
+		id="okgj_report_purchase_order" 
+		model="purchase.order" 
+                name="okgj.purchase.order" 
+		rml="okgj/report/okgj_purchase_order.rml"
+                string="采购订单"/>
+
+        <report id="okgj_report_picking_list_in" 
+		model="stock.picking.in" 
+		name="okgj.purchase.stock.picking.in" 
+		string="入库验收单" 
+		rml="okgj/report/okgj_purchase_stock_in_report.rml"/>
+
+        <report auto="False" 
+		id="report_okgj_purchase_return_report" 
+		model="okgj.purchase.return" 
+		name="okgj.purchase.return.report"
+                rml="okgj/report/okgj_purchase_return.rml" 
+		string="采购退货"
+                usage="default"/>
+
+        <report id="okgj_report_picking_list_out" 
+		model="stock.picking.out" 
+		name="okgj.purchase.stock.picking.out" 
+		string="采购退货出库单" 
+		rml="okgj/report/okgj_purchase_stock_out_report.rml"/>
+
+        <!--report auto="False" 
+		id="okgj_final_sale_order_report" 
+		model="sale.order" 
+                name="okgj.final.sale.print" 
+		rml="okgj/report/final_sale_print.rml"
+                string="销售送货单"/-->
+
+        <!--report auto="False" 
+		id="okgj_final_sale_order_multi_report" 
+		model="stock.picking" 
+                name="okgj.picking.multi.print" 
+		rml="okgj/report/okgj_all_multi_order_print.rml"
+                string="送货单与汇拣单"/-->
+
+        <report auto="False" 
+		id="okgj_multi_order_print_collect" 
+		model="okgj.multi.order.print" 
+                name="okgj.picking.multi.print.collect" 
+		rml="okgj/report/okgj_all_multi_order_print_collect.rml"
+                string="拣货单"/>
+
+        <report auto="False" 
+		id="okgj_multi_order_print_sale" 
+		model="okgj.multi.order.print" 
+                name="okgj.picking.multi.print.sale" 
+		rml="okgj/report/okgj_all_multi_order_print_sale.rml"
+                string="出库单"/>
+
+
+        <report auto="False" 
+		id="report_okgj_sale_return_report" 
+		model="okgj.sale.return" 
+		name="okgj.sale.return.report"
+                rml="okgj/report/okgj_sale_return.rml" 
+		string="销售退换货申请"
+                usage="default"
+		groups="base.group_no_one"/>
+
+        <report auto="False" 
+		id="report_okgj_logistics_report" 
+		model="okgj.logistics" 
+		name="okgj.logistics.print"
+                rml="okgj/report/okgj_logistics.rml" 
+		string="装车单"
+                usage="default"/>
+
+	
+        <report auto="False" 
+		id="report_okgj_order_picking_internal_in" 
+		model="okgj.order.picking.internal" 
+		name="okgj.order.picking.internal.in"
+                rml="okgj/report/okgj_order_picking_internal_in.rml" 
+		string="其它入库单"
+                usage="default"/>
+
+        <report auto="False" 
+		id="report_okgj_order_picking_internal_out" 
+		model="okgj.order.picking.internal" 
+		name="okgj.order.picking.internal.out"
+                rml="okgj/report/okgj_order_picking_internal_out.rml" 
+		string="其它出库单"
+                usage="default"/>
+
+        <report auto="False" 
+		id="report_okgj_okkg_sale" 
+		model="okgj.stock.picking.box.info" 
+		name="okgj.okkg.sale.report"
+                rml="okgj/report/okgj_okkg_sale.rml" 
+		string="快购装箱单"
+                usage="default"/>
+		
+		<report auto="False" 
+		id="report_okgj_stock_picking_in" 
+		model="stock.picking.in" 
+		name="okgj.stock.picking.in.report"
+                rml="okgj/report/okgj_stock_picking_in_report.rml" 
+		string="其它入库"
+                usage="default"/>
+		
+		<report auto="False" 
+		id="report_okgj_stock_picking_out" 
+		model="stock.picking.out" 
+		name="okgj.stock.picking.out.report"
+        rml="okgj/report/okgj_stock_picking_out_report.rml" 
+		string="其它出库"
+        usage="default"/>
+                
+        <!-- 优速快递单号 -->
+		<report auto="False" 
+		id="okgj_express_uc" 
+		model="sale.order" 
+		name="okgj.express.uc"
+        rml="okgj/report/okgj_express.rml" 
+		string="优速快递单打印"
+        usage="default"
+        report_type="pdf"/>
+        
+        <!--   优速快递单号 webkit
+		<report auto="False" 
+		id="okgj_webkit_express_uc" 
+		model="sale.order" 
+		name="okgj.webkit.express.uc"
+        file="okgj/report/okgj_express.mako" 
+		string="webkit优速快递单打印"
+        usage="default"
+        report_type="webkit"/>
+        -->
+                
+    </data>
+</openerp>

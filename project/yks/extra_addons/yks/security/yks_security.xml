@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="1">
+
+<record model="ir.module.category" id="yks_external_module_category">
+        <field name="name">外部用户</field>
+        <field name="sequence">100</field>
+</record>
+
+<record model="ir.module.category" id="yks_external_direct_sell_template">
+        <field name="name">直邮模板</field>
+        <field name="sequence">101</field>
+</record>
+
+<record model="ir.module.category" id="yks_external_artist">
+        <field name="name">美工</field>
+        <field name="sequence">102</field>
+</record>
+
+
+<!--  add groups   -->
+<record id="yks_group_external_warehouse" model="res.groups">
+       <field name="name">外部发货人员</field>
+       <field name="category_id" ref="yks_external_module_category"/>
+       <field name="users" eval="[(4, ref('base.user_root'))]"/>
+</record>
+<record id="yks_group_direct_sell_template" model="res.groups">
+       <field name="name">直邮模板管理</field>
+       <field name="category_id" ref="yks_external_direct_sell_template"/>
+       <field name="users" eval="[(4, ref('base.user_root'))]"/>
+</record>  
+<record id="yks_group_artist" model="res.groups">
+       <field name="name">美工</field>
+       <field name="category_id" ref="yks_external_artist"/>
+       <field name="users" eval="[(4, ref('base.user_root'))]"/>
+</record> 
+   
+
+
+</data>
+</openerp>

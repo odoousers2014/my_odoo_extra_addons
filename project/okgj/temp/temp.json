@@ -1,0 +1,66 @@
+
+{
+    "s": 1,
+     "m": {
+        "order_no": "2013031168390",
+         "order_id": 139044,
+         "order_info": {
+            "reconment": " ",
+             "tel": "",
+             "region_id": 707,
+             "sign_building": "",
+             "consignee": "万声乐",
+             "goods_amount": "599.60",
+             "pay_name": "货到付款",
+             "pay_time": 0,
+             "inv_content": "明细",
+             "user_id": 20810,
+             "district": 707,
+              "best_time": "",
+              "how_oos": "等待所有商品备齐后再发",
+              "order_amount": "599.90",
+             "order_id": 139044,
+             "coupon_pay": "0.00",
+              "order_status": 1,
+              "pay_id": 3,
+             "email": "",
+              "money_paid": "0.00",
+              "region_name": "南山区",
+              "bonus": "0.00",
+              "inv_payee": "",
+              "inv_amount": "599.90",
+              "bonus_pay": "0.0000",
+              "recharge_bonus": "0.00",
+              "address": "abc",
+              "shipping_status": 3,
+             "add_time": 1362955598,
+             "order_sn": "2013031168390",
+              "mobile": "15012552215",
+              "zipcode": "518000",
+              "pay_status": 0,
+             "send_time_content": "*本次消费乐享奖金:0.00元 *顾客选择送货时间:3月11号(星期一) 下午16:00～晚上22:00 ",
+              "shipping_fee": "0.30",
+             "order_weight": 21744
+        },
+         "user_info": {
+             "user_name": "13166666669",
+             "user_id": 20810,
+             "real_name": ""
+        },
+         "product_list": [
+            {
+                "goods_price": "149.90",
+                 "goods_name": "鲁花压榨一级花生油5.436L",
+                 "order_id": 139044,
+                 "goods_sn": "6916168616233",
+                  "item_weight": 5436,
+                 "goods_number": 4 
+            }
+        ],
+         "order_action": [
+            
+        ]
+
+    }
+}
+

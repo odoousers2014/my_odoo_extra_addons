@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+    
+<record id="okgj_oem_stock_location" model="stock.location">
+        <field name="location_id" ref="stock.stock_location_company"/>
+        <field eval="0" name="scrap_location"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="usage">internal</field>
+        <field name="name">OEM Location</field>
+</record>  
+
+    
+
+</data>
+</openerp>

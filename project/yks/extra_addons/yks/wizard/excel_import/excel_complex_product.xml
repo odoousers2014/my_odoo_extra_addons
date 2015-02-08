@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+		<act_window
+			id="excel_complex_product_action"
+			multi="False"
+			key2="client_action_relate"
+			name="组合品导入"
+			res_model="excel.base"
+			view_mode="form"
+			target="new"
+			context="{'default_model':'complex_product','default_replace':'create'}"
+			view_type="form"/>
+		<menuitem 
+			id="excel_complex_porduct_menu"
+			name="组合品导入"
+			parent="product.prod_config_main" 
+			sequence="3"
+			action="excel_complex_product_action"
+			groups="base.group_sale_salesman_all_leads"/>
+	</data>
+</openerp>

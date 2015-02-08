@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="okgj.view_okgj_import_order" model="ir.ui.view">
+            <field name="name">导入采购信息</field>
+            <field name="model">okgj.import.order</field>
+            <field name="arch" type="xml">
+            <form string="form" version="7.0">   
+             <group>
+            	<field name="excel"/> 
+            
+             </group>    
+             <separator string="退货导入模板下载:" invisible="context.get('p',0)"/>
+	     	 <field name="return_import_address" widget="url" invisible="context.get('p',0)"/>                
+            <footer>
+            	
+               <button string="取消" class="oe_highlight oe_right" special="cancel"/>
+               <button name="action_import_order" string="导入" type="object" class="oe_highlight oe_right" invisible="context.get('r',0)"/>
+               <button name="purchase_return_import" string="退货导入" type="object" class="oe_highlight oe_right" invisible="context.get('p',0)"/>
+            </footer>
+            </form>
+            </field>
+        </record> 
+        
+        <record id="action_okgj_import_order" model="ir.actions.act_window">
+            <field name="name">导入采购信息</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.import.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="inherit_id" ref="okgj.view_okgj_import_order" />
+        </record>
+
+		<record id="view_import_order_button" model="ir.ui.view">
+            <field name="name">view_import_order_button</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="okgj.view_okgj_purchase_more_form" />            
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_import_product']" position="after">
+            			<button name="%(okgj.action_okgj_import_order)d"  string="从Excel导入" type="action" context="{'p':1}" states="draft"/>
+                </xpath>                   
+            </field>
+        </record>
+        
+    </data>
+</openerp>           

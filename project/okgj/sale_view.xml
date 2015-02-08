@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<record id="okgi_meituan_inherit_view_order_form" model="ir.ui.view">
+    <field name="name">okgj.meituan.sale.order.form</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+    	<xpath expr="//form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_id']" position="after">
+    		<field name="link_code"/>
+    	</xpath>
+    	<xpath expr="//form/sheet/notebook/page/field[@name='order_line']/form/group/group/field[@name='product_id']" position="after">
+    		<field name="link_code"/>
+    	</xpath>
+    	<xpath expr="//form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='tax_id']" position="after">
+    		<field name="rebate" groups="okgj.group_okgj_finance_user"/>
+    	</xpath>
+    	<xpath expr="//form/sheet/notebook/page/field[@name='order_line']/form/group/group/field[@name='tax_id']" position="after">
+    		<field name="rebate" groups="okgj.group_okgj_finance_user"/>
+    	</xpath>
+    	
+    </field>
+</record>
+
+
+</data>
+</openerp>

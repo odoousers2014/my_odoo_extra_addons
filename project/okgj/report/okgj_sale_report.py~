@@ -1,0 +1,580 @@
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+from openerp import tools
+from osv import fields, osv
+import openerp.addons.decimal_precision as dp
+import re
+from openerp.tools.translate import _
+
+#物流中心，商品分类，供应商，品牌，条码，品名，上周日期，本周日期
+class okgj_report_sales_comp_wizard(osv.osv_memory):
+    _name = "okgj.report.sales.comp.wizard"
+    _columns = {
+        'warehouse_id':fields.many2one('stock.warehouse', u'物流中心', required=True),
+        'category_id':fields.many2one('product.category', u'类别'),
+        'supplier_id':fields.many2one('res.partner', u'供应商'),
+ ##       'brand_id':fields.many2one('okgj.product.brand', u'品牌'),
+        #'product_ean':fields.char(u'商品编码', size='32'),
+        'product_id':fields.many2one('product.product', u'商品'),
+        'first_start_date':fields.date(u'上期开始日期', required=True),
+        'first_end_date':fields.date(u'上期结束日期', required=True),
+        'second_start_date':fields.date(u'本期开始日期', required=True),
+        'second_end_date':fields.date(u'本期结束日期', required=True),
+    }
+    
+    def get_child(self, cr, uid, cate_id, context=None):
+        cate_obj = self.pool.get('product.category')
+        child_ids = []
+        def get_child_child(cr, uid, cate_id, context=None):
+            childs = cate_obj.browse(cr, uid, cate_id, context=context).child_id
+            for one_children in childs:
+                if one_children.child_id:
+                    get_child_child(cr, uid, one_children.id, context=context)
+                else:
+                    child_ids.append(one_children.id)
+        get_child_child(cr, uid, cate_id, context=context)
+        if not child_ids:
+            return '(' + str(cate_id) + ')'
+        return str(tuple(child_ids))
+
+    def action_open_window(self, cr, uid, ids, context=None):
+        """
+            @param cr: the current row, from the database cursor,
+            @param uid: the current user’s ID for security checks,
+            @param ids: the ID or list of IDs if we want more than one
+            @return:
+        """
+        if context is None:
+            context = {}
+        report_data = self.browse(cr, uid, ids, context=context)[0]
+        category_id = report_data.category_id.id
+        first_start_date = report_data.first_start_date
+        first_end_date = report_data.first_end_date
+        second_start_date = report_data.second_start_date
+        second_end_date = report_data.second_end_date
+        warehouse_id=0
+        category_id=0
+        supplier_id=0
+ ##       brand_id=0
+        product_id=0
+        
+        
+        
+        if report_data.warehouse_id:
+             warehouse_id = report_data.warehouse_id.lot_stock_id.id
+        if report_data.category_id:
+             category_id = report_data.category_id.id
+        if report_data.supplier_id:
+             supplier_id = report_data.supplier_id.id
+ ##       if report_data.brand_id:
+ ##            brand_id = report_data.brand_id.id
+        if report_data.product_id:
+             product_id = report_data.product_id.id
+        
+        strWhere=' 1=1'               
+##        if warehouse_id !=0:
+##           strWhere=strWhere +' AND  1=1'
+        if  category_id !=0:
+            strWhere=strWhere + '  AND productcategory.id in '+self.get_child(cr,uid,category_id,context=context)
+        if  supplier_id !=0:
+            strWhere=strWhere + '  AND partner.id='+str(supplier_id)
+##       if  brand_id !=0:
+##          strWhere=strWhere + '  AND partner.id='+str(brand_id)
+        if product_id !=0:
+            strWhere=strWhere +'  AND orderproduct.id='+str(product_id)
+       
+    
+        cr.execute(""" 
+        CREATE or replace VIEW report_sales_comp_data AS (      
+            --最终查询
+            select 
+            orderproduct.id as id,
+            substring(getparentcategory(productcategory.id),2,char_length(getparentcategory(productcategory.id))-1) as productcaterotyname,
+            partner.ref as suppliernumber,partner.name as suppliername,
+            orderproduct.default_code as productnumber,orderproduct.name_template as productname,
+            case orderproduct.is_group_product when 't' then '是' else '否' end as isgroupproduct,
+            puom.name as uomname,
+            orderproduct.min_qty as min_qty,orderproduct.variants as variants,
+            orderproduct.other_price as marketprice,pricelistpartnerinfo.price as purchaseprice,
+            producttemp.list_price as okprice, 
+            case orderproduct.is_group_product when 'f' then producttemp.standard_price else
+            parentproduct.parentcost end as okgjcostprice,
+            --销售成本
+            lastweekdata.salecostprice as lastsalecostprice,curweekdata.salecostprice as cursalecostprice,
+            lastweekdata.saleqty as lastweekdataqty,curweekdata.saleqty as curweekdataqty,
+            lastweekdata.saleamount as lastweekdataamount,curweekdata.saleamount as curweekdataamount,
+            --销售环比
+            case curweekdata.saleamount when 0 then 0 else
+            (curweekdata.saleamount-lastweekdata.saleamount)/lastweekdata.saleamount end *100 as salescomp,
+            --上期毛利率
+            case lastweekdata.saleamount when 0 then 0 else 
+            (lastweekdata.saleamount-lastweekdata.salecostprice)/lastweekdata.saleamount end *100 as lastmargin,
+            --本期毛利率
+            case curweekdata.saleamount when 0 then 0 else 
+            (curweekdata.saleamount-curweekdata.salecostprice)/curweekdata.saleamount end *100 as curmargin,
+            --毛利环比
+            case (lastweekdata.saleamount-lastweekdata.salecostprice) when 0 then 0 else
+            ((curweekdata.saleamount-curweekdata.salecostprice)-(lastweekdata.saleamount-lastweekdata.salecostprice))
+            /(lastweekdata.saleamount-lastweekdata.salecostprice) end *100 as margincomp,
+            --库存量
+            case orderproduct.is_group_product when 'f' then productinqty.invqty else
+            parentproduct.parentinvqty end as invqty,
+            --库存成本
+            case orderproduct.is_group_product when 'f' then productinqty.invqty * coalesce(producttemp.standard_price,0) else
+            parentproduct.parentinvqty*parentproduct.parentcost end as invamount,
+            --保质期
+            orderproduct.use_time as usetime,
+            orderproduct.create_date as createdate
+            
+            from product_product orderproduct 
+            inner join product_template producttemp on orderproduct.product_tmpl_id=producttemp.id
+            left join 
+                (select saleorderline.product_id, 
+                sum(coalesce(saleorderline.purchase_price,0)*coalesce(saleorderline.product_uom_qty,0))as salecostprice,
+                sum(coalesce(saleorderline.product_uom_qty,0))as saleqty,
+                sum(coalesce(saleorderline.price_unit,0)*coalesce(saleorderline.product_uom_qty,0))as saleamount
+                from sale_order saleorder 
+                inner join sale_order_line saleorderline on saleorder.id=saleorderline.order_id
+                
+                --left join stock_move stockmove on stockmove.sale_line_id=saleorderline.id
+                --inner join stock_picking stockpicking on stockmove.picking_id=stockpicking.id
+                --and stockmove.location_id in ("""+str(warehouse_id)+""")
+                --and stockmove.location_dest_id not in("""+str(warehouse_id)+""")
+                --and stockmove.state in('done')
+    
+                where  saleorder.state not  in('cancel')  and 
+                to_char(saleorder.create_date,'YYYY-MM-DD')>=%s and  to_char(saleorder.create_date,'YYYY-MM-DD')<=%s
+                
+                group by saleorderline.product_id) curweekdata on orderproduct.id=curweekdata.product_id
+            left join 
+                (select saleorderline.product_id, 
+                sum(coalesce(saleorderline.purchase_price,0)*coalesce(saleorderline.product_uom_qty,0))as salecostprice,
+                sum(coalesce(saleorderline.product_uom_qty,0))as saleqty,
+                sum(coalesce(saleorderline.price_unit,0)*coalesce(saleorderline.product_uom_qty,0))as saleamount
+                from sale_order saleorder 
+                inner join sale_order_line saleorderline on saleorder.id=saleorderline.order_id
+                
+                --left join stock_move stockmove on stockmove.sale_line_id=saleorderline.id
+                --inner join stock_picking stockpicking on stockmove.picking_id=stockpicking.id
+                --and stockmove.location_id in ("""+str(warehouse_id)+""")
+                --and stockmove.location_dest_id not in("""+str(warehouse_id)+""")
+                --and stockmove.state in('done')
+                
+                where  saleorder.state not  in('cancel') and 
+                to_char(saleorder.create_date,'YYYY-MM-DD')>=%s and  to_char(saleorder.create_date,'YYYY-MM-DD')<=%s
+                
+                group by saleorderline.product_id) lastweekdata on orderproduct.id=lastweekdata.product_id
+            left join product_category productcategory on producttemp.categ_id=productcategory.id
+            left join product_uom puom on producttemp.uom_id=puom.id
+            left join product_supplierinfo supplier on producttemp.id=supplier.product_id
+            left join res_partner partner on supplier.name=partner.id
+            left join pricelist_partnerinfo pricelistpartnerinfo on pricelistpartnerinfo.suppinfo_id=supplier.id
+            left join 
+                (select product.id,(coalesce(tempinqty.inqty,0)-coalesce(tempoutqty.outqty,0)) as invqty 
+                from 
+                    (select  product.id,producttemp.uom_id,puom.factor 
+                    from 
+                    product_product product
+                    inner join product_template producttemp on product.product_tmpl_id=producttemp.id
+                    left join product_uom puom on producttemp.uom_id=puom.id) product
+                left join (--获取入库数量
+                    select product_id,sum(inqty) as inqty from 
+                        (select 
+                            stockmove.product_id,stockmove.product_uom,
+                            (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as inqty
+                            from stock_move stockmove
+                        left join 
+                            (select  product1.id,producttemp1.uom_id,puom1.factor 
+                            from 
+                            product_product product1
+                            inner join product_template producttemp1 on product1.product_tmpl_id=producttemp1.id
+                            left join product_uom puom1 on producttemp1.uom_id=puom1.id) puom 
+                            on stockmove.product_id=puom.id
+                        left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                        where stockmove.location_id not in("""+str(warehouse_id)+""")
+                        and stockmove.location_dest_id  in("""+str(warehouse_id)+""")
+                        and stockmove.state in ('done')
+                        group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor) temp_totalinqty 
+                    group by product_id) tempinqty 
+                on product.id=tempinqty.product_id
+                left join (--出库
+                    select product_id,sum(outqty) as outqty from 
+                        (select stockmove.product_id,stockmove.product_uom,
+                            (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as outqty
+                            from stock_move stockmove
+                            left join 
+                                (select  productout.id,producttempout.uom_id,puomout.factor 
+                                from 
+                                product_product productout
+                                inner join product_template producttempout on productout.product_tmpl_id=producttempout.id
+                                left join product_uom puomout on producttempout.uom_id=puomout.id) puom on stockmove.product_id=puom.id
+                            left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                            where 
+                            stockmove.location_id in("""+str(warehouse_id)+""")
+                            and stockmove.location_dest_id not in("""+str(warehouse_id)+""")
+                            and stockmove.state in ('done')
+                            group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor)temp_outqty 
+                        group by product_id) tempoutqty 
+                on product.id=tempoutqty.product_id) productinqty on orderproduct.id=productinqty.id
+            
+            left join (select parentbom.product_id,
+            min(coalesce(tempinvqty.invqty ,0)/coalesce(childbom.product_qty,0))as parentinvqty,--end
+            sum(coalesce(childproducttemp.standard_price,0)*coalesce(childbom.product_qty,0)) as parentcost
+            from mrp_bom childbom 
+            left join mrp_bom parentbom on childbom.bom_id=parentbom.id 
+            left join (--即时库存量
+            select product.id,(coalesce(tempinqty.inqty,0)-coalesce(tempoutqty.outqty,0)) as invqty 
+            from (select  product.id,producttemp.uom_id,puom.factor 
+            from 
+            product_product product
+            inner join product_template producttemp on product.product_tmpl_id=producttemp.id
+            left join product_uom puom on producttemp.uom_id=puom.id) product
+                left join (--获取入库数量
+                    select product_id,sum(inqty) as inqty from 
+                        (select 
+                            stockmove.product_id,stockmove.product_uom,
+                            (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as inqty
+                            from stock_move stockmove
+                        left join 
+                            (select  product1.id,producttemp1.uom_id,puom1.factor 
+                            from 
+                            product_product product1
+                            inner join product_template producttemp1 on product1.product_tmpl_id=producttemp1.id
+                            left join product_uom puom1 on producttemp1.uom_id=puom1.id) puom 
+                            on stockmove.product_id=puom.id
+                        left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                        where stockmove.location_id not in("""+str(warehouse_id)+""")
+                        and stockmove.location_dest_id  in("""+str(warehouse_id)+""")
+                        and stockmove.state in ('done')
+                        group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor) temp_totalinqty 
+                    group by product_id) tempinqty 
+            on product.id=tempinqty.product_id
+            left join 
+                (--出库
+                    select product_id,sum(outqty) as outqty from 
+                        (select stockmove.product_id,stockmove.product_uom,
+                            (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*coalesce(puom.factor,0) as outqty
+                            from stock_move stockmove
+                            left join 
+                                (select  productout.id,producttempout.uom_id,puomout.factor 
+                                from 
+                                product_product productout
+                                inner join product_template producttempout on productout.product_tmpl_id=producttempout.id
+                                left join product_uom puomout on producttempout.uom_id=puomout.id) puom on stockmove.product_id=puom.id
+                            left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                            where 
+                            stockmove.location_id in("""+str(warehouse_id)+""")
+                            and stockmove.location_dest_id not in("""+str(warehouse_id)+""")
+                            and stockmove.state in ('done')
+                            group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor)temp_outqty 
+                        group by product_id) tempoutqty 
+            on product.id=tempoutqty.product_id) tempinvqty on childbom.product_id=tempinvqty.id
+            left join product_product productdata on productdata.id=parentbom.product_id
+            left join product_product childproduct on childbom.product_id=childproduct.id
+            inner join product_template childproducttemp on childproduct.product_tmpl_id=childproducttemp.id
+            where childbom.type='normal' 
+            group by parentbom.product_id) parentproduct on orderproduct.id=parentproduct.product_id
+            where 1=1 AND  """+strWhere+"""         
+        )
+        """, (second_start_date,second_end_date,first_start_date,first_end_date,)
+        
+        
+        )
+
+        
+        return {
+            'name': _('销售环比报表'),
+            'context': context,
+            'view_type': 'form',
+            "view_mode": 'tree',
+            'res_model':'report.sales.comp',
+            'type': 'ir.actions.act_window',
+#            'view_id': 'view_okgj_report_sales_comp_tree',
+        }
+okgj_report_sales_comp_wizard()
+
+class report_sales_comp(osv.osv):
+    _name = "report.sales.comp"
+    _description = "销售环比报表"
+    _order = 'productcaterotyname desc'
+    _auto = False
+    _columns = {
+            'productcaterotyname': fields.char(u'分类', readonly=True),
+           'suppliernumber': fields.char(u'供应商编码',readonly=True),
+             'suppliername': fields.char(u'供应商名称',readonly=True),
+             'productnumber': fields.char(u'对应商品条码',readonly=True),
+             'productname': fields.char(u'对应商品名称',readonly=True),
+             'isgroupproduct': fields.char(u'是否组合品',readonly=True),
+             'uomname': fields.char(u'单位',readonly=True),
+             'min_qty': fields.integer(u'箱装数量',readonly=True),
+             'variants': fields.char(u'规格',readonly=True),
+             'marketprice': fields.float(u'市场价', readonly=True),
+             'purchaseprice': fields.float(u'进价', readonly=True),
+             'okprice': fields.float(u'OK价', readonly=True),
+             'okgjcostprice': fields.float(u'成本价', readonly=True),
+            'lastsalecostprice': fields.float(u'上期销售成本', readonly=True),
+            'cursalecostprice': fields.float(u'本期销售成本', readonly=True),
+            'lastweekdataqty': fields.float(u'上期销售数量', readonly=True),
+            'curweekdataqty': fields.float(u'本期销售数量', readonly=True),
+            'lastweekdataamount': fields.float(u'上期销售金额', readonly=True),
+            'curweekdataamount': fields.float(u'本期销售金额', readonly=True),
+            'salescomp': fields.float(u'销售环比%', readonly=True),
+            'margincomp': fields.float(u'毛利环比%', readonly=True),
+            'lastmargin': fields.float(u'上期毛利率%', readonly=True),
+            'curmargin': fields.float(u'本期毛利率%', readonly=True),
+            'invqty': fields.float(u'库存数量', readonly=True),
+            'invamount': fields.float(u'库存金额', readonly=True),
+            'usetime': fields.integer(u'保质期',readonly=True),
+            'createdate': fields.date(u'商品创建时间',readonly=True),
+        }
+
+
+    def init(self, cr):
+        #tools.drop_view_if_exists(cr, 'report_sales_comp')
+        #总的结果查询
+        cr.execute("""
+        CREATE or replace VIEW report_sales_comp AS (      
+        select 
+            id as id,
+            productcaterotyname as productcaterotyname,
+            suppliernumber as suppliernumber,suppliername as suppliername,
+            productnumber as productnumber,productname as productname,
+            isgroupproduct as isgroupproduct,
+            uomname as uomname,
+            min_qty as min_qty,variants as variants,
+            marketprice as marketprice,
+            purchaseprice as purchaseprice,
+           okprice as okprice, 
+            okgjcostprice as okgjcostprice,
+            --销售成本
+             lastsalecostprice as lastsalecostprice,cursalecostprice as cursalecostprice,
+            lastweekdataqty as lastweekdataqty,curweekdataqty as curweekdataqty,
+            lastweekdataamount as lastweekdataamount,curweekdataamount as curweekdataamount,
+
+            --销售环比
+            salescomp as salescomp,
+            --上期毛利率
+            lastmargin as lastmargin,
+            --本期毛利率
+            curmargin as curmargin,
+            --毛利环比
+           margincomp as margincomp,
+            --库存量
+            invqty as invqty,
+            --库存成本
+            invamount as invamount,
+            --保质期
+            usetime as usetime,
+            createdate as createdate
+            
+        
+           from report_sales_comp_data
+        )
+        """
+    )
+report_sales_comp()
+
+
+    
+    
+##     def init(self, cr):
+##                 tools.drop_view_if_exists(cr, 'report_sales_comp')
+ 
+##                 #总的结果查询
+               
+##                 cr.execute(""" 
+##                     CREATE or replace VIEW report_sales_comp AS (      
+##   --最终查询
+## select 
+## orderproduct.id as id,
+## substring(getparentcategory(productcategory.id),2,char_length(getparentcategory(productcategory.id))-1) as productcaterotyname,
+## partner.ref as suppliernumber,partner.name as suppliername,
+## orderproduct.default_code as productnumber,orderproduct.name_template as productname,
+## case orderproduct.is_group_product when 't' then '是' else '否' end as isgroupproduct,
+## puom.name as uomname,
+## orderproduct.min_qty as min_qty,orderproduct.variants as variants,
+## orderproduct.other_price as marketprice,pricelistpartnerinfo.price as purchaseprice,
+## producttemp.list_price as okprice, 
+## case orderproduct.is_group_product when 'f' then producttemp.standard_price else
+## parentproduct.parentcost end as okgjcostprice,
+## --销售成本
+## lastweekdata.salecostprice as lastsalecostprice,curweekdata.salecostprice as cursalecostprice,
+## lastweekdata.saleqty as lastweekdataqty,curweekdata.saleqty as curweekdataqty,
+## lastweekdata.saleamount as lastweekdataamount,curweekdata.saleamount as curweekdataamount,
+## --销售环比
+## case curweekdata.saleamount when 0 then 0 else
+## (curweekdata.saleamount-lastweekdata.saleamount)/lastweekdata.saleamount end *100 as salescomp,
+## --上期毛利率
+## case lastweekdata.saleamount when 0 then 0 else 
+## (lastweekdata.saleamount-lastweekdata.salecostprice)/lastweekdata.saleamount end *100 as lastmargin,
+## --本期毛利率
+## case curweekdata.saleamount when 0 then 0 else 
+## (curweekdata.saleamount-curweekdata.salecostprice)/curweekdata.saleamount end *100 as curmargin,
+## --毛利环比
+## case (lastweekdata.saleamount-lastweekdata.salecostprice) when 0 then 0 else
+## ((curweekdata.saleamount-curweekdata.salecostprice)-(lastweekdata.saleamount-lastweekdata.salecostprice))
+## /(lastweekdata.saleamount-lastweekdata.salecostprice) end *100 as margincomp,
+## --库存量
+## case orderproduct.is_group_product when 'f' then productinqty.invqty else
+## parentproduct.parentinvqty end as invqty,
+## --库存成本
+## case orderproduct.is_group_product when 'f' then productinqty.invqty * coalesce(producttemp.standard_price,0) else
+## parentproduct.parentinvqty*parentproduct.parentcost end as invamount,
+## --保质期
+## orderproduct.use_time as usetime,
+## orderproduct.create_date as createdate
+
+## from product_product orderproduct 
+## inner join product_template producttemp on orderproduct.product_tmpl_id=producttemp.id
+## left join 
+##     (select saleorderline.product_id, 
+##     sum(coalesce(saleorderline.purchase_price,0)*coalesce(saleorderline.product_uom_qty,0))as salecostprice,
+##     sum(coalesce(saleorderline.product_uom_qty,0))as saleqty,
+##     sum(coalesce(saleorderline.price_unit,0)*coalesce(saleorderline.product_uom_qty,0))as saleamount
+##     from sale_order saleorder 
+##     inner join sale_order_line saleorderline on saleorder.id=saleorderline.order_id
+##     --where
+##     group by saleorderline.product_id) curweekdata on orderproduct.id=curweekdata.product_id
+## left join 
+##     (select saleorderline.product_id, 
+##     sum(coalesce(saleorderline.purchase_price,0)*coalesce(saleorderline.product_uom_qty,0))as salecostprice,
+##     sum(coalesce(saleorderline.product_uom_qty,0))as saleqty,
+##     sum(coalesce(saleorderline.price_unit,0)*coalesce(saleorderline.product_uom_qty,0))as saleamount
+##     from sale_order saleorder 
+##     inner join sale_order_line saleorderline on saleorder.id=saleorderline.order_id
+##     --where
+##     group by saleorderline.product_id) lastweekdata on orderproduct.id=lastweekdata.product_id
+## left join product_category productcategory on producttemp.categ_id=productcategory.id
+## left join product_uom puom on producttemp.uom_id=puom.id
+## left join product_supplierinfo supplier on producttemp.id=supplier.product_id
+## left join res_partner partner on supplier.name=partner.id
+## left join pricelist_partnerinfo pricelistpartnerinfo on pricelistpartnerinfo.suppinfo_id=partner.id
+## left join 
+##     (select product.id,(coalesce(tempinqty.inqty,0)-coalesce(tempoutqty.outqty,0)) as invqty 
+##     from 
+##         (select  product.id,producttemp.uom_id,puom.factor 
+##         from 
+##         product_product product
+##         inner join product_template producttemp on product.product_tmpl_id=producttemp.id
+##         left join product_uom puom on producttemp.uom_id=puom.id) product
+##     left join (--获取入库数量
+##         select product_id,sum(inqty) as inqty from 
+##             (select 
+##                 stockmove.product_id,stockmove.product_uom,
+##                 (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as inqty
+##                 from stock_move stockmove
+##             left join 
+##                 (select  product1.id,producttemp1.uom_id,puom1.factor 
+##                 from 
+##                 product_product product1
+##                 inner join product_template producttemp1 on product1.product_tmpl_id=producttemp1.id
+##                 left join product_uom puom1 on producttemp1.uom_id=puom1.id) puom 
+##                 on stockmove.product_id=puom.id
+##             left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+##             where stockmove.location_id not in(12)
+##             and stockmove.location_dest_id  in(12)
+##             and stockmove.state in ('done')
+##             group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor) temp_totalinqty 
+##         group by product_id) tempinqty 
+##     on product.id=tempinqty.product_id
+##     left join (--出库
+##         select product_id,sum(outqty) as outqty from 
+##             (select stockmove.product_id,stockmove.product_uom,
+##                 (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as outqty
+##                 from stock_move stockmove
+##                 left join 
+##                     (select  productout.id,producttempout.uom_id,puomout.factor 
+##                     from 
+##                     product_product productout
+##                     inner join product_template producttempout on productout.product_tmpl_id=producttempout.id
+##                     left join product_uom puomout on producttempout.uom_id=puomout.id) puom on stockmove.product_id=puom.id
+##                 left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+##                 where 
+##                 stockmove.location_id in(12)
+##                 and stockmove.location_dest_id not in(12)
+##                 and stockmove.state in ('done')
+##             --and stockmove.product_id=5981
+##                 group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor)temp_outqty 
+##             group by product_id) tempoutqty 
+##     on product.id=tempoutqty.product_id) productinqty on orderproduct.id=productinqty.id
+
+## left join (select parentbom.product_id,
+## min(coalesce(tempinvqty.invqty ,0)/coalesce(childbom.product_qty,0))as parentinvqty,--end
+## sum(coalesce(childproducttemp.standard_price,0)*coalesce(childbom.product_qty,0)) as parentcost
+## from mrp_bom childbom 
+## left join mrp_bom parentbom on childbom.bom_id=parentbom.id 
+## left join (--即时库存量
+## select product.id,(coalesce(tempinqty.inqty,0)-coalesce(tempoutqty.outqty,0)) as invqty 
+## from (select  product.id,producttemp.uom_id,puom.factor 
+## from 
+## product_product product
+## inner join product_template producttemp on product.product_tmpl_id=producttemp.id
+## left join product_uom puom on producttemp.uom_id=puom.id) product
+##     left join (--获取入库数量
+##         select product_id,sum(inqty) as inqty from 
+##             (select 
+##                 stockmove.product_id,stockmove.product_uom,
+##                 (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as inqty
+##                 from stock_move stockmove
+##             left join 
+##                 (select  product1.id,producttemp1.uom_id,puom1.factor 
+##                 from 
+##                 product_product product1
+##                 inner join product_template producttemp1 on product1.product_tmpl_id=producttemp1.id
+##                 left join product_uom puom1 on producttemp1.uom_id=puom1.id) puom 
+##                 on stockmove.product_id=puom.id
+##             left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+##             where stockmove.location_id not in(12)
+##             and stockmove.location_dest_id  in(12)
+##             and stockmove.state in ('done')
+##             group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor) temp_totalinqty 
+##         group by product_id) tempinqty 
+## on product.id=tempinqty.product_id
+## left join 
+##     (--出库
+##         select product_id,sum(outqty) as outqty from 
+##             (select stockmove.product_id,stockmove.product_uom,
+##                 (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*coalesce(puom.factor,0) as outqty
+##                 from stock_move stockmove
+##                 left join 
+##                     (select  productout.id,producttempout.uom_id,puomout.factor 
+##                     from 
+##                     product_product productout
+##                     inner join product_template producttempout on productout.product_tmpl_id=producttempout.id
+##                     left join product_uom puomout on producttempout.uom_id=puomout.id) puom on stockmove.product_id=puom.id
+##                 left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+##                 where 
+##                 stockmove.location_id in(12)
+##                 and stockmove.location_dest_id not in(12)
+##                 and stockmove.state in ('done')
+##             --and stockmove.product_id=5981
+##                 group by stockmove.product_id,stockmove.product_uom,stockpuom.factor,puom.factor)temp_outqty 
+##             group by product_id) tempoutqty 
+## on product.id=tempoutqty.product_id) tempinvqty on childbom.product_id=tempinvqty.id
+## left join product_product productdata on productdata.id=parentbom.product_id
+## left join product_product childproduct on childbom.product_id=childproduct.id
+## inner join product_template childproducttemp on childproduct.product_tmpl_id=childproducttemp.id
+## where childbom.type='normal' 
+## group by parentbom.product_id) parentproduct on orderproduct.id=parentproduct.product_id
+## --where orderproduct.productid=
+
+##   )
+##      """)

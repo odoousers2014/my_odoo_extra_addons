@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<!-- res.header form  jon.chow#elico-corp.com Jun 8, 2013-->
+		<record id="inherit_view_report_header_form" model="ir.ui.view">
+		    <field name="name">res.header.form</field>
+		    <field name="model">res.header</field>
+		    <field name="inherit_id" ref="base_report_header.view_report_header_form"/>
+		    <field name="arch" type="xml">
+		    	<xpath expr="//form/group/field[@name='rml_header']" position="after">
+		    		<field name="partner_ids" widget="many2many" colspan='4'/>
+		    	</xpath>
+		    </field>
+		</record>
+		
+		<!-- res.parnter form  jon.chow#elico-corp.com Jun 8, 2013-->
+		<record id="inherit_view_partner_form" model="ir.ui.view">
+		    <field name="name">res.partner.form</field>
+		    <field name="model">res.partner</field>
+		    <field name="inherit_id" ref="base.view_partner_form"/>
+		    <field name="arch" type="xml">
+		        <xpath expr="//field[@name='email']" position="after">
+		            <field name="header_id"/>
+		        </xpath>
+		    </field>
+		</record>
+	</data>
+</openerp>

@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openerp>
+<data>
+	<record model='ir.ui.view' id='bargain_product_import_form'>
+		<field name='name'>bargain.product.import.form</field>
+		<field name='model'>bargain.product.import</field>
+		<field name='arch' type='xml'>
+			<form string='import form' version='7.0'>
+				<group>
+					<field name='excel'/>
+				</group>
+				<separator string="导入模板下载:"/>
+	     		<field name="import_address"/>
+				<footer>
+					<button name='action_import' string='采购促销进价导入' type='object' class="oe_highlight"/> 
+					<button string="关闭" class="oe_right" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+	
+	<record model='ir.actions.act_window' id='action_bargain_product_import'>
+		<field name='name'>采购促销进价导入</field>
+		<field name='type'>ir.actions.act_window</field>
+		<field name='res_model'>bargain.product.import</field>
+		<field name='view_type'>form</field>
+		<field name='view_mode'>form</field>
+		<field name='target'>new</field>
+	</record>
+
+    <menuitem name="促销进价导入"
+		  id="menu_okgj_bargain_product_import"
+		  action="action_bargain_product_import"
+		  sequence="27"
+		  parent="okgj.menu_okgj_basedatainfo_root"/> 
+</data>
+</openerp>

@@ -1,0 +1,149 @@
+# -*- coding: utf-8 -*-
+from dateutil.relativedelta import relativedelta
+from openerp.osv import fields, osv
+from openerp.tools.translate import _
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+
+class okgj_sale_fill_order(osv.osv_memory):
+    _name = "okgj.sale.fill.order"
+okgj_sale_fill_order()
+
+class okgj_sale_fill_order_lines(osv.osv_memory):
+    _name = "okgj.sale.fill.order.lines"
+    _columns = {               
+        'wizard_id': fields.many2one('sale.fill.order','Parent Wizard'), 
+        'product_id': fields.many2one('product.product', u'商品', required=True),
+        'product_qty': fields.float(u'待购数量', digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
+        'uom_id':fields.related('product_id', 'uom_id', type='many2one', relation='product.uom', string=u'计量单位', readonly=True),
+        'qty_avail': fields.related('product_id', 'qty_available', type='float', string=u'可用数量', readonly=True),
+        'last_week': fields.function(_get_last_sell, string=u'前7天出货量', type='float', multi='sell', readonly=True),
+        'last_month': fields.function(_get_last_sell, string=u'前30天出货量', type='float', multi='sell', readonly=True),
+    }
+
+    def _get_last_sell(self, cr, uid, ids, field_name, arg, context=None):
+        if context is None:
+            context = {}
+        partner_id = context.get('active_partner_id', [])
+        warehouse_id = context.get('active_warehouse_id', [])
+        warehouse_data = self.pool.get('stock.warehouse').browse(cr, uid, warehouse_id, context)
+        lot_stock_id = warehouse_data.lot_stock_id.id
+        lot_output_id = warehouse_data.lot_output_id.id
+        mov_obj = self.pool.get('stock.move')
+        uom_obj = self.pool.get('product.uom')
+        today = fields.date.context_today
+        last_week = today - relativedelta(days=7)
+        last_month = today - relativedelta(days=30)
+        res = {}
+        lines_data = self.browse(cr, uid, ids, context)
+        for one_line in lines_data:
+            product_id = one_line.product_id.id
+            product_uom = one_line.uom_id
+            line_id = one_line.id
+            week_move_lines_ids = mov_obj.search(cr, uid, [('product_id','=',product_id), ('location_id','=',lot_stock_id), ('location_dest_id','=',lot_output_id),('date','>=', last_week), ('state','=', 'done')], context)
+            week_move_lines_data = mov_obj.browse(cr, uid, week_move_lines_ids, context)
+            week_qty = 0
+            for one_move in week_move_lines_data:
+                if product_uom != one_move.product_uom:
+                    product_qty = uom_obj._compute_qty(cr, uid, one_move.product_uom, one_move.product_qty, product_uom)
+                else:
+                    product_qty = one_move.product_qty
+                week_qty = week_qty + product_qty
+                
+            month_move_lines_ids = mov_obj.search(cr, uid, [('product_id','=',product_id), ('location_id','=',lot_stock_id), ('location_dest_id','=',lot_output_id),('date','>=', last_month), ('state','=', 'done')], context)
+            month_move_lines_data = mov_obj.browse(cr, uid, month_move_lines_ids, context)
+            month_qty = 0
+            for one_move in month_move_lines_data:
+                if product_uom != one_move.product_uom:
+                    product_qty = uom_obj._compute_qty(cr, uid, one_move.product_uom, one_move.product_qty, product_uom)
+                else:
+                    product_qty = one_move.product_qty
+                month_qty = month_qty + product_qty
+            res[one_line.id]['last_week'] = week_qty
+            res[one_line.id]['last_month'] = month_qty
+        return res
+
+okgj_sale_fill_order_lines()    
+
+class okgj_sale_fill_order(osv.osv_memory):
+    _name = "okgj.sale.fill.order"
+    _columns = { 
+        'line_ids': fields.one2many('sale.fill.order.lines', 'wizard_id','Serial Numbers'),    
+    }
+
+    def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
+        mod_obj = self.pool.get('ir.model.data')
+        if context is None: context = {}
+        partner_id = context.get('active_partner_id', [])
+        warehouse_id = context.get('active_warehouse_id', [])
+        if (not partner_id) or (not warehouse_id):
+            raise osv.except_osv(_('Invalid Action!'), _('You should fill the Partner and Warehouse Before.'))
+        res = super(okgj_sale_fill_order, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+        return res
+    
+    def default_get(self, cr, uid, fields, context=None):
+        """ To get default values for the object.
+        @param self: The object pointer.
+        @param cr: A database cursor
+        @param uid: ID of the user currently logged in
+        @param fields: List of fields for which we want default values 
+        @param context: A standard dictionary 
+        @return: A dictionary which of fields with values. 
+        """ 
+        if not context:
+            context = {}
+        partner_id = context.get('active_partner_id', [])
+        warehouse_id = context.get('active_warehouse_id', [])
+        if (not partner_id) or (not warehouse_id):
+            raise osv.except_osv(_('Invalid Action!'), _('You should fill the Partner and Warehouse Before.'))
+        res = super(okgj_sale_fill_order, self).default_get(cr, uid, fields, context=context)
+        partner_products = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context).product_ids
+        line_ids = []
+        for one_product in partner_ids:
+            line_ids.append((0, 0,  {'product_id':one_product.id, 'product_qty':1})
+
+        if 'line_ids' in fields:
+            res.update({'line_ids': line_ids})
+        return res
+
+    def do_import(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        data = {}
+        today = fields.date.context_today
+        sale_line_obj = self.pool.get('okgj.sale.order.line') 
+        form_data = self.browse(cr, uid, ids, context=context)
+        partner_id = context.get('active_partner_id', [])
+        order_id = context.get('active_ids',[])
+        pricelist_id = context.get('pricelist_id', [])
+        fiscal_position_id = context.get('fiscal_position_id', False)
+        product_pricelist_obj = self.pool.get('product.pricelist')
+        account_tax_obj = self.pool.get('account.tax')
+        account_fiscal_position_obj = self.pool.get('account.fiscal.position')
+        for one_line  in form_data:
+            #处理价格表与税
+            if pricelist_id:
+                price = product_pricelist_obj.price_get(cr, uid, [pricelist_id], one_line.product_id.id, qty or 1.0, partner_id or False, {'uom': one_line.product_id.uom_id.id, 'date': date_order})[pricelist_id]
+            else:
+                price = one_line.product_id.standard_price
+            taxes = account_tax_obj.browse(cr, uid, map(lambda x: x.id, one_line.product_id.supplier_taxes_id))
+            fpos = fiscal_position_id and account_fiscal_position_obj.browse(cr, uid, fiscal_position_id, context=context) or False
+            taxes_ids = account_fiscal_position_obj.map_tax(cr, uid, fpos, taxes)
+
+            res['value'].update({'price_unit': price, 'taxes_id': taxes_ids})
+
+            data = {
+                'name':one_line.product_id.name,
+                'product_id':one_line.product_id.id,
+                'price_unit': price,
+                'product_qty':one_line.product_qty,
+                'product_uom':one_line.product_id.uom_id.id,
+                'date_planned':today,
+                'order_id':order_id,
+                'state':draft,
+            }
+            sale_line_obj.create(cr, uid, data, context)
+        return {'type': 'ir.actions.act_window_close'}            
+
+okgj_sale_fill_order()

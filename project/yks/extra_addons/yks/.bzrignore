@@ -1,0 +1,12 @@
+*.pyc
+direct_sell_template.pyc
+__init__.pyc
+ir_exports.pyc
+partner.pyc
+product.pyc
+purchase.pyc
+sale.pyc
+stock.pyc
+sync_api.pyc
+user.pyc
+maintain

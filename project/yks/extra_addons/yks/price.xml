@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="1">
+<record id='product_price_type_wholesale' model='product.price.type'>
+    <field name="name">批发价</field>
+    <field name="field">price_wholesale</field>
+</record>
+<record id='product_pricelist_wholesale' model='product.pricelist'>
+    <field name="name">批发价格表</field>
+    <field name="type">sale</field>
+</record>
+</data>
+<data>
+
+
+
+
+
+
+
+</data>
+</openerp>

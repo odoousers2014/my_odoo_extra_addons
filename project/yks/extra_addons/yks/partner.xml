@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+
+<data>
+<!-- sale_man only can see himself customer-->
+<record id="yks_rule_sale_man_customer" model="ir.rule">
+    <field name="name">yks.sale_man.customer</field>
+    <field ref="base.model_res_partner" name="model_id"/>
+    <field name="domain_force">['|','|',('user_id.id','=',user.id),('user_id','=',False),('customer','=',False)]</field>
+    <field name="groups" eval="[(6,0, [ref('base.group_sale_salesman'),])]"/>
+</record>
+<!-- sale_chager and manager can see all customer-->
+<record id="yks_rule_sale_chager_customer" model="ir.rule">
+    <field name="name">yks.sale_chager.customer</field>
+    <field ref="base.model_res_partner" name="model_id"/>
+    <field name="domain_force">[(1,'=',1)]</field>
+    <field name="groups" eval="[(6,0, [ref('base.group_sale_salesman_all_leads')])]"/>
+</record>
+
+
+<record model="ir.ui.view" id="yks_res_city_tree_view">
+    <field name="name">yks.res.city.tree</field>
+    <field name="model">res.city</field>
+    <field name="arch" type="xml">
+        <tree string="City">
+            <field name="name"/>
+            <field name="state_id"/>
+        </tree>
+    </field>
+</record>
+<record model="ir.ui.view" id="yks_res_city_form_view">
+    <field name="name">yks.res.city.form</field>
+    <field name="model">res.city</field>
+    <field name="arch" type="xml">
+        <form string="City">
+            <field name="name"/>
+            <field name="state_id"/>
+        </form>
+    </field>
+</record>
+<record model="ir.actions.act_window" id="action_yks_res_city">
+    <field name="name">城市</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">res.city</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="yks_res_city_tree_view"/>
+</record>
+<menuitem id="yks_res_city_menu" name="城市"  
+                   parent="base.menu_localisation"  action="action_yks_res_city"/>
+                   
+                   
+<record model="ir.ui.view" id="yks_res_district_tree_view">
+    <field name="name">yks.res.district.tree</field>
+    <field name="model">res.district</field>
+    <field name="arch" type="xml">
+        <tree string="District"  editable='top'>
+            <field name="name"/>
+            <field name="city_id"/>
+        </tree>
+    </field>
+</record>
+<record model="ir.actions.act_window" id="action_yks_res_district">
+    <field name="name">区县</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">res.district</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="yks_res_district_tree_view"/>
+</record>
+<menuitem id="yks_res_district_menu" name="区县"  parent="base.menu_localisation"  action="action_yks_res_district"/>	
+
+
+<!-- res.partner search view -->
+<record id="yks_res_partner_search_view" model="ir.ui.view">
+	<field name="name">yks.res.partner.search</field>
+	<field name="model">res.partner</field>
+	<field name="inherit_id" ref="base.view_res_partner_filter"/>
+	<field name="arch" type="xml">
+		<field name="parent_id" domain="[('is_company','=',1),]" operator="child_of" position="replace">
+		</field>
+		<field name="name" position='replace'>
+		  <field name="name" filter_domain="['|',('user_id','=',uid),('user_id','=',False),'|',('name','ilike',self),('ref','=',self)]"/>
+		</field>
+	</field>
+</record>
+
+
+<!-- res.partner tree view --> 
+<record model="ir.ui.view" id="yks_view_partner_tree">
+    <field name="name">yks.res.partner.tree</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='user_id']" position='after'>
+            <field name='section_id'/>
+        </xpath>
+        <xpath expr="//field[@name='email']" position='attributes'>
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='email']" position='after'>
+            <field name='qq'/>
+            <field name='wechat'/>
+            <field name='wangwang'/>
+        </xpath>
+        <xpath expr="//field[@name='name']" position='after'>
+            <field name='code' invisible="not context.get('search_default_supplier',)"/>
+        </xpath>
+        <xpath expr="//field[@name='user_id']" position='attributes'>
+            <attribute name="invisible">0</attribute>
+        </xpath>
+        
+    </field>
+</record>
+
+<!-- res.partner form view -->                   
+<record model="ir.ui.view" id="yks_res_partner_form_view">
+	<field name="name">yks.res.partner.form</field>
+	<field name="model">res.partner</field>
+	<field name="inherit_id" ref="base.view_partner_form"/>
+	<field name="arch" type="xml">
+       <field name="parent_id" position="before">
+           <field name="code" placeholder='公司编码'/>
+       </field>
+       <xpath expr="//field[@name='mobile']"  position="attributes">
+           <attribute name="required">1</attribute> 
+       </xpath>
+       <xpath expr="//page[@string='Contacts']" position="attributes">
+           <attribute name="attrs">{'invisible': 0}</attribute> 
+       </xpath>
+       <xpath expr="//field[@name='user_id']" position='replace'>
+       </xpath>
+       
+       <xpath expr="//field[@name='fax']"  position="after">
+           <field name="qq"/>
+           <field name="wechat"/>
+           <field name="wangwang"/>
+           <field name="monkey_id"/>
+           <field name="is_contact"/>
+           <field name="brand_ids" widget="many2many_tags"/>
+           <field name="industry"/>
+           <field name="gender"/>
+       </xpath>
+       <xpath expr="//field[@name='website']"  position="after">
+           <field name="shop_type"/>
+           <field name="sale_type"/>
+           <field name="annual_sale"/>
+           <field name="month_sale"/>
+           <field name="sku_month_sale"/>
+           <field name="taobao_rate"/>
+           <field name="business_content"/>
+           <field name="count_of_employees"/>
+           <field name="user_id" required="context.get('search_default_customer') or context.get('search_default_supplier')"/>
+       </xpath>
+       
+       
+	</field>
+</record>       
+
+<record id="base.action_partner_supplier_form" model="ir.actions.act_window">
+    <field name="name">Suppliers</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">res.partner</field>
+    <field name="view_type">form</field>
+    <field name="domain">[('supplier','=',1)]</field>
+    <field name="view_mode">kanban,tree,form</field>
+    <field name="context">{'search_default_supplier': 1,'default_customer': 0,'default_supplier': 1}</field>
+    <field name="filter" eval="True"/>
+    <field name="help" type="html">
+      <p class="oe_view_nocontent_create">
+        Click to add a contact in your address book.
+      </p><p>
+        OpenERP helps you easily track all activities related to
+        a supplier: discussions, history of purchases,
+        documents, etc.
+      </p>
+    </field>
+</record>
+
+<!-- menu for all partner -->
+<record id="yks_action_all_partner" model="ir.actions.act_window">
+    <field name="name">合作伙伴</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">res.partner</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="search_view_id" ref="base.view_res_partner_filter"/>
+</record>
+<menuitem id="yks_menu_all_partner" action="yks_action_all_partner" parent="base.menu_sales" sequence="1" groups='base.group_system'/>
+
+<!-- My Customer -->
+<record model="ir.actions.act_window" id="action_yks_my_customers">
+	<field name="name">我的客户</field>
+	<field name="type">ir.actions.act_window</field>
+	<field name="res_model">res.partner</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+	<field name="domain">[('customer','=',True),'|',('user_id','=',uid),('user_id','=',False)]</field>
+	<field name="view_id" ref="base.view_partner_tree"></field>
+	<field name="search_view_id" ref="base.view_res_partner_filter"/>
+</record>
+<menuitem id="yks_my_customers" name="我的客户" sequence="20" parent="base.menu_sales"  action="action_yks_my_customers"/>
+               
+<!-- Sale Charge，ALL Customer-->
+<record id="base.action_partner_form" model="ir.actions.act_window">
+    <field name="name">Customers</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">res.partner</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">kanban,tree,form</field>
+    <field name="domain">[('customer','=',True)]</field>
+    <field name="context">{"search_default_customer":1}</field>
+    <field name="search_view_id" ref="base.view_res_partner_filter"/>
+</record>
+<menuitem id="base.menu_partner_form" parent="base.menu_sales" action="base.action_partner_form" sequence="1" groups="base.group_sale_salesman_all_leads"/>       
+
+</data>
+</openerp>

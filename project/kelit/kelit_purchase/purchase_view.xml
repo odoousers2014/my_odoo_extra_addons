@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<!--jon Purchase order Form view  -->
+    	<record id="inherit_purchase_order_form" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.purchase_order_form" />
+			<field name="arch" type="xml">
+				
+				<field name="payment_term_id" position="replace">
+				</field>
+				<field name="pricelist_id" position='after'>
+					<field name="payment_term_id"/>
+					<field name="incoterm_id"/>
+				</field>
+				
+				<field name="origin" position="attributes">
+					<attribute name="string">Internal Reference</attribute>
+				</field>
+				
+				<field name="date_order" position="replace">
+				</field>
+				
+				<field name="minimum_planned_date" position="replace">
+				</field>
+				
+				<field name="origin" position="before">
+					<field name="minimum_planned_date"/>
+				</field>
+				<field name="dest_address_id" position="before">
+					<field name="date_order"/>
+				</field>
+				
+				<xpath expr="//form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='company_id']" position='attributes'>
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				
+				
+				
+            </field>
+        </record>
+        
+        
+        <!-- purchase order calendar view  view  jon.chow#elico-corp.com Jul 24, 2013-->
+        <record model="ir.ui.view" id="inherit_purchase_order_calendar">
+            <field name="name">purchase.order.calendar</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_calendar"/>
+            <field name="arch" type="xml">
+	 			<xpath expr="//calendar" position='attributes'>
+	 				<attribute name="date_start">date_order</attribute>
+	 			</xpath>
+
+            </field>
+        </record>
+
+
+
+
+	</data>
+</openerp>
+

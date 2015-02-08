@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>	
+        <record id="view_okgj_product_import" model="ir.ui.view">
+            <field name="name">导入商品</field>
+            <field name="model">okgj.product.import</field>
+            <field name="arch" type="xml">
+            <form string="form" version="7.0">   
+             <group>
+		 <field name="excel"/> 
+             </group>
+	     <separator string="导入模板下载:"/>
+	     <field name="import_address" widget="url"/>
+	     <separator string="更新模板下载:"/>
+	     <field name="update_address" widget="url"/> 
+            <footer>
+               <button name="do_import" string="导入" type="object" class="oe_highlight"/>
+	       <button name="do_update" string="更新" type="object" class="oe_highlight"/>
+               <button string="取消" class="oe_right" special="cancel"/>
+            </footer>
+            </form>
+            </field>
+        </record> 
+        
+        <record id="action_okgj_product_import" model="ir.actions.act_window">
+            <field name="name">导入商品</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.product.import</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+	<!--menuitem name="导入商品"
+		  id="product.menu_okgj_product_import"
+		  parent="base.menu_base_partner"  
+		  sequence="30"/>
+
+	<menuitem name="导入商品"
+		  id="product.menu_okgj_product_import2"
+		  action="action_okgj_product_import" 
+		  parent="product.menu_okgj_product_import"  /-->
+
+
+        <record id="view_okgj_product_import_end" model="ir.ui.view">
+            <field name="name">导入结果</field>
+            <field name="model">okgj.product.import.end</field>
+            <field name="arch" type="xml">
+            <form string="form">
+		<field name="success_product"/>
+		<field name="success_bom"/>
+		<newline/>
+		<field name="note" colspan="4" widget="text_tag"/>
+		<newline/>
+		<button string="关闭" special="cancel"/>
+            </form>
+            </field>
+        </record> 
+        
+    </data>
+</openerp>

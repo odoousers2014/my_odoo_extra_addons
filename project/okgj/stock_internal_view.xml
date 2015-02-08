@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="view_okgj_stock_picking_internal_internal_tree" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.internal.tree</field>
+            <field name="model">stock.picking</field>
+            <field name="arch" type="xml">
+                <tree string="其它">
+		    <field name="internal_order_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="invoice_state" groups="account.group_account_invoice"/>
+                    <field name="stock_journal_id"/>
+		    <field name="write_uid" string="审核人"/>
+                    <field name="write_date" string="审核时间"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_stock_picking_internal_internal_form" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.internal.form</field>
+            <field name="model">stock.picking</field>
+            <field name="arch" type="xml">
+                <form string="其它" version="7.0">
+		    <header>
+			<button name="draft_validate" states="draft" string="审批通过" type="object" class="oe_highlight"/>
+			<button name="action_assign" states="confirmed" string="检测可用" type="object" class="oe_highlight"/>
+			<button name="force_assign" states="confirmed" string="强制可用" type="object" class="oe_highlight" groups="base.group_user"/>
+			<button name="action_process" states="assigned" string="收货" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			<group>
+			    <group>
+				<!--field name="warehouse_id"/-->
+				<field name="name"/>
+				<field name="type" invisible="1"/>
+				<field name="okgj_type" invisible="1"/>
+			    </group>
+			    <group>
+				<field name="date_done"/>
+				<field name="stock_journal_id"/>
+			    </group>
+			</group>
+			<field name="move_lines" string="商品" colspan="4"  context="{'form_view_ref':'view_move_picking_form', 'tree_view_ref':'view_move_picking_tree', 'picking_type': 'internal'}"/>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_stock_picking_internal_internal_search" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.internal.search</field>
+            <field name="model">stock.picking</field>
+            <field name="arch" type="xml">
+                <search  string="其它">
+		    <field name="internal_order_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="action_okgj_stock_picking_internal_internal_in" model="ir.actions.act_window">
+            <field name="name">内部调拨</field>
+            <field name="res_model">stock.picking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_stock_picking_internal_internal_search"/>
+            <field name="domain">[('type','=','internal'),('okgj_type', '=', 'okgj_internal_internal')]</field>
+            <field name="context">{'default_type': 'internal', 'default_okgj_type': 'okgj_internal_internal'}</field>
+            <field name="help" type="html">
+              <p>
+		  内部调拨
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_internal_internal_tree_in" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_stock_picking_internal_internal_tree"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_internal_internal_in"/>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_internal_internal_form_in" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_stock_picking_internal_internal_form"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_internal_internal_in"/>
+        </record>
+
+	<!--其它入库-->
+        <record id="view_okgj_stock_picking_internal_other_tree" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.other.tree</field>
+            <field name="model">stock.picking.in</field>
+            <field name="arch" type="xml">
+                <tree string="其它">
+		    <field name="internal_order_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="invoice_state" groups="account.group_account_invoice"/>
+                    <field name="stock_journal_id"/>
+		    <field name="write_uid" string="审核人"/>
+                    <field name="write_date" string="审核时间"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_stock_picking_internal_other_form" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.other.form</field>
+            <field name="model">stock.picking.in</field>
+            <field name="arch" type="xml">
+                <form string="其它" version="7.0">
+		    <header>
+			<button name="draft_validate" states="draft" string="审批通过" type="object" class="oe_highlight"/>
+			<button name="action_assign" states="confirmed" string="检测可用" type="object" class="oe_highlight"/>
+			<button name="force_assign" states="confirmed" string="强制可用" type="object" class="oe_highlight" groups="base.group_user"/>
+			<button name="action_process" states="assigned" string="收货" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			<group>
+			    <group>
+				<!--field name="warehouse_id"/-->
+				<field name="name"/>
+				<field name="type" invisible="1"/>
+				<field name="okgj_type" invisible="1"/>
+			    </group>
+			    <group>
+				<field name="date_done"/>
+				<field name="stock_journal_id"/>
+			    </group>
+			</group>
+			<field name="move_lines" string="商品" colspan="4"  context="{'form_view_ref':'view_move_picking_form', 'tree_view_ref':'view_move_picking_tree', 'picking_type': 'in'}"/>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_stock_picking_internal_other_search" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.other.tree</field>
+            <field name="model">stock.picking.in</field>
+            <field name="arch" type="xml">
+                <search  string="其它">
+		    <field name="internal_order_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="action_okgj_stock_picking_internal_other_in" model="ir.actions.act_window">
+            <field name="name">其它入库</field>
+            <field name="res_model">stock.picking.in</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_stock_picking_internal_other_search"/>
+            <field name="domain">[('type','=','in'),('okgj_type', '=', 'okgj_internal_in')]</field>
+            <field name="context">{'default_type': 'in', 'default_okgj_type': 'okgj_internal_in'}</field>
+            <field name="help" type="html">
+              <p>
+		  其它入库
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_internal_other_tree_in" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_stock_picking_internal_other_tree"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_internal_other_in"/>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_internal_other_form_in" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_stock_picking_internal_other_form"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_internal_other_in"/>
+        </record>
+
+	<!--其它出库-->
+        <record id="view_okgj_stock_picking_internal_other_tree_out" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.other.tree.out</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <tree string="其它">
+		    <field name="internal_order_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="invoice_state" groups="account.group_account_invoice"/>
+                    <field name="stock_journal_id"/>
+		    <field name="write_uid" string="审核人"/>
+                    <field name="write_date" string="审核时间"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_stock_picking_internal_other_form_out" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.other.form.out</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <form string="其它" version="7.0">
+		    <header>
+			<button name="draft_validate" states="draft" string="审批通过" type="object" class="oe_highlight"/>
+			<button name="action_assign" states="confirmed" string="检测可用" type="object" class="oe_highlight"/>
+			<button name="force_assign" states="confirmed" string="强制可用" type="object" class="oe_highlight" groups="base.group_user"/>
+			<button name="action_process" states="assigned" string="发货" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <sheet>
+			<group>
+			    <group>
+				<!--field name="warehouse_id"/-->
+				<field name="name"/>
+				<field name="type" invisible="1"/>
+				<field name="okgj_type" invisible="1"/>
+			    </group>
+			    <group>
+				<field name="date_done"/>
+				<field name="stock_journal_id"/>
+			    </group>
+			</group>
+			<field name="move_lines" string="商品" colspan="4"  context="{'form_view_ref':'view_move_picking_form', 'tree_view_ref':'view_move_picking_tree', 'picking_type': 'out'}"/>
+		    </sheet>
+                </form>
+	    </field>
+	</record>
+
+        <record id="view_okgj_stock_picking_internal_other_search_out" model="ir.ui.view">
+            <field name="name">view.stock.picking.internal.other.search.out</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <search  string="其它">
+		    <field name="internal_order_id"/>
+                    <field name="name"/>
+                    <field name="date"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/>
+                </search>
+            </field>
+        </record>
+
+    <record id="action_okgj_stock_picking_internal_other_out" model="ir.actions.act_window">
+            <field name="name">其它出库</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_stock_picking_internal_other_search_out"/>
+            <field name="domain">[('type','=','out'),('okgj_type', '=', 'okgj_internal_out')]</field>
+            <field name="context">{'default_type': 'out', 'default_okgj_type': 'okgj_internal_out'}</field>
+            <field name="help" type="html">
+              <p>
+		  其它出库
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_internal_other_tree_out" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_stock_picking_internal_other_tree_out"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_internal_other_out"/>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_internal_other_form_out" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_stock_picking_internal_other_form_out"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_internal_other_out"/>
+        </record>
+
+   </data>
+</openerp>

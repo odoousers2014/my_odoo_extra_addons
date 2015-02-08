@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+	<!--出库单搜索视图 -->
+	<record id="okgj_view_picking_out_search" model="ir.ui.view">
+            <field name="name">okgj.stock.picking.out.search</field>
+            <field name="model">stock.picking</field>
+	    <field name="inherit_id" ref="stock.view_picking_out_search"/>
+            <field name="arch" type="xml">
+		<field name="name" position="after">
+		    <field name="send_time" string="要求送货时间"/>
+		</field>
+	    </field>
+	</record>
+
+
+	<!--销售出库增加打印按钮-->
+        <record id="okgj_view_picking_out_sale_print_form" model="ir.ui.view">
+            <field name="name">okgj.picking.out.sale.print</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="arch" type="xml">
+		<xpath expr="//button[@name='action_process']" position="replace">
+		    <button name="action_process" states="assigned" string="发货" type="object" class="oe_highlight"/>
+		</xpath>
+		<field name="partner_id" position="after">
+		    <field name="inv_print_state"/>
+		</field>
+		<!--xpath expr="/form/header//button[@name='action_process']" position="after">
+                    <button name="print_final_sale" icon="gtk-print" string="打印" type="object" class="oe_highlight"  attrs="{'invisible': [('type','&lt;&gt;','out')]}"/>
+                </xpath-->
+            </field>
+        </record>
+
+        <record id="okgj_view_picking_out_tree" model="ir.ui.view">
+            <field name="name">stock.okgj.view.picking.out.tree</field>
+            <field name="model">stock.picking.out</field>
+	    <field name="arch" type="xml">
+                <tree  string="Delivery Orders">
+		    <field name="sale_id"/>
+                    <field name="name"/>
+		    <field name="send_time"/>
+		    <!--button name="print_final_sale" icon="gtk-print" string="打印" type="object" class="oe_highlight"  attrs="{'invisible': [('type','&lt;&gt;','out')]}"/-->
+		    <field name="okgj_city"/>
+		    <field name="region_name"/>
+		    <field name="consignee"/>
+		    <field name="type" invisible="1"/>
+		    <field name="pay_id"/>
+                    <field name="date"/>
+                    <field name="state"/>
+		    <field name="inv_print_state"/>
+		    <field name="inv_payee"/>
+		    <field name="inv_content"/>
+		    <field name="inv_amount"/>
+		    <field name="reg_operator_id"/>
+		    <field name="reg_date"/>
+		    <field name="verify_uid"/>
+		    <field name="verify_date"/>
+                </tree>
+            </field>
+        </record>
+
+
+	<!--销售出库单-->
+        <record id="action_okgj_picking_tree" model="ir.actions.act_window">
+            <field name="name">销售出库单</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="domain">[('type','=','out'),('okgj_type','=', False)]</field>
+            <field name="context">{'default_type': 'out', 'contact_display': 'partner_address'}</field>
+            <field name="search_view_id" ref="okgj.okgj_view_picking_out_search"/>
+        </record>
+        <record id="okgj_action_picking_tree_out_view1_waiting" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="okgj_view_picking_out_tree"/>
+            <field name="act_window_id" ref="action_okgj_picking_tree"/>
+        </record>
+        <record id="action_picking_tree_out_view2_waiting" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="okgj_view_picking_out_sale_print_form"/>
+            <field name="act_window_id" ref="action_okgj_picking_tree"/>
+        </record>
+
+	<!--销售出库单打印-->
+        <record id="okgj_view_picking_out_tree_print" model="ir.ui.view">
+            <field name="name">stock.okgj.view.picking.out.tree</field>
+            <field name="model">stock.picking.out</field>
+	    <field name="arch" type="xml">
+                <tree  string="Delivery Orders">
+                    <field name="sale_id"/>
+                    <field name="name"/>
+		    <field name="send_time"/>
+		    <!--button name="print_final_sale" string="打印" icon="gtk-print" type="object" class="oe_highlight"  attrs="{'invisible': [('type','&lt;&gt;','out')]}"/-->
+		    <field name="okgj_city"/>
+		    <field name="region_name"/>
+            <field name="okgj_address"/>
+		    <field name="consignee"/>
+		    <field name="type" invisible="1"/>
+		    <field name="pay_id"/>
+                    <field name="create_date"/>
+                    <field name="state"/>
+                    <field name="print_state" invisible="1"/>
+		    <field name="inv_payee"/>
+		    <field name="inv_content"/>
+		    <field name="inv_amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_okgj_picking_tree_print" model="ir.actions.act_window">
+            <field name="name">出库单打印</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="domain">[('type','=','out'),('okgj_type','=', False),('print_state','=','not'),('state','=','assigned')]</field>
+            <field name="context">{'default_type': 'out', 'contact_display': 'partner_address'}</field>
+            <field name="search_view_id" ref="okgj.okgj_view_picking_out_search"/>
+        </record>
+        <record id="okgj_action_picking_tree_out_view1_waiting_print" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="okgj_view_picking_out_tree_print"/>
+            <field name="act_window_id" ref="action_okgj_picking_tree_print"/>
+        </record>
+        <record id="action_picking_tree_out_view2_waiting_print" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="okgj_view_picking_out_sale_print_form"/>
+            <field name="act_window_id" ref="action_okgj_picking_tree_print"/>
+        </record>
+
+        <record id="action_okgj_picking_tree_reprint" model="ir.actions.act_window">
+            <field name="name">出库单重打印</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="domain">[('type','=','out'),('okgj_type','=', False),('state','!=','cancel')]</field>
+            <field name="context">{'default_type': 'out', 'contact_display': 'partner_address'}</field>
+            <field name="search_view_id" ref="okgj.okgj_view_picking_out_search"/>
+        </record>
+        <record id="okgj_action_picking_tree_out_view1_waiting_reprint" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="okgj_view_picking_out_tree_print"/>
+            <field name="act_window_id" ref="action_okgj_picking_tree_reprint"/>
+        </record>
+        <record id="action_picking_tree_out_view2_waiting_reprint" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="okgj_view_picking_out_sale_print_form"/>
+            <field name="act_window_id" ref="action_okgj_picking_tree_reprint"/>
+        </record>
+
+
+         <!-- 外挂  -->
+	 <!--record id="view_okgj_stock_picking_container_form" model="ir.ui.view">
+	     <field name="name">view.okgj.stock.picking.container.form</field>
+	     <field name="model">okgj.stock.picking.container</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <form string="外挂">
+		     <field name="product_id"/>
+		     <newline/>
+		     <field name="type"/>
+		     <newline/>
+		     <field name="product_qty"/>
+		     <newline/>
+		     <field name="product_variant"/>
+		 </form>
+	     </field>
+	 </record>
+
+	 <record id="view_okgj_stock_picking_container_tree" model="ir.ui.view">
+	     <field name="name">view.okgj.stock.picking.container.tree</field>
+	     <field name="model">okgj.stock.picking.container</field>
+	     <field eval="16" name="priority"/>
+	     <field name="arch" type="xml">
+		 <tree string="外挂">
+		     <field name="product_id"/>
+		     <field name="type"/>
+		     <field name="product_qty"/>
+		     <field name="product_variant"/>
+		 </tree>
+	     </field>
+	 </record-->
+
+
+	 <!--去除Product Return按钮--> 
+        <record id="view_okgj_picking_out_remove_form" model="ir.ui.view">
+            <field name="name">view.okgj.picking.out.remove.tree</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@string='Return Products']" position="replace"/>
+            </field>
+        </record>
+
+        <record id="view_okgj_picking_in_remove_form" model="ir.ui.view">
+            <field name="name">view.okgj.picking.in.remove.tree</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@string='Return Products']" position="replace"/>
+            </field>
+        </record>
+
+	 <!--复核出库-->
+        <record id="view_okgj_stock_picking_out_more_tree" model="ir.ui.view">
+            <field name="name">view.stock.picking.out.more.tree</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <tree string="复核出库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="stock_journal_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_stock_picking_out_more_form" model="ir.ui.view">
+            <field name="name">view.stock.picking.out.more.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <form string="复核单" version="7.0">	
+		    <header>
+			<button name="action_process" states="assigned" string="确认上架" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+		    </header>
+		    <group>
+			<group>
+			    <field name="origin"/>
+			    <field name="date_done"/>
+			</group>
+			<group>
+			    <field name="name"/>
+			    <field name="stock_journal_id"/>
+			</group>
+		    </group>
+		    <group col="6">
+			<field name="okgj_box"/>
+			<field name="real_weight"/>
+			<field name="okgj_weight"/>
+		    </group>
+                    <field name="move_lines" nolabel="1" colspan="4">
+			<tree string="商品">
+			    <field name="product_id"/>
+			    <field name="product_qty"/>
+			    <field name="product_uom"/>
+			    <field name="prodlot_id"/>
+			</tree>
+		    </field>
+		    <field name="okgj_container"/>
+		    <!--field name="container_ids" string="外挂" colspan="4">
+			<tree string="外挂" editable="top">
+			    <field name="product_id"/>
+			    <field name="product_qty"/>
+			    <field name="product_variant"/>
+			</tree>
+		    </field-->
+                </form>
+	    </field>
+	</record>
+
+	 <!--复核出库-->
+        <record id="view_okgj_stock_picking_out_more_search" model="ir.ui.view">
+            <field name="name">view.stock.picking.out.more.search</field>
+            <field name="model">stock.picking.out</field>
+            <field name="arch" type="xml">
+                <search string="复核出库">
+                    <field name="origin"/>
+                    <field name="name"/>
+                    <field name="date"/>
+		    <field name="okgj_city"/>
+		    <filter string="按日期" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'date'}"/>
+		    <filter string="按状态" name="groupby_date" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'state'}"/>
+		    <filter string="按台账" name="groupby_journal_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'stock_journal_id'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_okgj_stock_picking_out_more" model="ir.actions.act_window">
+            <field name="name">复核出库</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_stock_picking_out_more_search"/>
+            <field name="domain">[('type','=','out')]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+              <p>
+		  复核出库帮助，将会依据仓库加入更多限制最终只显示复核出库的条目！
+              </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_stock_picking_out_more_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_stock_picking_out_more_tree"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_out_more"/>
+        </record>
+        <record id="act_view_okgj_stock_picking_out_more_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_stock_picking_out_more_form"/>
+            <field name="act_window_id" ref="action_okgj_stock_picking_out_more"/>
+        </record>
+
+        <menuitem action="action_okgj_stock_picking_out_more" id="menu_action_okgj_stock_picking_out_more" parent="stock.menu_stock_warehouse_mgmt" sequence="2"/>
+
+
+
+   </data>
+</openerp>

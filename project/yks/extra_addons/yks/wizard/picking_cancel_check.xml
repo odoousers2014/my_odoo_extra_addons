@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<record id="yks_picking_cancel_check_from_view" model="ir.ui.view">
+    <field name="name">yks.picking.cancel.check</field>
+    <field name="model">picking.cancel.check</field>
+    <field name="arch" type="xml">
+        <form string="取消检查可用，整个仓库的所有出库单" version="7.0">
+            <group>
+                 <field name="shop_id" required="1"/>
+            </group>
+            <footer>
+                <button name="apply" string="确认" type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window 
+    id="action_wizard_picking_cancel_check"
+    multi="False"
+    key2="tree_but_open"
+    name="取消出库检查可用"
+    res_model="picking.cancel.check"
+    view_mode="form"
+    target="new"
+    usage="menu"
+    view_type="form"/>
+<menuitem id="yks_menu_picking_cancel_check" name="取消出库检查可用" parent="stock.menu_stock_inventory_control" action="action_wizard_picking_cancel_check" groups="stock.group_stock_manager"/>
+
+<record id="yks_picking_auto_check_from_view" model="ir.ui.view">
+    <field name="name">yks.picking.auto.check</field>
+    <field name="model">picking.auot.check</field>
+    <field name="arch" type="xml">
+        <form string="检查该库位的 等待可用 的出库单，如果库存足够，自动转为待发货状态" version="7.0">
+            <group>
+                 <field name="location_id" required="1"/>
+            </group>
+            <footer>
+                <button name="apply" string="确认" type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window 
+    id="action_wizard_picking_auto_check"
+    multi="False"
+    key2="tree_but_open"
+    name="出库检查可用"
+    res_model="picking.auot.check"
+    view_mode="form"
+    target="new"
+    usage="menu"
+    view_type="form"/>
+<menuitem id="yks_menu_picking_auto_check" name="出库检查可用" parent="stock.menu_stock_inventory_control" action="action_wizard_picking_auto_check" groups="stock.group_stock_manager"/>
+
+
+</data>
+</openerp>

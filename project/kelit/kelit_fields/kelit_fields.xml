@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>   
+    
+		<!--jon Product Brand tree view --> 
+		<record model="ir.ui.view" id="product_brand_tree_view">
+			<field name="name">product.brand.tree</field>
+			<field name="model">product.brand</field>
+			<field name="type">tree</field>
+			<field name="priority">0</field>
+			<field name="arch" type="xml">
+				<field name="code"/>
+				<field name="name"/>
+			</field>
+		</record>
+		
+		
+        <!--Product Brand and Denomination Views -->          
+        <record id="product_brand_action" model="ir.actions.act_window">
+            <field name="name">Product Brands</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.brand</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <record id="product_denomination_action" model="ir.actions.act_window">
+            <field name="name">Product Denominations</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.denomination</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+		
+		<!-- jon  let the action go to the brand tree view -->
+        <record model="ir.actions.act_window.view" id="action_brand_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="product_brand_tree_view"/>
+            <field name="act_window_id" ref="product_brand_action"/>
+        </record>
+		
+		
+		
+        <!--Product Brand and Denomination Menu -->           
+        <menuitem id="product_denomination_menu" name="Product Denominations" parent="product.prod_config_main" action="product_denomination_action"/>
+        <menuitem id="product_brand_menu" name="Product Brands" parent="product.prod_config_main" action="product_brand_action"/>
+        
+        <!--Product Tree View  -->
+		<record model="ir.ui.view" id="product_normal_tree_view_kelit">
+			<field name="name">product.tree_normal_view_kelit</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_product_tree_view" />
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="replace">
+					<field name="brand_id" string="Brand"/>
+		        	<field name="name" string="Name"/>
+		        	<field name="name_cn" string="名字"/>
+		        	<field name="vintage" string="Vintage"/>
+		        	<field name="region_id" invisible="1"/>
+		        </xpath>
+            </field>
+        </record>
+        
+        <!--Yannick Product Tree View 
+		<record model="ir.ui.view" id="product_normal_tree_view_kelit">
+			<field name="name">product.tree_normal_view_kelit</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_product_tree_view" />
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="replace">
+					<field name="brand_id" string="Brand"/>
+		        	<field name="name_sort_en" string="Name"/>
+		        	<field name="name_sort_cn" string="名字" width="12"/>
+		        	<field name="vintage" string="Vintage"/>
+		        	<field name="region_id" invisible="1"/>
+		        </xpath>
+            </field>
+        </record> -->
+        <!-- why there is problem in  kelit  server -->
+
+        <!--Product Search -->   
+		<record id="kelit_product_product_search_extend" model="ir.ui.view">
+            <field name="name">kelit.product.product.search.extend</field>
+            <field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_search_form_view" />
+            <field name="arch" type="xml">
+            	<xpath expr="//field[@name='name']" position="replace">
+            		<field name="name" string="Product" filter_domain="['|','|',('name','ilike',self),('brand_id','ilike',self),('default_code','ilike',self)]"/>
+                	<field name="name_cn"/>
+                	<field name="vintage" filter_domain="[('vintage',=,self)]" string="Vintage"/>
+                	<field name="default_code"/>
+                	<field name="region_id"/>
+                	<field name="brand_id"/>
+                </xpath>
+                <xpath expr="//filter[@string='Category']" position="after">
+                    <filter string="Default Code" domain="[]" context="{'group_by' : 'default_code'}"/>
+                    <filter string="Region" domain="[]" context="{'group_by' : 'region_id'}"/>
+                    <filter string="Vintage" domain="[]" context="{'group_by' : 'vintage'}"/>
+					<filter string="Brand" name="brand" domain="[]" context="{'group_by' : 'brand_id'}"/>
+<!--                <filter string="vintage" domain="[]" context="{'group_by' : 'vintage'}"/> -->
+                </xpath>
+            </field>
+        </record>
+		
+		<!-- jon:creat a group group_gm , only  it can see the field standard_price -->
+		<record id="group_gm" model="res.groups">
+			<field name="name">Group GM</field>
+		</record>
+
+
+        
+        <!--Yannick Product Form View -->   
+		<record model="ir.ui.view" id="product_normal_form_view_kelit">
+			<field name="name">product.form_normal_view_kelit</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+			    <xpath expr="//field[@name='default_code']" position="after">
+				    <button name="get_default_code" string="Generate Reference" type="object" colspan="1" class="oe_highlight" attrs="{'invisible':['|',('default_code', '!=', False),('is_wine','=',False)]}"/>
+				    <newline />
+				    <field name="is_wine" invisible="1"/>
+				</xpath>
+				<xpath expr="//field[@name='name']" position="replace">
+                	<label for="name" string="Product English Name" style="font-size:12px;"/>
+					<field name="name" placeholder="Name" required="1"/>
+			   <!--<field name="name_en" placeholder="Name" on_change="onchange_name_en(name_en)" required="1"/> -->
+                	<label for="name_cn" string="Product Chinese Name" style="font-size:12px;"/>
+					<field name="name_cn" placeholder="Name in Chinese" required="1"/>
+				</xpath>
+				<!--<xpath expr="//field[@name='type']" position="replace">
+				   <field name="type" on_change="onchange_type(type)"/>
+				</xpath>-->
+				<xpath expr="//field[@name='categ_id']" position="replace">
+                	<label for="brand_id" string="Product Brand" style="font-size:12px;"/>				
+                    <field name="brand_id" colspan = "4" required="1" attrs="{'readonly':[('default_code', '!=', False)],'required':[('is_wine','=',True)]}"/>
+              <!--  <field name="brand_id" colspan = "4" required="1" attrs="{'readonly':[('default_code', '!=', False)],'required':[('is_wine','=',True)],'invisible':[('is_wine','=',False)]}"/> -->
+              <!--  <label for="brand_id" string="Product Brand" style="font-size:12px;" attrs="{'invisible':[('is_wine','=',False)]}"/> -->
+                	<label for="categ_id" string="Product Category" style="font-size:12px;"/>
+                    <field name="categ_id" colspan = "4" on_change="onchange_categ_id(categ_id)"/>
+				</xpath>
+				<xpath expr="//field[@name='type']" position="after">
+                    <field name="vintage" attrs="{'readonly':[('default_code', '!=', False)],'required':[('is_wine','=',True)],'invisible':[('is_wine','=',False)]}"/>
+                    <field name="bottle_size" attrs="{'readonly':[('default_code', '!=', False)],'required':[('is_wine','=',True)],'invisible':[('is_wine','=',False)]}"/>
+				</xpath>
+				<xpath expr="//label[@for='ean13']" position="before">
+                    <field name="alcoholic" attrs="{'invisible':[('is_wine','=',False)]}"/>
+                    <field name="denomination" attrs="{'invisible':[('is_wine','=',False)]}"/>
+                    <field name="region_id" attrs="{'invisible':[('is_wine','=',False)]}"/>
+				</xpath>
+				                
+                
+                <!--Jon  page Procurements visiable for group group_gm -->
+                <page string="Procurements" position='attributes'>
+                	<attribute name='groups'>kelit_fields.group_gm</attribute>
+                </page>
+                
+                <!--Jon  standard_price only visiable for group group_gm -->
+                <field name="standard_price" position='attributes'>
+                    <attribute name='groups'>kelit_fields.group_gm</attribute>
+                </field>
+            </field>
+        </record>
+        
+        <!--Redefine Product Order -->
+        <record id="product.open_view_product_tree1" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="product.product_product_tree_view"/>
+            <field name="act_window_id" ref="product.product_normal_action_sell"/>
+        </record>
+        
+        <record id="product.open_view_product_form1" model="ir.actions.act_window.view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product.product_normal_form_view"/>
+            <field name="act_window_id" ref="product.product_normal_action_sell"/>
+        </record>
+
+        <record id="product.open_view_product_kanban1" model="ir.actions.act_window.view">
+            <field name="sequence" eval="3"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="product.product_kanban_view"/>
+            <field name="act_window_id" ref="product.product_normal_action_sell"/>
+        </record>
+
+        
+    </data>
+</openerp>
+
+
+        <!--Product Form View
+        <record model="ir.ui.view" id="product_normal_form_view_kelit">
+            <field name="name">product.form_normal_view_kelit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view" />
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                
+                <field name="standard_price" position='attributes'>
+                    <attribute name='groups'>kelit_fields.group_gm</attribute>
+                </field>
+                
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <button name="get_default_code" string="Generate Reference" type="object" colspan="1" class="oe_highlight" attrs="{'invisible':[('default_code', '!=', False)]}"/>
+                    <newline />
+                </xpath>
+                <xpath expr="//label[@for='name']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='name']" position="replace">
+                <label for="name_en" string="Product English Name" style="font-size:12px;"/>
+                    <field name="name_en" placeholder="Name" on_change="onchange_name_en(name_en)" required="1"/>
+                <label for="name_cn" string="Product Chinese Name" style="font-size:12px;"/>
+                    <field name="name_cn" placeholder="Name in Chinese" required="1"/>
+                </xpath>
+                <xpath expr="//field[@name='sale_ok']" position="before">
+                </xpath>
+                <xpath expr="//label[@for='categ_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='categ_id']" position="replace">
+                <label for="brand_id" string="Product Brand" style="font-size:12px;"/>
+                    <field name="brand_id" colspan = "4" required="1" attrs="{'readonly':[('default_code', '!=', False)]}"/>
+                <label for="categ_id" string="Product Category" style="font-size:12px;"/>
+                    <field name="categ_id" colspan = "4"/>
+                </xpath>
+                <xpath expr="//field[@name='type']" position="after">
+                    <field name="vintage" attrs="{'readonly':[('default_code', '!=', False)]}"/>
+                    <field name="bottle_size" attrs="{'readonly':[('default_code', '!=', False)]}"/>
+                </xpath>
+                <xpath expr="//label[@for='ean13']" position="before">
+                    <field name="alcoholic" />
+                    <field name="denomination" />
+                    <field name="region_id" />
+                </xpath>
+            </field>
+        </record>
+        -->

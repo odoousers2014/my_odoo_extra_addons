@@ -1,0 +1,445 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <menuitem name="投诉处理" 
+                  parent="base.menu_base_partner"
+                  id="okgj.menu_okgj_claim_root" 
+                  sequence="2"/>
+
+        <menuitem name="投诉设置" 
+                  parent="base.menu_base_partner"
+                  id="okgj.menu_okgj_claim_setup" 
+                  sequence="50"/>
+        
+        <!--投诉类型-->
+        <record id="view_okgj_claim_type_form" model="ir.ui.view">
+            <field name="name">view.okgj.claim.type.form</field>
+            <field name="model">okgj.claim.type</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="投诉类型">
+                    <field name="name"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_okgj_claim_type_tree" model="ir.ui.view">
+            <field name="name">view.okgj.claim.type.tree</field>
+            <field name="model">okgj.claim.type</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="投诉类型">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_okgj_claim_type_search" model="ir.ui.view">
+            <field name="name">view.okgj.claim.type.search</field>
+            <field name="model">okgj.claim.type</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <search string="投诉类型">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_okgj_claim_type" model="ir.actions.act_window">
+            <field name="name">投诉类型</field>
+            <field name="res_model">okgj.claim.type</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_claim_type_search"/>
+        </record>
+
+        <menuitem name="投诉类型" 
+                  id="okgj.menu_okgj_claim_type"
+                  parent="okgj.menu_okgj_claim_setup"  
+                  action="action_okgj_claim_type"
+                  sequence="1"/>
+        
+        <!--投诉等级-->
+        <record id="view_okgj_claim_grade_form" model="ir.ui.view">
+            <field name="name">view.okgj.claim.grade.form</field>
+            <field name="model">okgj.claim.grade</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="投诉等级">
+                    <field name="name"/>
+                    <field name="sequence"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_okgj_claim_grade_tree" model="ir.ui.view">
+            <field name="name">view.okgj.claim.grade.tree</field>
+            <field name="model">okgj.claim.grade</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="投诉等级">
+                    <field name="name"/>
+                    <field name="sequence"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_okgj_claim_grade_search" model="ir.ui.view">
+            <field name="name">view.okgj.claim.grade.search</field>
+            <field name="model">okgj.claim.grade</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <search string="投诉等级">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_okgj_claim_grade" model="ir.actions.act_window">
+            <field name="name">投诉等级</field>
+            <field name="res_model">okgj.claim.grade</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_claim_grade_search"/>
+        </record>
+
+        <menuitem name="投诉等级" 
+                  id="okgj.menu_okgj_claim_grade"
+                  parent="okgj.menu_okgj_claim_setup"  
+                  action="action_okgj_claim_grade"
+                  sequence="5"/>
+                
+        <!--投诉关联-->
+        <record id="view_okgj_claim_link_form" model="ir.ui.view">
+            <field name="name">view.okgj.claim.link.form</field>
+            <field name="model">okgj.claim.link</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="投诉关联">
+                    <field name="name"/>
+                    <field name="object"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_okgj_claim_link_tree" model="ir.ui.view">
+            <field name="name">view.okgj.claim.link.tree</field>
+            <field name="model">okgj.claim.link</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="投诉关联">
+                    <field name="name"/>
+                    <field name="object"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_okgj_claim_link_search" model="ir.ui.view">
+            <field name="name">view.okgj.claim.link.search</field>
+            <field name="model">okgj.claim.link</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <search string="投诉关联">
+                    <field name="name"/>
+                    <field name="object"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_okgj_claim_link" model="ir.actions.act_window">
+            <field name="name">投诉关联</field>
+            <field name="res_model">okgj.claim.link</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_claim_link_search"/>
+        </record>
+
+        <menuitem name="投诉关联" 
+                  id="okgj.menu_okgj_claim_link"
+                  parent="okgj.menu_okgj_claim_setup"  
+                  action="action_okgj_claim_link"
+                  sequence="10"/>
+
+        <!--投诉处理-->
+        <record id="view_okgj_claim_notes_temp_form" model="ir.ui.view">
+            <field name="name">view.okgj.claim.notes.temp.form</field>
+            <field name="model">okgj.claim.notes.temp</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="投诉处理">
+                    <field name="description"/>
+                    <newline/>
+                    <field name="todo_uid"/>
+                    <button name="action_done"  string="完成" type="object"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_okgj_claim_notes_temp" model="ir.actions.act_window">
+            <field name="name">投诉处理</field>
+            <field name="res_model">okgj.claim.notes.temp</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+        </record>
+
+        <record id="view_okgj_claim_notes_form" model="ir.ui.view">
+            <field name="name">view.okgj.claim.notes.form</field>
+            <field name="model">okgj.claim.notes</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="投诉等级">
+                    <field name="create_date"/>
+                    <newline/>
+                    <field name="create_uid"/>
+                    <newline/>
+                    <field name="description"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_okgj_claim_notes_tree" model="ir.ui.view">
+            <field name="name">view.okgj.claim.notes.tree</field>
+            <field name="model">okgj.claim.notes</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="处理">
+                    <field name="create_date"/>
+                    <field name="create_uid"/>
+                    <field name="description"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="view_okgj_claim_notes_search" model="ir.ui.view">
+            <field name="name">view.okgj.claim.notes.search</field>
+            <field name="model">okgj.claim.notes</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <search string="处理">
+                    <field name="create_date"/>
+                    <field name="create_uid"/>
+                    <field name="description"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_okgj_claim_notes" model="ir.actions.act_window">
+            <field name="name">处理</field>
+            <field name="res_model">okgj.claim.notes</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_claim_notes_search"/>
+        </record>
+
+        <!--投诉-->
+        <record id="view_okgj_order_claim_form" model="ir.ui.view">
+            <field name="name">view.okgj.order.claim.form</field>
+            <field name="model">okgj.order.claim</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="投诉处理" version="7.0">
+                    <header>
+                        <button name="action_progress" states="draft" string="确认" type="object" class="oe_highlight"/>
+                        <button name="action_add_note" states="progress" string="添加意见" type="object" class="oe_highlight"/>
+                        <button name="action_close" states="progress" string="投诉已完成" type="object" class="oe_highlight"/>
+                        <button name="action_reopen" states="done" string="重打开该投诉" type="object" class="oe_highlight"/>
+                        <button name="action_cancel" states="done" string="非投诉" type="object" class="oe_highlight"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,progress,done"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="desc" colspan="4"/>
+                            <group>						 
+                                <field name="sale_id"/>
+                                <field name="claim_type_id"/>
+                            </group>				
+                            <group>
+                                <!--field name="todo_deadline"/-->	
+                                <field name="date_closed"/>	
+                                <field name="claim_grade_id"/>
+                            </group>
+                            <field name="image1" colspan="3"/>
+                            <newline/>
+                            <field name="image2" colspan="3"/>
+                            <newline/>
+                            <field name="image3" colspan="3"/>
+                            <newline/>
+                            <field name="image4" colspan="3"/>
+                            <newline/>
+                            <field name="image5" colspan="3"/>
+                            <newline/>
+                            <field name="image6" colspan="3"/>
+                        </group>
+                        <group>
+                            <field name="todo_uid"/>
+                        </group>				
+                        <label for="cc_uids"/>
+                        <field name="cc_uids" widget="many2many_tags"/>
+                        <label for="all_uids"/>
+                        <field name="all_uids" widget="many2many_tags"/>
+                        <h2>
+                            <label for="claim_note_ids" string="处理记录"/>
+                        </h2>
+                        <field name="claim_note_ids" colspan="4">
+                            <tree string="处理记录">
+                                <field name="create_date"/>
+                                <field name="create_uid"/>
+                                <field name="description"/>
+                            </tree>
+                        </field>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_okgj_order_claim_tree" model="ir.ui.view">
+            <field name="name">view.okgj.order.claim.tree</field>
+            <field name="model">okgj.order.claim</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="投诉">
+                    <field name="name"/>
+                    <field name="create_date"/>
+                    <field name="sale_id"/>
+                    <field name="claim_type_id"/>
+                    <field name="desc"/>
+                    <field name="state"/>
+                    <field name="todo_uid"/>
+                    <field name="cc_uids" invisible="1"/>
+                    <field name="all_uids" invisible="1"/>				 	
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_okgj_order_claim_search" model="ir.ui.view">
+            <field name="name">view.okgj.order.claim.search</field>
+            <field name="model">okgj.order.claim</field>
+            <field eval="16" name="priority"/>
+            <field name="arch" type="xml">
+                <search string="投诉">
+                    <field name="name"/>
+                    <field name="sale_id"/>
+                    <filter name="progress" string="进行中" domain="[('state','=','progress')]"/>
+                    <group expand="0" string="分组...">
+                        <filter string="投诉日期" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'create_date'}"/>
+                        <filter string="类型" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'claim_type_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        
+        <record id="action_okgj_order_claim_all" model="ir.actions.act_window">
+            <field name="name">全部投诉</field>
+            <field name="res_model">okgj.order.claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_okgj_order_claim_search"/>
+        </record>
+
+        <menuitem id="okgj.menu_okgj_order_claim_all"
+                  parent="okgj.menu_okgj_claim_root"  
+                  action="action_okgj_order_claim_all"
+                  sequence="1"/>
+
+        <record id="action_okgj_order_claim_my_create" model="ir.actions.act_window">
+            <field name="name">我发起的投诉</field>
+            <field name="res_model">okgj.order.claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('create_uid','=',uid)]</field>
+            <field name="context">{'search_default_progress': 1}</field>
+            <field name="search_view_id" ref="view_okgj_order_claim_search"/>
+        </record>
+
+        <menuitem id="okgj.menu_okgj_order_claim_my_create"
+                  parent="okgj.menu_okgj_claim_root"  
+                  action="action_okgj_order_claim_my_create"
+                  sequence="2"/>
+        
+        <record id="action_okgj_order_claim_my_cc" model="ir.actions.act_window">
+            <field name="name">抄送给我的投诉</field>
+            <field name="res_model">okgj.order.claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('cc_uids.user_id','in',[uid])]</field>
+            <field name="context">{'search_default_progress': 1}</field>
+            <field name="search_view_id" ref="view_okgj_order_claim_search"/>
+        </record>
+        
+        <menuitem id="okgj.menu_okgj_order_claim_my_cc"
+                  parent="okgj.menu_okgj_claim_root"  
+                  action="action_okgj_order_claim_my_cc"
+                  sequence="5"/>
+
+        
+        <record id="action_okgj_order_claim_my_todo" model="ir.actions.act_window">
+            <field name="name">需我处理的投诉</field>
+            <field name="res_model">okgj.order.claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('todo_uid.user_id','=',uid)]</field>
+            <field name="context">{'search_default_progress': 1}</field>
+            <field name="search_view_id" ref="view_okgj_order_claim_search"/>
+        </record>
+        
+        <menuitem id="okgj.menu_okgj_order_claim_my_todo"
+                  parent="okgj.menu_okgj_claim_root"  
+                  action="action_okgj_order_claim_my_todo"
+                  sequence="5"/>
+
+        
+        <record id="action_okgj_order_claim_my_all" model="ir.actions.act_window">
+            <field name="name">我参与的投诉</field>
+            <field name="res_model">okgj.order.claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('all_uids.user_id','in', [uid])]</field>
+            <field name="context">{'search_default_progress': 1}</field>
+            <field name="search_view_id" ref="view_okgj_order_claim_search"/>
+        </record>
+
+        <menuitem id="okgj.menu_okgj_order_claim_my_all"
+                  parent="okgj.menu_okgj_claim_root"  
+                  action="action_okgj_order_claim_my_all"
+                  sequence="10"/>
+
+        <!--field name="user_id" domain="[('id','in', [id for id in user_ids[0][2]]])]"/-->
+
+
+        <!-- Sequences for 投诉 -->
+        <record id="seq_type_okgj_order_claim" model="ir.sequence.type">
+            <field name="name">OKGJ Order Claim </field>
+            <field name="code">okgj.order.claim</field>
+        </record>
+
+        <record id="seq_okgj_order_claim" model="ir.sequence">
+            <field name="name">OKGJ Order Claim</field>
+            <field name="code">okgj.order.claim</field>
+            <field name="prefix">TS</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        
+    </data>
+</openerp>
+

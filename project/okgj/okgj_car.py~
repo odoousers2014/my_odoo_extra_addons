@@ -1,0 +1,259 @@
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+
+from osv import fields, osv
+import openerp.addons.decimal_precision as dp
+from openerp.tools.translate import _
+import re
+import time
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP
+
+#车辆信息登记
+class okgj_logistics_car(osv.osv):
+    _name = 'okgj.logistics.car'
+    _columns = {
+        'name':fields.char(u'编号', size=16, required=True),
+        'car_code':fields.char(u'车牌号', size=32, required=True),
+        'driver':fields.char(u'司机姓名', size=16, required=True),
+        'driver_phone':fields.char(u'电话号码', size=16, required=True),
+        'start_time': fields.date(u'合作日期'),
+    }
+
+    def name_get(self, cr, uid, ids, context=None):
+        if isinstance(ids, (list, tuple)) and not len(ids):
+            return []
+        if isinstance(ids, (long, int)):
+            ids = [ids]
+        reads = self.read(cr, uid, ids, ['car_code','driver'], context=context)
+        res = []
+        for record in reads:
+            if record['car_code']:
+                newname = record['car_code'] +' / '+ record['driver']
+            else:
+                newname = record['driver']
+            res.append((record['id'], newname))
+        return res
+
+okgj_logistics_car()
+
+
+class okgj_logistics(osv.osv):
+    _name = "okgj.logistics"
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
+okgj_logistics()
+
+class okgj_logistics_line_cause(osv.osv_memory):
+    _name = "okgj.logistics.line.cause"
+    _columns = {
+        'cause':fields.text('原因', required=True),
+    }
+
+    def action_cancel(self, cr, uid, ids, context=None):
+        line_ids = context and context.get('active_ids', False) or False
+        if not line_ids:
+            raise osv.except_osv(_('Invalid Action!'), _('请先选择订单'))
+        cause = self.browse(cr, uid, ids[0], context=context).cause
+        line_obj = self.pool.get('okgj.logistics.line')
+        line_obj.write(cr, uid, line_ids[0], {'state':'cancel', 'cause':cause}, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+    
+okgj_logistics_line_cause()
+
+class okgj_logistics_line(osv.osv):
+
+    def _get_diff(self, cr, uid, ids, field_names, arg, context=None):
+        """ 获取差异额
+        @param prop: Name of field.
+        @param unknow_none:
+        @return: Dictionary of values.
+        """
+        if context is None:
+            context = {}
+        result = {}.fromkeys(ids, 0.0)
+        for one_line in self.browse(cr, uid, ids, context=context):
+            result[one_line.id] = one_line.money_owned - one_line.money_act
+        return result
+
+    _name = "okgj.logistics.line"
+    _columns = {
+        'logistics_id':fields.many2one('okgj.logistics','Logistics'),
+        'picking_id':fields.many2one('stock.picking.out', u'出库单号'), #TODO:加入domain限制
+        'sale_order_id':fields.related('picking_id', 'sale_id', type="many2one", relation="sale.order", string="订单", readonly=True),
+        'okgj_address':fields.related('picking_id', 'sale_id', 'okgj_address', type="char", string=u'收货地址', readonly=True),
+        'best_time':fields.related('picking_id', 'sale_id', 'best_time', type="char", string=u'送货时间', readonly=True),
+        'date_order':fields.related('picking_id', 'sale_id', 'date_order', type="datetime", string=u'下单时间', readonly=True),
+        'consignee':fields.related('picking_id', 'sale_id', 'consignee', type="char", string=u'收货人', readonly=True),
+        'send_time_content':fields.related('picking_id', 'sale_id', 'send_time_content', type="char", string=u'送货备注', readonly=True),
+        'okgj_tel':fields.related('picking_id', 'sale_id', 'okgj_tel', type="char", string=u'联系电话', readonly=True),
+        'pay_id':fields.related('picking_id', 'sale_id', 'pay_id', type="char", string=u'付款方式', readonly=True),
+        'money_owned':fields.related('picking_id', 'sale_id', 'order_amount', type="float", string=u'货到付款金额', readonly=True),
+        'money_act': fields.float(u'实收金额', digits_compute=dp.get_precision('Product Price')),
+        'money_diff': fields.function(_get_diff, type='float', string="差异"),
+        'box':fields.related('picking_id', 'okgj_box', type="char", string=u'箱号', readonly=True),
+        'container':fields.related('picking_id', 'okgj_container', type="text", string=u'外挂', readonly=True),
+        'state':fields.selection([
+            ('todo', u'待送'),
+            ('cancel', u'未送达'),
+            ('done', u'已送达'),
+        ], string='状态', readonly=True),
+        'notes':fields.text(u'备注'),
+        'cause':fields.text('未送达原因'),
+        }
+    
+    _defaults = {
+        'state': lambda *a: 'todo',
+    }
+
+    def create(self, cr, uid, vals, context=None):
+        new_id = super(okgj_logistics_line, self).create(cr, uid, vals, context)
+        money_owned = self.browse(cr, uid, new_id, context=context).money_owned
+        if money_owned:
+            self.write(cr, uid, new_id, {'money_act':money_owned}, context=context)
+        return new_id
+
+    def action_done(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'done'}, context=context)
+
+    ## def action_cancel(self, cr, uid, ids, context=None):
+    ##     self.write(cr, uid, ids, {'state':'cancel'}, context=context)
+
+okgj_logistics_line()
+
+#装车
+class okgj_logistics(osv.osv):
+    
+    def _get_done_line(self, cr, uid, ids, field_names, arg=None, context=None):
+        if context is None:
+            context = {}
+        result = {}.fromkeys(ids, 0.0)
+        for one in self.browse(cr, uid, ids, context=context):
+            one_line_ids = []
+            for one_line in one.line_ids:
+                if one_line.state == 'done':
+                    one_line_ids.append(one_line.id)
+            result[one.id] = one_line_ids
+        return result
+
+
+    _inherit = "okgj.logistics"
+    _order ="create_date desc"
+    _columns = {
+        'create_uid':fields.many2one('res.users', u'装车登记人', readonly='True'),
+        'create_date':fields.datetime(u'装车登记时间', readonly='True'),
+        'back_uid':fields.many2one('res.users', u'返程登记人', readonly='True'),
+        'back_date':fields.datetime(u'返程登记时间', readonly='True'),
+        'money_uid':fields.many2one('res.users', u'回款登记人', readonly='True'),
+        'money_date':fields.datetime(u'回款登记时间', readonly='True'),
+        'name': fields.char(u'装车单号', size=64, required=True, select=True, readonly=True, states={'draft':[('readonly',False)]}),
+        'car_id':fields.many2one('okgj.logistics.car', u'车辆', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+        'car_name':fields.related('car_id', 'name', type='char', string=u'管家编号', readonly=True, store=True),
+        'okgj_tel':fields.related('car_id', 'driver_phone', type='char', string="联系电话", readonly=True),
+        'picking':fields.char(u'发货单号', size=32, readonly=True, states={'draft':[('readonly',False)]}),
+        'okgj_box':fields.text(u'箱号', help=u'物流箱号，每行一个', readonly=True, states={'draft':[('readonly',False)]}),
+        'okgj_box_qty': fields.integer(u'箱数', readonly=True, states={'draft':[('readonly',False)]}),
+        'okgj_box_return_qty': fields.integer(u'返回箱数', readonly=True, states={'start':[('readonly',False)]}),
+        'state':fields.selection([
+            ('draft', u'草稿'),
+            ('start', u'已出发'),
+            ('end', u'已返程'),
+            ('done', u'完成'),
+        ], string='状态', readonly=True),
+        'start_miles':fields.float(u'出发里程', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True, states={'draft':[('readonly',False)]}),
+        'end_miles':fields.float(u'返回里程', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True,  states={'start':[('readonly', False)]}),
+        'line_ids':fields.one2many('okgj.logistics.line', 'logistics_id', u'明细行', readonly=True, states={'draft':[('readonly',False)],'end':[('readonly',False)]}),
+        'line_done_ids':fields.function(_get_done_line, type='one2many', relation='okgj.logistics.line', string=u'已完成明细行', readonly=True),
+    }
+
+    _defaults = {
+        'state': lambda *a: 'draft',
+        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'okgj.logistics'),
+    }
+
+    #写入箱数
+    ## def create(self, cr, user, vals, context=None):
+    ##     if vals.get('okgj_box', False):
+    ##         vals.update({'okgj_box_qty' : len(re.split('\n', vals.get('okgj_box')))})
+    ##     return super(okgj_logistics, self).create(cr, user, vals, context)
+
+    #写入箱数
+    ## def write(self, cr, uid, ids, vals, context=None):
+    ##     if vals.get('okgj_box', False):
+    ##         vals.update({'okgj_box_qty' : len(re.split('\n', vals.get('okgj_box')))})
+    ##     return  super(okgj_logistics, self).write(cr, uid, ids, vals, context=context)
+
+    def action_start(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'start'}, context=context)
+
+    def action_end(self, cr, uid, ids, context=None):
+        for one in self.browse(cr, uid, ids, context=context):
+            for one_picking_line in one.line_ids:
+                if one_picking_line.state == 'todo':
+                    raise osv.except_osv(_('Invalid Action!'), _('请先确认 %s 是否送达') % (one_picking_line.picking_id.sale_id.name))                
+        self.write(cr, uid, ids, {
+            'state':'end',
+            'back_uid':uid,
+            'back_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            }, context=context)
+
+    def action_done(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {
+            'state':'done',
+            'money_uid':uid,
+            'money_date':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            }, context=context)
+
+    def onchange_picking(self, cr, uid, ids, line_ids=False, picking=False, context=None):
+        """ On change of Picking and will add line_ids
+        @return: Dictionary of values
+        """
+        if (not picking):
+            return {}
+        if picking:
+            picking_obj = self.pool.get('stock.picking.out')
+            picking_ids = picking_obj.search(cr, uid, [('name', '=', picking), ('state', '=', 'done'), ('okgj_type', '=', False)], context=context)
+            if not picking_ids:
+                warning = {
+                    'title': _('未找到匹配的送货单'),
+                    'message': picking,
+                }
+                return {'warning':warning}
+            if isinstance(picking_ids, list):
+                if len(picking_ids) != 1:
+                    warning = {
+                        'title': _('找到多个匹配的送货单, 无法识别'),
+                        'message': picking,
+                        }
+                    return {'warning':warning}
+                picking_ids = picking_ids[0]
+            line_ids.append((0, 0, {'picking_id':picking_ids}))
+            return {'value':{'line_ids':line_ids, 'picking':False}}
+        return {}
+
+okgj_logistics()
+
+#TODO:计算成本与科目
+## class okgj_logistics_cost(osv.osv, format_address):
+##     _name = "okgj.logistics.cost"
+##     _columns = {
+
+##     }
+## okgj_logistics_cost()
+

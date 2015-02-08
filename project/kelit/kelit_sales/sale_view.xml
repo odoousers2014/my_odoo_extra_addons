@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+		<!-- Code made by Yu for sale order line discount -->    
+    	<record id="view_move_sol_tree_KL" model="ir.ui.view">
+			<field name="name">sale.order.line.discount_KL</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_order_form" />
+			<field name="arch" type="xml">
+                <xpath expr="/form/sheet/notebook/page/field/tree/field[@name='discount']" position="replace">
+                	<!--field name="discount" groups="sale.group_discount_per_so_line"	on_change="on_discount_change(discount, context)"/-->
+                	<field name="discount" on_change="on_discount_change(discount, context)"/>
+                	<field name="unit_price_permission" invisible='1' />
+                </xpath>
+                
+                <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form/group/group/div/field[@name='discount']" position="replace">
+					<field name="discount" on_change="on_discount_change(discount, context)"/>
+					<field name="unit_price_permission" invisible='1' />
+                </xpath>
+                
+                <!--  jon.chow#elico-corp.com May 16, 2013  -->
+                <xpath expr="/form/sheet/notebook/page/field/tree/field[@name='price_unit']" position="attributes">
+                	<attribute name="attrs">{'readonly':[('unit_price_permission', '!=', True)]}</attribute>
+                </xpath>
+                
+                <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form/group/group/field[@name='price_unit']" position="attributes">
+					<attribute name="attrs">{'readonly':[('unit_price_permission', '!=', True)]}</attribute>
+				</xpath>
+				
+				<!-- invisible Descripton jon.chow#elico-corp.com Jul 22, 2013
+                <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/tree/field[@name='product_id']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				
+				-->
+				
+				<!--  widget handle can't  display stirng-->	
+                <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/tree/field[@name='sequence']" position="attributes">
+					<attribute name="string">Sequence</attribute>
+				</xpath>
+							
+				
+				<!--  add filed is_sample	-->	
+                <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/tree/field[@name='name']" position="after">
+					<field name="is_sample" groups='base.group_sale_salesman' on_change="on_change_is_sample(is_sample,parent.pricelist_id, product_id, product_uom_qty, product_uom, product_uos_qty, product_uos, name, parent.partner_id, False, True, parent.date_order, False, parent.fiscal_position, False, context)"/>
+				</xpath>
+                <xpath expr="/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form/group/group" position="inside">
+					<field name="is_sample" on_change="on_change_is_sample(is_sample,parent.pricelist_id, product_id, product_uom_qty, product_uom, product_uos_qty, product_uos, name, parent.partner_id, False, True, parent.date_order, False, parent.fiscal_position, False, context)"/>
+				</xpath>
+				
+				
+				<!--View Invoice button fro group account.group_account_invoice  jon.chow#elico-corp.com 2013-12-12-->
+				<xpath expr="//button[@name='action_view_invoice']" position='attributes'>
+				    <attribute name='groups'>account.group_account_invoice</attribute>
+				</xpath>
+				
+
+				
+				
+		
+                
+            </field>
+        </record>
+        
+           
+        
+        <!--jon set max_sale_discount -->
+        <record id="view_sale_config_settings" model="ir.ui.view">
+            <field name="name">sale settings</field>
+            <field name="model">sale.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_sale_config_settings" />
+            <field name="arch" type="xml">
+                <div name="linkedin" position='before'>
+	                <group col='4'>
+	                    <field name="max_sale_discount"/>
+	                    <label for="max_sale_discount"/>
+	                </group>
+                </div>
+             </field>
+        </record>
+        
+        <!-- pricelist_id  widget -> selection jon.chow#elico-corp.com May 15, 2013-->
+        <record model="ir.ui.view" id="inherit_view_order_form">
+            <field name="name">inherit.view_order_form.form</field>
+            <field name="model">sale.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='pricelist_id']" position="attributes">
+					<attribute name="widget">selection</attribute>
+					<attribute name="groups">base.group_sale_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>

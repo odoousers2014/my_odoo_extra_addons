@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<menuitem id="yks_outer_user_menu" name="外部人员操作"  sequence="500" groups='yks.yks_group_external_warehouse'/>
+<menuitem sequence="1" id="yks_outer_user_menu_sale" name="销售"  parent='yks_outer_user_menu'/>
+<menuitem sequence="2" id="yks_outer_user_menu_warehouse" name="仓库"  parent='yks_outer_user_menu' groups='yks.yks_group_external_warehouse'/>
+
+<!-- Artist -->
+<menuitem id="yks_top_artist" name="美工"  sequence="500" groups='yks.yks_group_artist'/>
+<menuitem id="yks_sencond_artist" name="美工"  parent='yks_top_artist'/>
+
+
+
+</data>
+</openerp>

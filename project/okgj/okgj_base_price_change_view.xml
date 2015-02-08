@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding='utf-8'?>
+<openerp>
+	<data>
+
+    <record id="view_base_price_change_line_tree" model="ir.ui.view">
+		<field name="name">base.price.change.line.tree</field>
+        	<field name="model">okgj.base.price.change.line</field>
+            <field name="arch" type="xml">
+            	<tree string="基础价列表" version="7.0" colors="red:(price_state == '1');blue:(price_state == '2')">
+	                <field name='product_id'/>
+	               	<field name='warehouse_id'/>
+                    <field name='list_price'/>
+                    <field name='okkg_price'/>
+                    <field name='other_price'/>
+                    <field name='recent_purchase_price'/>
+                    <button name="action_upload_line" string="确认并上传" type="object" states="draft,reedit" class="oe_highlight" icon="gtk-ok"/>
+                    <button name="action_need_reedit_line" string="驳回" type="object" states="draft,reedit" class="oe_highlight" icon="gtk-stop"/>
+                    <field name='product_price_unit'/>
+                    <field name="product_qty" />
+	                <field name="adjust_ratio" />
+	                <field name='product_price'/>
+                    <field name='min_price'/>
+                    <field name='max_price'/>
+                    <field name='create_uid'/>
+                    <field name='create_date'/>
+	                <field name="state"/>
+                    <field name="price_state" invisible="1"/>
+                </tree>
+            </field>
+   	</record>
+    
+      
+    <record id="view_base_price_change_line_form" model="ir.ui.view">
+    	<field name="name">base.price.change.line.form</field>
+       		<field name="model">okgj.base.price.change.line</field>
+            <field name="arch" type="xml">
+            	<form string="基础价" version="7.0">
+            		<header>
+            			<button name="action_upload_line" string="确认并上传" type="object" states="draft,reedit" class="oe_highlight"/>
+                        <button name="action_reedit_line" string="重新编辑" type="object" states="confirmed,need_reedit" class="oe_highlight"/>
+	        			<field name="state" widget="statusbar" readonly="1" statusbar_visible="draft,confirmed"/>
+	        		</header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <label string="基础价"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="product_id" on_change="onchange_product_qty_ratio(product_id, product_qty, adjust_ratio)" readonly="1"/>
+                                <field name="product_qty" on_change="onchange_product_qty_ratio(product_id, product_qty, adjust_ratio)" readonly="1"/>
+                                <field name="adjust_ratio" readonly="1"/>
+                                <field name="product_price_unit" on_change="onchange_product_price_unit(product_id, product_qty, product_price_unit)" readonly="1"/>
+                                <field name="product_price" readonly="1"/>
+                                <!--field name="adjust_ratio" on_change="onchange_product_qty_ratio(product_id, product_qty, adjust_ratio)"/-->
+                                <!--field name="product_price_unit" on_change="onchange_product_price_unit(product_id, product_qty, product_price_unit)"/>
+                                <field name="product_price" on_change="onchange_product_price(product_id, product_qty, product_price)"/--> 
+                            </group>
+                            <group>
+                                <field name="warehouse_id" readonly="1"/>
+                                <field name="min_price"/>
+                                <field name="max_price"/>
+                                <field name="price_state"/> 
+                            </group>
+                        </group>
+                    </sheet>
+                <div class="oe_chatter">
+                    <!--field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/-->
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </form>
+            </field>
+     </record>
+
+    <record id="view_base_price_change_line_search" model="ir.ui.view">
+		<field name="name">base.price.change.line.search</field>
+        	<field name="model">okgj.base.price.change.line</field>
+            <field name="arch" type="xml">
+            	<search string="基础价">
+                    <field name="name_template" string="商品" filter_domain="['|',('name_template','ilike',self),('default_code','ilike',self)]"/>
+                    <field name='create_uid'/>
+	                <field name="product_id"/>
+	               	<field name="warehouse_id"/>
+	                <field name="state"/>
+                    <filter string="未提交" name="unpost" domain="['|',('state','=','draft'),('state','=','reedit')]"/>
+                    <filter string="驳回" domain="[('state','=','need_reedit')]"/>
+                    <filter string="低于成本价商品" domain="[('price_state','=','1')]"/>
+                    <filter string="高于市场价商品" domain="[('price_state','=','2')]"/>
+                </search>
+            </field>
+   	</record>
+
+     
+     <record id="base_price_change_line_action" model="ir.actions.act_window">
+          <field name="name">基础价明细</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">okgj.base.price.change.line</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">tree,form</field>
+          <field name="context">{"search_default_unpost":'1'}</field>
+      </record>
+      
+  	<menuitem 
+	  	id="base_price_change_line_menu"
+	  	action="base_price_change_line_action"
+	  	parent="okgj.menu_okgj_basedatainfo_root"  
+	  	sequence="21"/>
+
+	<!--基础价审核-->
+	<record id="view_okgj_base_price_change_line_confirm_form" model="ir.ui.view">
+        <field name="name">view.okgj.base.price.change.line.confirm.form</field>
+        <field name="model">okgj.base.price.change.line.confirm</field>
+        <field name="arch" type="xml">
+            <form string="审核">
+                <separator string="请确认是否需要审核并上传所选基础价"/>
+                <newline/>
+                <button name="do_confirm" string="审核" type="object" class="oe_highlight"/>
+                <button string="关闭" class="oe_link" special="cancel" />
+            </form>
+        </field>
+    </record>
+
+
+        <record id="action_okgj_base_price_change_line_confirm" model="ir.actions.act_window">
+            <field name="name">审核</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.base.price.change.line.confirm</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_base_price_change_line_confirm_form"/>
+        </record>
+
+         <act_window name="审核并上传"
+            res_model="okgj.base.price.change.line.confirm"
+            src_model="okgj.base.price.change.line"
+            view_mode="form"
+            key2="client_action_multi"
+            multi="True"
+            target="new"
+            id="action_okgj_base_price_change_line_confirm"
+            groups="okgj.group_okgj_purchase_manager"
+	    />
+
+
+	<!--变更会员价-->
+	<record id="view_okgj_list_price_change_base_price_form" model="ir.ui.view">
+        <field name="name">view.okgj.list.price.change.base.price.from</field>
+        <field name="model">okgj.list.price.change.base.price</field>
+        <field name="arch" type="xml">
+            <form string="会员价变更价格">
+                <separator string="请输入新会员价"/>
+                <newline/>
+                <field name="list_price"/>
+                <newline/>
+                <button name="do_confirm" string="确认" type="object" class="oe_highlight"/>
+                <button string="关闭" class="oe_link" special="cancel"/>
+            </form>
+        </field>
+    </record>
+    
+    
+    <record id="action_okgj_list_price_change_base_price" model="ir.actions.act_window">
+            <field name="name">变更会员价</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.list.price.change.base.price</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_list_price_change_base_price_form"/>
+        </record>
+
+
+         <!--列表维护-->
+    <record id="view_base_price_change_order_tree" model="ir.ui.view">
+		<field name="name">base.price.change.order.tree</field>
+        	<field name="model">okgj.base.price.change</field>
+            <field name="arch" type="xml">
+            	<tree string="基础价调整单">
+			<field name='create_uid'/>
+	                <field name='product_id'/>
+	               	<field name='warehouse_id'/>
+	                <field name="state" invisible="1"/>
+	                <field name="approve_state"/>
+                </tree>
+            </field>
+   	</record>
+
+    <record id="view_base_price_change_order_search" model="ir.ui.view">
+		<field name="name">base.price.change.order.search</field>
+        	<field name="model">okgj.base.price.change</field>
+            <field name="arch" type="xml">
+            	<search string="基础价调整单">
+            		<field name="name_template" string="商品" filter_domain="['|',('name_template','ilike',self),('default_code','ilike',self)]"/>
+	                <field name='product_id'/>
+	               	<field name='warehouse_id'/>
+	                <field name="approve_state"/>
+                    <!--filter string="待审" domain="[('approve_state','!=','done')]"/-->
+                </search>
+            </field>
+   	</record>
+
+    
+    <record id="view_base_price_change_order_form" model="ir.ui.view">
+    	<field name="name">base.price.change.order.form</field>
+       		<field name="model">okgj.base.price.change</field>
+            <field name="arch" type="xml">
+            	<form string="基础价调整单" version="7.0">
+            		<header>
+            			<button name='action_upload_all' string='确认并上传' type='object' class='oe_highlight'/>
+                        <button name='action_reedit' string='重新编辑' type='object' class='oe_highlight'/>
+	        			<!--field name="state" widget="statusbar" readonly="1" statusbar_visible="draft,confirmed"/-->
+                        <field name="state" invisible="1"/>
+	        		</header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <label string="基础调整"/>
+                            </h1>
+                        </div>
+	        		<group>
+	        			<group>
+		             		<field name='product_id' on_change="onchange_product_id(product_id, warehouse_id)"/>
+	                   		<field name="standard_price"/>
+                            <field name="list_price" />
+                            <button name='do_change_list_price' string='修改会员价' type='object' class='oe_link'/>
+                            <newline/>
+	                    </group>
+	                    <group>
+	                    	<field name='warehouse_id' on_change="onchange_product_id(product_id, warehouse_id)"/>
+                            <field name="other_price"/>
+                            <field name="okkg_price"/> 
+	                    	<field name='recent_purchase_price'/>
+	                    </group>
+                   	</group>
+                   	<h2>
+                   	<label for='price_change_line_ids' string='明细'/>
+                   	</h2>
+                   	<field name='price_change_line_ids' colspan='4'>
+                   		<tree string='明细' editable="top"  colors="red:(price_state =='1');blue:(price_state =='2')">
+                            <field name="product_qty"  on_change="onchange_product_qty_ratio(parent.product_id, product_qty, adjust_ratio)"/>
+                            <field name="adjust_ratio"/>
+                            <field name="product_price_unit" on_change="onchange_product_price_unit(parent.product_id, product_qty, product_price_unit)"/>
+                            <field name="product_price"/>
+                            <!--field name="adjust_ratio" on_change="onchange_product_qty_ratio(parent.product_id, product_qty, adjust_ratio)"/-->
+                            <!--field name="product_price_unit"/-->
+                            <!--field name="product_price" on_change="onchange_product_price(parent.product_id, product_qty, product_price)"/--> 
+                            <field name="min_price"/>
+                            <field name="max_price"/>
+                            <field name="state"/>
+                            <field name="price_state" invisible="1"/>
+                   		</tree>
+                   	</field>
+                    </sheet>
+                 </form>
+            </field>
+     </record>
+     
+     <record id="view_base_price_change_search" model="ir.ui.view">
+		<field name="name">base.price.change.search</field>
+        	<field name="model">okgj.base.price.change</field>
+            <field name="arch" type="xml">
+            	<search string="基础价">
+            		<field name="name_template" string="商品" filter_domain="['|',('name_template','ilike',self),('default_code','ilike',self)]"/>
+                    <filter string="已审" name="approve_state" domain="[('approve_state','=','done')]"/>
+                    <filter string="待审" name="approve_state" domain="[('approve_state','=','wait_approve')]"/>
+                </search>
+            </field>
+   	</record>
+   	
+     <record id="base_price_change_order_action" model="ir.actions.act_window">
+          <field name="name">基础价调整单</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">okgj.base.price.change</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">tree,form</field>
+      </record>
+      
+  	<menuitem 
+	    name='基础价调整单' 
+	  	id="base_price_change_order_menu"
+	  	action="base_price_change_order_action"
+	  	parent="okgj.menu_okgj_basedatainfo_root"  
+	  	sequence="22"/>
+	  	
+	<!--view: base price change datas import wizard --> 
+	<record model='ir.ui.view' id='price_change_datas_import_form'>
+		<field name='name'>price.change.datas.import.form</field>
+		<field name='model'>price.change.datas.import</field>
+		<field name='arch' type='xml'>
+			<form string='import form' version='7.0'>
+				<group>
+					<field name='excel'/>
+				</group>
+				<separator string="导入模板下载:"/>
+	     		<field name="import_address"/>
+	     		<separator string="更新模板下载:"/>
+	     		<field name='update_address'/>
+				<footer>
+					<button name='action_import' string='调价商品导入' type='object' context="{'action':'import'}" class="oe_highlight"/> 
+					<button name='action_import' string='调价商品更新' type='object' context="{'action':'update'}" class="oe_highlight"/>
+					<button string="关闭" class="oe_right" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+	
+	<record model='ir.actions.act_window' id='action_price_change_datas_import'>
+		<field name='name'>基础价调整商品导入</field>
+		<field name='type'>ir.actions.act_window</field>
+		<field name='res_model'>price.change.datas.import</field>
+		<field name='view_type'>form</field>
+		<field name='view_mode'>form</field>
+		<field name='target'>new</field>
+	</record>
+
+	<menuitem name="基础价调整导入"
+		  id="menu_okgj_price_change_datas_import"
+		  action="action_price_change_datas_import"
+		  sequence="23"
+		  parent="okgj.menu_okgj_basedatainfo_root"/>
+
+</data>
+</openerp>

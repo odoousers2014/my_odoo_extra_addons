@@ -1,0 +1,53 @@
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="yks_picking_scan_done_form_view">
+	<field name="name">picking.scan.done.form</field>
+	<field name="model">picking.scan.done</field>
+	<field name="arch" type="xml">
+		<form string="picking.scan.done" version='7.0'>
+			<group>
+				<group>
+					<field name="scan_input" on_change="onchange_scan_input(scan_input, lines)"/>
+				</group>
+				<group>
+					<field name="manner"/>
+				</group>
+			</group>
+			<newline/>
+			<field name="lines">
+				<tree>
+					<field name="picking_id"/>
+					<field name="location_id"/>
+					<field name="state"/>
+					<field name="platform_so_id"/>
+					<field name="receive_user"/>
+					<field name="receive_address"/>
+				</tree>
+			</field>
+            <footer>
+                <button name="apply" string="完成出库" type="object" class="oe_highlight" />
+            </footer>
+		</form>
+		
+		
+	</field>
+</record>
+
+<record model="ir.actions.act_window" id='action_yks_picking_scan_done'>
+	<field name='name'>扫发货单</field>
+	<field name='type'>ir.actions.act_window</field>
+	<field name='res_model'>picking.scan.done</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="view_id" ref="yks_picking_scan_done_form_view"/>
+	<field name='context'>{}</field>
+	
+	
+</record>
+<menuitem id="yks_picking_scan_done_menu" name="扫发货单"  parent="stock.menu_stock_warehouse_mgmt"  
+		sequence="22" action="action_yks_picking_scan_done" groups="stock.group_stock_manager"/>
+
+
+</data>
+</openerp>

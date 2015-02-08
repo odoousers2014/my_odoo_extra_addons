@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+<record id="report_webkit.ir_property_webkitheaderdefault0" model="ir.property">
+    <field name="fields_id" ref="report_webkit.field_ir_act_report_xml_webkit_header"/>
+    <field eval="&quot;&quot;&quot;webkit_header_default&quot;&quot;&quot;" name="name"/>
+    <field eval="'ir.header_webkit,' + str(ref('ir_header_webkit_basesample1'))" name="value"/>
+</record>
+
+</data>
+</openerp>
+

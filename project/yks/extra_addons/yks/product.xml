@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<!-- YKS Product Brand -->
+<record model="ir.ui.view" id="yks_product_brand_tree_view">
+	<field name="name">yks.product.brand.tree</field>
+	<field name="model">product.brand</field>
+	<field name="arch" type="xml">
+		<tree string="品牌"  editable="top">
+			<field name="name" />
+			<field name="create_uid"  readonly="1"/>
+		</tree>
+	</field>
+</record>
+<record id="yks_product_brand_action" model="ir.actions.act_window">
+	<field name="name">产品品牌</field>
+	<field name="type">ir.actions.act_window</field>
+	<field name="res_model">product.brand</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+</record>
+<menuitem id="yks_product_brand_menu" name="产品品牌"
+	parent="product.prod_config_main" action="yks_product_brand_action" />
+<menuitem id="yks_product_brand_menu_purchase" name="产品品牌"
+    parent="purchase.menu_product_in_config_purchase" action="yks_product_brand_action" />
+
+<!-- YKS Product Form -->
+<record model="ir.ui.view" id="yks_product_normal_form_view">
+	<field name="name">yks.product.form.viewt</field>
+	<field name="model">product.product</field>
+	<field name="inherit_id" ref="product.product_normal_form_view" />
+	<field name="arch" type="xml">
+		<xpath expr="//field[@name='default_code']" position="attributes">
+			<attribute name="string">SKU</attribute>
+		</xpath>
+
+        <xpath expr="//field[@name='default_code']" position="after">
+          <field name="create_uid"  readonly="1"/>
+        </xpath>
+        
+        <field name="list_price" position="after">
+        	<field name='goods_item' placeholder='商品货号'/>
+        </field>
+        
+        <xpath expr="//field[@name='name']" position="after">
+          <field name="en_name" placeholder="English Name"/>
+        </xpath>
+		
+		<xpath expr="//field[@name='description']" position="before">
+			<group string="分类信息"  name="milk_field">
+				<group>
+					<field name='brand_id'/>
+					<field name='formula'/>
+					<field name='old_id'  groups='base.group_system'/>
+					<field name='hs_tax_id'/>
+				</group>
+				<group>
+					<field name='place_production' />
+					<field name='suitable_crowd' />
+					<field name="hs_code"/>
+					<field name='pp_tax_id'/>
+				</group>
+			</group>
+		</xpath>
+	</field>
+</record>
+<!-- YKS Product Tree  -->
+<record model="ir.ui.view" id="yks_product_tree_view">
+	<field name="name">product.product.tree</field>
+	<field name="model">product.product</field>
+	<field name="inherit_id" ref="product.product_product_tree_view"/>
+	<field name="arch" type="xml">
+		<field name="name" position="after">
+		  <field name="brand_id"/>
+		</field>
+	</field>
+</record>
+<!-- YKS Product Search  -->
+<record id="yks_product_search_view" model="ir.ui.view">
+	<field name="name">yks.product.product.search</field>
+	<field name="model">product.product</field>
+	<field name="inherit_id" ref="product.product_search_form_view" />
+	<field name="arch" type="xml">
+	   <field name="name" position="after">
+	       <field name="brand_id" string="品牌" filter_domain="[('brand_id.name','ilike',self)]"/>
+	   </field>
+	   <filter string="Category" position="after">
+	       <filter string="品牌" domain="[]" context="{'group_by' : 'brand_id'}"/>
+	       <filter string="产地国家" domain="[]" context="{'group_by' : 'place_production'}"/>
+	   </filter>
+	</field>
+</record>
+
+
+<!-- Product View for artist -->
+<record model="ir.ui.view" id="yks_artist_product_tree_view">
+    <field name="name">product.product.tree</field>
+    <field name="model">product.product</field>
+    <field name="arch" type="xml">
+        <tree string="Product">
+            <field name="name"/>
+            <field name="default_code"/>
+        </tree>
+    </field>
+</record>
+<record model="ir.ui.view" id="yks_artist_product_form_view">
+    <field name="name">product.product.form</field>
+    <field name="model">product.product</field>
+    <field name="arch" type="xml">
+        <form string="Product">
+            <field name="image" widget="image"/>
+            <field name="name"/>
+            <field name="default_code"/>
+        </form>
+    </field>
+</record>
+<record model="ir.actions.act_window" id="yks_action_artist_product">
+    <field name="name">产品</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">product.product</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+</record>
+<record model="ir.actions.act_window.view" id="yks_action_artist_product_to_tree">
+    <field name="sequence" eval="1"/>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="yks_artist_product_tree_view"/>
+    <field name="act_window_id" ref="yks_action_artist_product"/>
+</record>
+<record model="ir.actions.act_window.view" id="yks_action_artist_product_to_form">
+    <field name="sequence" eval="1"/>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="yks_artist_product_form_view"/>
+    <field name="act_window_id" ref="yks_action_artist_product"/>
+</record>
+<menuitem sequence="1" id="yks_artist_product" name="产品"  parent='yks_sencond_artist' action="yks_action_artist_product"/>
+
+
+<!-- product category -->
+<record model="ir.ui.view" id="yks_product_category_form_view">
+    <field name="name">product.category.form</field>
+    <field name="model">product.category</field>
+    <field name="inherit_id" ref="product.product_category_form_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='parent_id']" position="after">
+            <field name="create_uid"  readonly="1"/>
+        </xpath>
+
+    </field>
+</record>
+
+
+</data>
+</openerp>
+

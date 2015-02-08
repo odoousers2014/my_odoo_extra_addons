@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+
+        <record model="ir.ui.view" id="intercompany_sale_order_form_view">
+            <field name="name">intercompany.sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/notebook" position="inside">
+                    <page string="Intercompany">
+                    	<group>
+                    	<field name="parent_po"/>
+                    	<field name="child_po"/>
+                    	<field name="ic"/>
+                    	<field name="from_ic"/>
+                    	</group>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+        
+        
+        <record model="ir.ui.view" id="intercompany_purchase_order_form_view">
+            <field name="name">intercompany.purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/notebook" position="inside">
+                    <page string="Intercompany">
+                    	<group>
+                    	<field name="parent_so"/>
+                    	<field name="child_so"/>
+                    	<field name="ic"/>
+                    	<field name="from_ic"/>
+                    	</group>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+        
+
+
+
+
+
+    
+</data>
+</openerp>

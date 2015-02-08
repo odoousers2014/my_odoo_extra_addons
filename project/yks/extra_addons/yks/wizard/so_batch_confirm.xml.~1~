@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+<record id="yks_so_batch_confirm_from_view" model="ir.ui.view">
+    <field name="name">yks.so.batch.confirm</field>
+    <field name="model">so.batch.confirm</field>
+    <field name="arch" type="xml">
+        <form string="批量确认" version="7.0">
+            <h2>批量处理出库单据</h2>
+            <group>
+                <field name="select_count" readonly="1"/>
+            </group>
+            <footer>
+                <button name="apply" string="确认" type="object" class="oe_highlight" />
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window 
+    id="yks_so_batch_confirm_action"
+    multi="True"
+    key2="client_action_multi"
+    name="批量确认"
+    res_model="so.batch.confirm"
+    src_model="sale.order"
+    view_mode="form"
+    target="new"
+    view_type="form"/>
+</data>
+</openerp>

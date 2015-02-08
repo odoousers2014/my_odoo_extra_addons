@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	
+	<record id="view_okgj_product_demo_form" model="ir.ui.view">	
+	    <field name="name">okgj.product.demo.form</field>
+	    <field name="model">okgj.product.demo</field>
+        <field name="view_mode">form</field>	
+        <field name="view_mode">tree,form</field>            
+	    <field name="arch" type="xml">
+		<form string="单品导入">
+				<field name="default_code"/>
+				<field name="categ_id"/>					
+				<field name="name"/>
+				<field name="type"/>					
+				<field name="variants"/>
+				<field name="uom_id"/>
+				<field name="uom_po_id"/>
+				<field name="other_price"/>		
+				<field name="default_purchase_price"/>
+				<field name="list_price"/>
+				<field name="brand_id"/>
+				<field name="place"/>					
+				<field name="ean128"/>
+				<field name="weight"/>
+				<field name="mark"/>					
+				<field name="standard_price"/>
+				<field name="long"/>
+				<field name="wight"/>
+				<field name="height"/>		
+				<field name="note"/>	
+				<field name="life_time"/>
+				<field name="seller_code"/>	
+				<field name="seller_ids"/>
+				<field name="purchase_price"/>													
+		</form>
+	    </field>
+	</record>
+	
+         <record id="view_okgj_bom_demo" model="ir.ui.view">
+            <field name="name">okgj.bom.demo</field>
+            <field name="model">okgj.bom.demo</field>
+            <field name="view_mode">form</field>      
+            <field name="view_mode">tree,form</field>                  
+            <field name="arch" type="xml">
+            <form string="Lines" version="7.0">
+                  <separator string="Import Product"/>
+                  <group>
+                <field name="product_id"/>
+				<field name="bom_code"/>					
+				<field name="bom_type"/>
+				<field name="bom_price"/>
+				</group>
+				<group>					
+				<field name="bom_ok_price"/>
+				<field name="bom_note"/>
+				<field name="uom_id"/>	
+                  </group>                              
+                <field name="line_ids" >
+                        <tree string="Line Number" editable="bottom">
+                            <field name="product_id"/>     
+                            <field name="bom_line_code"/>                                                
+                            <field name="bom_line_detail_code"/>          
+                            <field name="variants"/>  
+                            <field name="uom_id"/>                                                
+                            <field name="product_qty"/>          
+                            <field name="list_price"/>                                                                                                                                                                                                      
+                        </tree>
+                    </field>                    
+              </form>
+            </field>
+        </record>
+
+        <record id="action_view_okgj_product_demo" model="ir.actions.act_window">
+            <field name="name">单品导入</field>
+            <field name="res_model">okgj.product.demo</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="act_window_id" ref="view_okgj_product_demo_form"/>
+	    <field name="help" type="html">
+		<p class="oe_view_nocontent_create">
+		    点击新建单品导入
+		</p>
+	    </field>
+        </record>
+
+        <record id="action_okgj_bom_demo" model="ir.actions.act_window">
+            <field name="name">组合品导入</field>
+            <field name="res_model">okgj.bom.demo</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="act_window_id" ref="view_okgj_bom_demo"/>            
+	    <field name="help" type="html">
+		<p class="oe_view_nocontent_create">
+		    点击新建组合品导入
+		</p>
+	    </field>
+        </record>
+
+	<menuitem name="单品导入"
+		  id="product.menu_okgj_product_demo"
+		  action="action_view_okgj_product_demo" 
+		  parent="okgj.menu_okgj_basedatainfo_root"  
+		  sequence="30"/>
+	<menuitem name="组合品导入"
+		  id="product.menu_okgj_bom_demo"
+		  action="action_okgj_bom_demo" 
+		  parent="okgj.menu_okgj_basedatainfo_root"  
+		  sequence="31"/>
+	
+    </data>
+</openerp>

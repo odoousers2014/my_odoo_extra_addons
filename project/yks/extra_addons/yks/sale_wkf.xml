@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+<record id="act_wait_account" model="workflow.activity">
+    <field name="wkf_id" ref="sale.wkf_sale"/>
+    <field name="name">wait_account</field>
+    <field name="kind">function</field>
+    <field name="action">write({'state':'wait_account'})</field>
+</record>
+<record id="trans_draft_wait_account" model="workflow.transition">
+    <field name="act_from" ref="sale.act_draft"/>
+    <field name="act_to" ref="act_wait_account"/>
+    <field name="signal">quotation_sent</field>
+    <field name="condition">create_type=='manual'</field>
+</record>
+<record id="trans_wait_account_sent" model="workflow.transition">
+    <field name="act_from" ref="act_wait_account"/>
+    <field name="act_to" ref="sale.act_sent"/>
+    <field name="signal">account_approve</field>
+    <field name="condition">True</field>
+</record>
+<record id="sale.trans_draft_sent" model="workflow.transition">
+    <field name="act_from" ref="sale.act_draft"/>
+    <field name="act_to" ref="sale.act_sent"/>
+    <field name="signal">quotation_sent</field>
+    <field name="condition">create_type=='auto'</field>
+</record>
+
+<!-- ship_end not auot to done, shpeed->sing_in->done  -->
+<record id="sale_stock.trans_ship_end_done" model="workflow.transition">
+    <field name="act_from" ref="sale_stock.act_ship_end"/>
+    <field name="act_to" ref="sale.act_done"/>
+    <field name="signal">sign_in</field>
+    <field name="condition">True</field>
+</record>
+<!-- return to draft  -->
+<record id="trans_sent_draft" model="workflow.transition">
+    <field name="act_from"  ref="sale.act_sent"/>
+    <field name="act_to" ref="sale.act_draft"/> 
+    <field name="signal">back_draft</field>
+    <field name="condition">True</field>
+</record>
+<record id="trans_wait_account_draft" model="workflow.transition">
+    <field name="act_from" ref="act_wait_account"/>
+    <field name="act_to" ref="sale.act_draft"/> 
+    <field name="signal">back_draft</field>
+    <field name="condition">create_type=='manual'</field>
+</record>
+    
+    
+</data>
+</openerp>

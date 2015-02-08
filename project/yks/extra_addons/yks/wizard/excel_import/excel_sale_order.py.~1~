@@ -1,0 +1,270 @@
+# -*- coding:utf-8 -*-
+#author:cloudy
+#description: import sale orders from excel files
+import base64
+from openerp.osv import fields, osv
+import re
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from datetime import datetime
+
+
+class excel_sale_order(osv.osv_memory):
+    ''''''
+    _inherit = "excel.base"
+
+    def apply(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        res = super(excel_sale_order, self).apply(cr, uid, ids, context)
+        wizard = self.browse(cr, uid, ids[0], context)
+        if wizard.model == 'beibeiwang':
+            res_ids = self.create_sale_order(cr, uid, wizard, wizard.model, context)
+            res.update({
+                'name': u'贝贝网订单',
+                'view_type': 'form',
+                'view_mode': 'tree,form',
+                'res_model': 'sale.order',
+                'domain': [('id', 'in', res_ids)],
+                'type': 'ir.actions.act_window',
+            })
+        elif wizard.model == 'yangmatou':
+            res_ids = self.create_sale_order(cr, uid, wizard, wizard.model, context)
+            res.update({
+                'name': u'洋码订单',
+                'view_type': 'form',
+                'view_mode': 'tree,form',
+                'res_model': 'sale.order',
+                'domain': [('id', 'in', res_ids)],
+                'type': 'ir.actions.act_window',
+            })
+        return res
+
+    def apply_check_so(self, cr, uid, model, title_data):
+        exist_platform_so_id = ''
+        sku_not_exist = ''
+        bad_line = ''
+        no_sku_line = ''
+        if model == 'beibeiwang' or model == 'yangmatou':
+            sale_obj = self.pool.get('sale.order')
+            product_obj = self.pool.get('product.product')
+            for line in title_data['data']:
+                check_platform_so_id = line.get('platform_so_id')
+                if 'beibeiwang' == model:
+                    check_sku = line.get('sku')
+                    if not check_sku:
+                        no_sku_line += '%s\t' % line.get('row_nu')
+                    if check_sku:
+                        if not product_obj.search(cr, uid, [('default_code', '=', check_sku.strip())]):
+                            sku_not_exist += "%s\t" % check_sku
+                    if check_platform_so_id:
+                        if sale_obj.search(cr, uid, [('platform_so_id', '=', check_platform_so_id.strip())]):
+                            exist_platform_so_id += "%s\t" % check_platform_so_id
+                    if line.get('product_qty_total') != line.get('product_qty'):
+                        bad_line += "%s\t" % line['row_nu']
+                elif model == 'yangmatou':
+                    check_skus = line.get('sku')
+                    if not check_skus:
+                        no_sku_line += '%s\t' % line.get('row_nu')
+                    else:
+                        check_skus = check_skus.split(';')
+                        for check_sku in check_skus:
+                            if check_sku:
+                                if not product_obj.search(cr, uid, [('default_code', '=', check_sku.strip())]):
+                                    sku_not_exist += "%s\t" % check_sku
+                            if check_platform_so_id:
+                                if sale_obj.search(cr, uid, [('platform_so_id', '=', check_platform_so_id.strip())]):
+                                    exist_platform_so_id += "%s\t" % check_platform_so_id
+            if no_sku_line:
+                raise osv.except_osv(u'错误', u'excel中的下列行没有SKU信息,请补充完整%s' % no_sku_line)
+            if exist_platform_so_id:
+                raise osv.except_osv(u'错误', u'下列平台交易号存在,请与系统中的信息核对后删除excel中的信息%s' % exist_platform_so_id)
+            if sku_not_exist:
+                raise osv.except_osv(u'错误', u'下列SKU在系统中不存在,请核对%s' % sku_not_exist)
+            if bad_line:
+                raise osv.except_osv(u'错误', u'下列行商品总数和数量不一致,请核对\n%s' % bad_line)
+
+            bad_title = ''
+            for title in self.Excel_model[model]['title']:
+                if title not in title_data['title']:
+                    bad_title += '%s\t' % title
+            if bad_title:
+                raise osv.except_osv(u'错误', u'下列字段不存在,请核对\n%s' % bad_title)
+
+        return True
+
+    def _get_city_id(self, cr, uid, city_dicts, city):
+        '''获得城市的ID,若没有就新建'''
+        obj_id = None
+        city = city
+        for line in city_dicts:
+            if re.search(city[0:2], line):
+                obj_id = city_dicts[line]['id']
+                break
+        if not obj_id:
+            raise osv.except_osv(u'错误', u'''系统中不存在城市:"%s",请联系开发人员添加''' % city)
+        return obj_id
+
+    def _get_country_state_id(self, cr, uid, country_state_dicts, country):
+        '''获得省份的ID,若没有就新建'''
+
+        obj_id = None
+        country = country
+        for line in country_state_dicts:
+            if re.search(country[0:2], line):
+                obj_id = country_state_dicts[line]['id']
+                break
+        if not obj_id:
+            if not obj_id:
+                raise osv.except_osv(u'错误', u'''系统中不存在省份:"%s",请联系开发人员添加''' % country)
+        return obj_id
+
+    def create_sale_order(self, cr, uid, wizard, model, context=None):
+        """创建销售订单"""
+        
+        mod_obj = self.pool.get('ir.model.data')
+
+        if context is None:
+            context = {}
+        res_ids = []
+        partner_obj = self.pool.get('res.partner')
+        partner_id = mod_obj.get_object_reference(cr, uid, 'yks', 'yks_res_partner_direct_sale')[1]
+
+        partner = partner_obj.browse(cr, uid, partner_id, context)
+        
+        sale_obj = self.pool.get('sale.order')
+        sale_order_line_obj = self.pool.get('sale.order.line')
+        product_obj = self.pool.get('product.product')
+        country_state_obj = self.pool.get('res.country.state')
+        country_state_ids = country_state_obj.search(cr, uid, [('name', '!=', '')])
+        country_state_dict = country_state_obj.read(cr, uid, country_state_ids, ['name', 'id'])
+        country_state_dicts = {}
+        for data in country_state_dict:
+            country_state_dicts.update({
+                data['name']: data,
+            })
+        city_obj = self.pool.get('res.city')
+        city_ids = city_obj.search(cr, uid, [('name', '!=', '')])
+        city_dict = city_obj.read(cr, uid, city_ids, ['name', 'id'])
+        city_dicts = {}
+        for data in city_dict:
+            city_dicts.update({
+                data['name']: data,
+            })
+        product_ids = product_obj.search(cr, uid, [('name', '!=', '')])
+        product_data = product_obj.read(cr, uid, product_ids, ['default_code', 'id', 'name'])
+        product_datas = {}
+        for data in product_data:
+            product_datas.update({
+                '%s' % data['default_code']: data,
+            })
+        title_data = self.parse_title_data(file_contents=base64.decodestring(wizard.file))
+        self.apply_check_so(cr, uid, wizard.model, title_data)
+        '''创建订单'''
+        for line in title_data['data']:
+            order_vals = {}
+            order_line_vals = {}
+            note = line.get('buyer_note') and u'买家备注:' + line.get('buyer_note') + line.get('seller_note') and u'卖家备注:' + line.get('seller_note')
+            platform_so_id = line.get('platform_so_id').strip()
+            receive_phone = line.get('receive_phone').strip()
+            default_code = line.get('sku').strip()
+            platform_create_time = str(line.get('platform_create_time').strip())
+            platform_pay_time = str(line.get('platform_pay_time').strip())
+            receive_user = line.get('receive_user').strip()
+            price_unit = line.get('price_unit')
+            receive_address = line.get('receive_address')
+            country = '',
+            city = '',
+            if model == 'beibeiwang':
+                product_qty = int(line.get('product_qty').strip())
+                platform_seller_id = line.get('platform_seller_id').strip()
+                country = line.get('province').strip()
+                city = line.get('city').strip()
+                order_vals.update({
+                    'platform_seller_id': platform_seller_id,
+                    'unneed_express': True,
+                })
+            elif model == 'yangmatou':
+                platform_user_id = line.get('platform_user_id').strip()
+                product_qty = line.get('product_qty').strip()
+                address = receive_address.split(',')
+                country = address[0]
+                city = address[1]
+                sale_model = 'normal'
+                sale_models = line.get('sale_model').strip()
+                if sale_models == u'海外直邮':
+                    sale_model = 'zy'
+                order_vals.update({
+                    'platform_user_id': platform_user_id,
+                    'sale_model': sale_model,
+                    'deliver_address': u'广东 深圳 前海保税区',
+                })
+            order_vals.update({
+                'user_id': uid,
+                'platform_so_id': platform_so_id,
+                'receive_user': receive_user,
+                'receiver_city_id': self._get_city_id(cr, uid, city_dicts, city),
+                'receiver_state_id': self._get_country_state_id(cr, uid, country_state_dicts, country),
+                'platform_create_time': datetime.strptime(platform_create_time, DEFAULT_SERVER_DATETIME_FORMAT),
+                'platform_pay_time': datetime.strptime(platform_pay_time, DEFAULT_SERVER_DATETIME_FORMAT),
+                'receive_phone': receive_phone,
+                'receive_address': receive_address,
+                'note': note,
+                'partner_id': partner.id,
+                'pricelist_id': partner.property_product_pricelist.id,
+                'partner_invoice_id': partner.id,
+                'partner_shipping_id': partner.id,
+                'section_id': '3',
+            })
+            sale_id = None
+            sale_id = sale_obj.create(cr, uid, order_vals, context=context)
+            if sale_id:
+                res_ids.append(sale_id)
+            if model == 'beibeiwang':
+                order_line_vals.update({
+                    'delay': 0,
+                    'name': "[%s] %s" % (product_datas[default_code]['default_code'], product_datas[default_code]['name']),
+                    'order_id': sale_id,
+                    'price_unit': price_unit,
+                    'product_uom': 1,
+                    'product_uom_qty': product_qty,
+                    'state': 'draft',
+                    'type': 'make_to_stock',
+                    'product_id': product_datas[default_code]['id'],
+                })
+                sale_order_line_obj.create(cr, uid, order_line_vals, context=context)
+            elif model == 'yangmatou':
+                default_codes = default_code.split(';')
+                price_units = price_unit.split(';')
+                product_qtys = product_qty.split(';')
+                datas = zip(default_codes, price_units, product_qtys)
+                for data in datas:
+                    order_line_vals.update({
+                    'delay': 0,
+                    'name': "[%s] %s" % (product_datas[data[0]]['default_code'], product_datas[data[0]]['name']),
+                    'order_id': sale_id,
+                    'price_unit': data[1],
+                    'product_uom': 1,
+                    'product_uom_qty': data[2],
+                    'state': 'draft',
+                    'type': 'make_to_stock',
+                    'product_id': product_datas[data[0]]['id'],
+                    })
+                    sale_order_line_id = sale_order_line_obj.create(cr, uid, order_line_vals, context=context)
+            # if freight > 0:
+            #     order_line_vals.update({
+            #     'delay': 0,
+            #     'name': "[%s] %s" % (product_datas['PostFee2']['default_code'], product_datas['PostFee2']['name']),
+            #     'order_id': sale_id,
+            #     'price_unit': 1,
+            #     'product_uom': 1,
+            #     'product_uom_qty': int(freight),
+            #     'state': 'draft',
+            #     'type': 'make_to_stock',
+            #     'product_id': product_datas['PostFee2']['id'],
+            # })
+            # sale_order_line_obj.create(cr, uid, order_line_vals, context=context)
+        return res_ids
+
+    
+
+excel_sale_order()

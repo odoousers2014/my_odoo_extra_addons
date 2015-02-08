@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record id="view_okgj_res_users_form" model="ir.ui.view">
+            <field name="name">view.okgj.res.users.form</field>
+            <field name="model">res.users</field>
+	    <field name="inherit_id" ref="base.view_users_form"/>
+	    <field eval="10" name="priority"/>
+            <field name="arch" type="xml">
+		<field name="signature" position="after">
+		    <field name="warehouse_ids" widget="many2many_tags"/>
+		</field>
+            </field>
+        </record>
+
+        <record id="view_okgj_res_partner_form" model="ir.ui.view">
+                <field name="name">view.okgj.res.partner.form</field>
+                <field name="model">res.partner</field>
+                <field name="inherit_id" ref="base.view_partner_form"/>
+                <field eval="16" name="priority"/>
+                <field name="arch" type="xml">
+		    <field name="email" position="after">
+			<field name="qq"/>
+			<field name="coop_way"/>
+		    </field>
+                    <notebook position="inside">
+			<page string="供应范围" attrs="{'invisible': [('supplier','=',False)]}">
+			    <field name="okgj_comment2"/>
+			</page>
+		    </notebook>
+                </field>
+        </record>
+   </data>
+</openerp>

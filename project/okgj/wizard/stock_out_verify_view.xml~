@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+	<!--复核明细行-->
+	<!--record id="view_okgj_stock_out_verify_line_form" model="ir.ui.view">
+            <field name="name">view.okgj.stock.out.verify.line.form</field>
+            <field name="model">okgj.okgj.stock.out.verify.line</field>
+            <field name="arch" type="xml">
+		<form string="复核明细">
+		    <field name="product_id"/>
+		    <field name="product_qty"/> 
+		    <field name="product_verify_qty"/> 
+		    <field name="product_more_qty"/> 
+		    <field name="product_diff_qty"/> 
+		</form>
+            </field>
+        </record>
+
+	<record id="view_okgj_stock_out_verify_line_tree" model="ir.ui.view">
+            <field name="name">view.okgj.stock.out.verify.line.tree</field>
+            <field name="model">okgj.okgj.stock.out.verify.line</field>
+            <field name="arch" type="xml">
+		<tree string="复核明细">
+		    <field name="product_id"/>
+		    <field name="product_qty"/> 
+		    <field name="product_verify_qty"/> 
+		    <field name="product_more_qty"/> 
+		    <field name="product_diff_qty"/> 
+		</tree>
+            </field>
+        </record-->
+
+	<!--复核-->
+	<record id="view_okgj_stock_out_verify_form" model="ir.ui.view">
+            <field name="name">view.okgj.stock.out.verify.form</field>
+            <field name="model">okgj.stock.out.verify</field>
+            <field name="arch" type="xml">
+		<form string="出库复核" version="7.0">
+                <header>
+		    <button name="done" states="draft" string="复核确认" type="object" class="oe_highlight"/>
+		</header>
+		<sheet>
+                    <div class="oe_title">
+			<h1>
+			    <label string="拣货复核"/>
+			</h1>
+		    </div>
+		    <field name="state" invisible="1"/>
+		    <group>
+			<group>
+			    <field name="name" on_change="onchange_name(name)"/>
+			    <field name="sale_order_id" readonly="1"/>
+			    <field name="okgj_box"/>
+			</group>
+			<group>
+			    <field name="goods_weight"/>
+			    <field name="all_weight"/>
+			</group>			
+			<group>
+			    <field name="inv_payee"/>
+			</group>
+			<group>
+			    <field name="inv_amount"/>
+			</group>
+		    </group>
+		    <group>
+			<group>
+			    <field name="scan_type"/>
+			</group>
+			<group>
+			    <field name="product_qty"/>
+			</group>
+		    </group>
+		    <h2>
+			<label for="ean" string="请在以下框内扫描或录入商品条码"/>
+			<field name="ean" on_change="onchange_ean(scan_type, product_qty, ean)" rowspan="2"/>
+			<label for="move_ids" string="商品明细"/>
+		    </h2>
+		    <field name="move_ids" string="复核明细">
+			<tree string="Products">
+			    <field name="product_id"/>
+			    <field name="product_qty"/> 
+			    <field name="product_verify_qty"/> 
+			    <field name="product_extra_qty"/> 
+			    <field name="product_diff_qty"/> 
+			</tree>
+                    </field>   
+		</sheet>
+		</form>
+            </field>
+        </record>
+
+        <record id="action_okgj_stock_out_verify" model="ir.actions.act_window">
+            <field name="name">拣货复核</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.stock.out.verify</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form,tree</field>
+            <field name="view_id" ref="view_okgj_stock_out_verify_form"/>
+        </record>
+
+    </data>
+</openerp>

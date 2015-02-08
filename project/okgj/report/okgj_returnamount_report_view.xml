@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	<record id="view_okgj_report_returnamount_form" model="ir.ui.view">
+        <field name="name">view.okgj.report.returnamount.form</field>
+        <field name="model">okgj.report.returnamount</field>
+        <field name="arch" type="xml">
+            <form string="销售出库跟踪" version="7.0">
+                <group col="8" colspan="8">
+                    <field name="okgj_rpt_hwarehouse"/>
+                    <field name="okgj_rpt_hsaleshop"/>
+                    <field name="okgj_rpt_horderno"/>    
+                    <field name="okgj_rpt_hstockoutno"/>
+                    <field name="okgj_rpt_sendtime"/>
+                    <field name="okgj_rpt_city"/>
+                </group>
+                
+                <!--group col="8" colspan="8"-->
+                <field name="okgj_rpt_ispick"/>
+                <label for="okgj_rpt_ispick" string="未拣货"/>
+                
+                <field name="okgj_rpt_isverify"/>
+                <label for="okgj_rpt_isverify" string="未复核"/>
+
+                <field name="okgj_rpt_isincar"/>
+                <label for="okgj_rpt_isincar" string="未装车"/>
+
+                <field name="okgj_rpt_isback"/>
+                <label for="okgj_rpt_isback" string="未返程"/>
+
+                <field name="okgj_rpt_isuncancel"/>
+                <label for="okgj_rpt_isuncancel" string="未取消"/>
+
+                <!--/group-->
+                <group col="2">
+                    <newline/>
+                    <button name="do_import" string="查询" type="object" class="oe_highlight"/>
+                </group>
+            <!--h2>
+                <label for="line_ids" string="销售出库跟踪明细"/>
+            </h2-->
+                <field name="line_ids">
+                    <tree string="销售出库跟踪明细">
+                        <field name="okgj_row_number"/>	
+                        <field name="okgj_rpt_orderno"/>
+                        <field name="okgj_rpt_stockoutno"/>
+                        <field name="okgj_rpt_box"/>
+                        <field name="okgj_rpt_consignee"/>
+                        <field name="okgj_rpt_tel"/>
+                        <field name="okgj_rpt_warehouse"/>
+                        <field name="okgj_rpt_saleshop"/>
+                        <field name="okgj_rpt_okgjcity"/>
+                        <field name="okgj_rpt_regionname"/>
+                        <field name="okgj_rpt_address"/>
+                        <field name="okgj_rpt_payname"/>
+                        <field name="okgj_rpt_dateorder2"/>
+                        <field name="okgj_rpt_orderdate"/>
+                        <field name="okgj_rpt_sendtime"/>
+                        <field name="okgj_rpt_orderamount"/>
+                        <field name="okgj_rpt_invpayee"/>
+                        <field name="okgj_rpt_invcontent"/>
+                        <field name="okgj_rpt_invamount"/>
+                        <field name="okgj_rpt_pickuser"/>
+                        <field name="okgj_rpt_regdate"/>
+                        <field name="okgj_rpt_verifyuser"/>
+                        <field name="okgj_rpt_verifydate"/>
+                        <field name="okgj_rpt_orderstate"/>
+                        <field name="okgj_rpt_outstatus"/>
+                        <field name='okgj_rpt_shopcancel'/>
+                        <field name="okgj_rpt_logisticsno"/>
+                        <field name="okgj_rpt_incaruser"/>
+                        <field name="okgj_rpt_incardate"/>
+                        <field name="okgj_rpt_carno"/>
+                        <field name="okgj_rpt_cardriver"/>
+                        <field name="okgj_rpt_driverphone"/>
+                        <field name="okgj_rpt_container"/>
+                        <field name="okgj_rpt_backuser"/>
+                        <field name="okgj_rpt_backdate"/>
+                        <field name="okgj_rpt_backstate"/>
+                        <field name="undelivered_cause"/>
+                        <field name="okgj_rpt_moneyuser"/>
+                        <field name="okgj_rpt_moneydate"/>
+                        <field name="okgj_rpt_needpaymoney"/>
+                        <field name="okgj_rpt_moneyact"/>
+                        <field name="okgj_rpt_posact"/>
+                        <field name="okgj_rpt_moneydiff"/>
+                        <field name="okgj_rpt_notes"/>	
+                    </tree>
+                </field>
+            </form>
+        </field>
+    </record>	    
+	
+	<!--  销售出库跟踪  -->
+    <record id="view_okgj_report_returnamount_tree" model="ir.ui.view">
+        <field name="name">view.okgj.report.returnamount.tree</field>
+        <field name="model">okgj.report.returnamount</field>
+        <field name="arch" type="xml">
+        <tree string="销售出库跟踪">
+        <field name="okgj_rpt_hstockoutno"/>	
+        <field name="okgj_rpt_horderno"/>
+            </tree>
+        </field>
+	</record>
+
+    <record id="view_okgj_report_returnamount_search" model="ir.ui.view">
+        <field name="name">view.okgj.report.returnamount.search</field>
+        <field name="model">okgj.report.returnamount</field>
+        <field name="arch" type="xml">
+            <search string="销售出库跟踪">
+         <!--field name="name"/-->
+            </search>
+        </field>
+	</record>
+
+    <record model="ir.actions.act_window" id="action_okgj_report_returnamount2">
+        <field name="name">销售出库跟踪</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_okgj_report_returnamount_form"/>
+        <field name="search_view_id" ref="view_okgj_report_returnamount_search"/>
+        <!--field name="domain">[('sale_id','&lt;&gt;',False)]</field-->
+        <field name="res_model">okgj.report.returnamount</field>
+    </record>
+
+    	<!--menuitem name="销售报表管理" 
+		  id="okgj.menu_okgj_report_sales3"
+		  parent="base.menu_reporting"  
+		  sequence="8"/>
+	
+        <menuitem id="okgj.menu_okgj_report_orderreturnamount_data"
+		  parent="okgj.menu_okgj_report_sales3"  
+		  name="销售出库跟踪"
+		  sequence="80"
+		  action="action_okgj_report_returnamount2"/-->
+	
+	<menuitem name="销售出库跟踪" 
+		  id="okgj.menu_okgj_report_orderreturnamount"
+		  parent="okgj.menu_okgj_sales_root"  
+		  action="okgj.action_okgj_report_returnamount2" 
+		  sequence="20"/>
+    </data>
+</openerp>

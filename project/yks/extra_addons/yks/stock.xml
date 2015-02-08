@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+view_location_form
+
+<record model="ir.ui.view" id="yks_stock_location_form_view">
+    <field name="name">yks.stock.location.form</field>
+    <field name="model">stock.location</field>
+    <field name="inherit_id" ref="stock.view_location_form"/>
+    <field name="arch" type="xml">
+    	<field name="usage" position="after">
+    		<field name="code" groups="base.group_system"/>
+    	</field>
+
+    </field>
+</record>
+
+<!-- Pick out search -->
+<record id="yks_view_picking_out_search" model="ir.ui.view">
+    <field name="name">yks_view_picking_out_search.search</field>
+    <field name="model">stock.picking.out</field>
+    <field name="inherit_id" ref="stock.view_picking_out_search"/>
+    <field name="arch" type="xml">
+       <filter name="confirmed" position="after">
+           <filter name="no_printed" string="深圳待打印" domain="[('state','not in',['cancel', 'done']),('shop_id','=',1),'|',('printed','=',False),('express_printed','=',False)]"/>
+           <filter name="todo_sync_express" string="快递待同步" domain="[('state','!=','cancel'),('express_id','!=',False),('platform_so_state','in',['WAIT_SELLER_SEND_GOODS', 'ORDER_PAYED', 'ORDER_WAIT_SEND', 'ORDER_TRUNED_TO_DO', 'waitsellersend', '10'])]"/>
+           <filter name="todo" string="未完成" domain="[('state','not in',['cancel','done'])]"/>
+           <filter name="todone" string="已打印待出库" domain="[('printed','=',True),('state','=','assigned')]"/>
+       </filter>
+       <filter string="Status" position="after">
+           <filter string="快递方式"  context="{'group_by':'carrier_id'}"/>
+       </filter>
+       <field name="name" string="Picking List" position="after">
+          <field name="platform_so_id" string="交易编号" filter_domain="[('platform_so_id','ilike',self)]"/>
+       </field>
+    </field>
+</record>
+
+<!-- stock.picking.in Receive Button only for Warehouse man -->
+<record model="ir.ui.view" id="yks_view_picking_in_form">
+    <field name="name">yks.stock.picking.in.form</field>
+    <field name="model">stock.picking.in</field>
+    <field name="inherit_id" ref="stock.view_picking_in_form"/>
+    <field name="arch" type="xml">
+        <button name="action_process" states="assigned" string="Receive" type="object" class="oe_highlight" position='replace'>
+            <button name="action_process" states="assigned" string="Receive" type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+        </button>
+        <field name="partner_id" position="after">
+        	<field name="location_id" readonly="1"/>
+            <field name="location_dest_id" readonly="1"/>
+        </field>
+        
+    </field>
+</record>
+
+<!-- stock.picking.out Delivery Button only for Warehouse man -->
+<record model="ir.ui.view" id="yks_view_picking_out_form">
+    <field name="name">yks.stock.picking.out.form</field>
+    <field name="model">stock.picking.out</field>
+    <field name="inherit_id" ref="stock.view_picking_out_form"/>
+    <field name="arch" type="xml">
+    	<button name="draft_validate" states="draft" string="Confirm &amp; Deliver" type="object" class="oe_highlight" position='replace'>
+    		<button name="draft_validate" states="draft" string="Confirm &amp; Deliver" type="object" class="oe_highlight" groups="base.group_system"/>
+    	</button>
+        <button name="action_process" states="assigned" string="Deliver" type="object" class="oe_highlight" position='replace'>
+            <button name="action_process" states="assigned" string="Deliver" type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+            <button name="relieve_assign" states="assigned" string="取消检查可用" type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+            <button name='cancel_print' type='object' string='取消打印' attrs="{'invisible':[('printed','=',False)]}" class="oe_highlight" groups="stock.group_stock_manager"/>
+        </button>
+        <field name="origin" position="after">
+            <field name="shop_id"/>
+        </field>
+        <field name="partner_id" position="after">
+            <field name="location_id" readonly="1"/>
+            <field name="location_dest_id" readonly="1"/>
+        </field>
+        
+        <xpath expr="//form/sheet/h1" position="before">
+            <group>
+                <group>
+	                <field name='carrier_id' string="快递方式"/>
+	                <field name='scan_input' attrs="{'readonly':[('unneed_express','=',True)]}" on_change="onchange_scan_input(scan_input,carrier_id,express_ids)" groups="stock.group_stock_manager" class="oe_form_field_char_not_sapce"/>
+                </group>
+                <group >
+                    <field name='unneed_express' attrs="{'readonly':[('state','=','done')]}"/> 
+                    <field name='need_express_count' attrs="{'readonly':[('state','=','done')]}"/>
+                </group>
+            </group>
+            <field name='express_ids' widget="many2many_tags"/> 
+        </xpath>
+        <field name ="state" position="before">
+          <button name="%(yks_stock_out_order)d" string="打印出库凭证" attrs="{'invisible':['|',('printed','=',True),('state','not in',['assigned','done'])]}" type="action" class="oe_highlight" groups="stock.group_stock_manager"/> 
+          <button name="split_picking_out" groups="stock.group_stock_manager" string="拆分出库单" type="object" attrs="{'invisible':['|',('state','not in',['draft','confirmed','assigned']),('printed','=',True)]}"/>
+        </field>
+        
+    </field>
+</record>
+
+<!-- TODO inner Picking only warehouse manager can be action_process -->
+<record model="ir.ui.view" id="yks_view_picking_form">
+    <field name="name">yks.stock.picking.form.</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+        <button name="draft_validate" states="draft" string="Confirm &amp; Transfer" type="object" class="oe_highlight" position='replace'>
+            <button name="draft_validate" states="draft" string="Confirm &amp; Transfer" type="object" class="oe_highlight" position='replace' groups="stock.group_stock_manager"/>
+        </button>
+        <button name="action_process" states="assigned" string="Confirm &amp; Transfer" groups="stock.group_stock_user" type="object" class="oe_highlight" position='replace'>
+            <button name="action_process" states="assigned" string="Confirm &amp; Transfer"  type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+            <button name="copy_new" string="复制" type="object" class="oe_highlight" groups="stock.group_stock_manager"/>
+        </button>
+    </field>
+</record>
+
+<!-- stock.move tree for stock.picking.out.form -->
+<record model="ir.ui.view" id="yks_view_move_picking_tree">
+    <field name="name">yks.inherit_view_move_tree</field>
+    <field name="model">stock.move</field>
+    <field name="inherit_id" ref="stock.view_move_picking_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//tree" position="inside">
+            <button name='show_product_pictrue' string='Show The Product Picture' type='object' icon='STOCK_SELECT_COLOR'/>
+        </xpath>
+        <xpath expr="//tree/field[@name='location_id']" position="attributes">
+            <attribute name="invisible">0</attribute>
+        </xpath>
+    </field>
+</record>
+
+<!-- form product big picture -->
+<record model="ir.ui.view" id="yks_view_product_big_picture">
+    <field name="name">yks.product.big.picture</field>
+    <field name="model">product.product</field>
+    <field name="arch" type="xml">
+        <form  string='Picture'>
+            <field name='name'  readonly='1'/>
+            <field name='image' widget='image' readonly='1'/>
+        </form>
+    </field>
+</record>
+
+<!--  德国发货菜单  -->
+ <record model="ir.actions.act_window" id="action_yks_germany_stock_picking_out">
+      <field name="name">出库单</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">stock.picking.out</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="stock.view_picking_out_tree"/>
+      <field name="domain">[('type','=','out')]</field>
+</record>
+<menuitem id="menu_yks_germany_stock_picking_out" name="德国发货"   groups='yks.yks_group_external_warehouse' 
+                parent="yks_outer_user_menu_warehouse"  action='action_yks_germany_stock_picking_out'/>
+
+<!-- intner picking tree -->
+<record model="ir.ui.view" id="yks_vpicktree_tree_view">
+    <field name="name">yks.stock.picking.tree</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.vpicktree"/>
+    <field name="arch" type="xml">
+        <field name="name" position="after">
+                <field name="create_uid"/>
+                <field name="create_date"/>
+                <field name="date_done"/>
+        </field>
+        <xpath expr="//field[@name='date']" position="attributes">
+           <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='min_date']" position="attributes">
+           <attribute name="invisible">1</attribute>
+        </xpath>
+    </field>
+</record>
+
+<!-- Picking in  tree view -->
+<record model="ir.ui.view" id="yks_stock_picking_in_tree_view">
+    <field name="name">yks.stock.picking.in.tree</field>
+     <field name="model">stock.picking.in</field>
+    <field name="inherit_id" ref="stock.view_picking_in_tree"/>
+    <field name="arch" type="xml">
+        <tree position="attributes">
+        	<attribute name="create">false</attribute>
+        </tree>
+	    <field name="name" position="after">
+	            <field name="create_uid"/>
+	            <field name="create_date"/>
+	            <field name="date_done"/>
+	    </field>
+	    <xpath expr="//field[@name='date']" position="attributes">
+	       <attribute name="invisible">1</attribute>
+	    </xpath>
+        <xpath expr="//field[@name='min_date']" position="attributes">
+           <attribute name="invisible">1</attribute>
+        </xpath>
+    </field>
+</record>
+
+<!-- Picking out  tree view -->
+<record model="ir.ui.view" id="yks_stock_picking_out_tree_view">
+	<field name="name">yks.stock.picking.out.tree</field>
+	<field name="model">stock.picking.out</field>
+	<field name="inherit_id" ref="stock.view_picking_out_tree"/>
+	<field name="arch" type="xml">
+        <tree position="attributes">
+        	<attribute name="create">false</attribute>
+        </tree>
+	    <field name="name" position="after">
+			<field name="sale_uid"/>
+            <field name="carrier_id"/>
+            <field name="printed"/>
+            <field name="express_printed"/>
+            <field name="express_id"/>
+            <field name="receive_user"/>
+            <field name="shop_id"/>
+			<field name="create_date" invisible="0"/>
+			<field name="date_done" invisible="0"/>
+	    </field>
+        <xpath expr="//field[@name='date']" position="attributes">
+           <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='min_date']" position="attributes">
+           <attribute name="invisible">1</attribute>
+        </xpath>
+        
+	</field>
+</record>
+
+<!-- Picking out Form View -->
+<record model="ir.ui.view" id="yks_stock_picking_out_creater_form_view">
+	<field name="name">yks.stock.picking.out.creater.form</field>
+	<field name="model">stock.picking.out</field>
+	<field name="inherit_id" ref="stock.view_picking_form"/>
+	<field name="arch" type="xml">
+        <form position="attributes">
+        	<attribute name="create">false</attribute>
+        </form>
+		<field name="partner_id" position="after">
+		    <field name="sale_uid"/>
+		</field>
+		<xpath expr="//header" positon='insider'>
+		    <button name="express_post_to_platform" attrs="{'invisible':['|',('express_id','=',False),('platform_so_state','not in',['WAIT_SELLER_SEND_GOODS','ORDER_PAYED','ORDER_WAIT_SEND','ORDER_TRUNED_TO_DO','waitsellersend','10'])]}"  
+		            string="快递上传平台" type="object" class="oe_highlight"/>
+            <button name="express_post_to_platform" string="测试-快递上传平台" type="object" groups="base.group_system"/>
+		</xpath>
+        <notebook position="before">
+            <group>
+                <group string="发货信息">
+                    <field name="deliver_name" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="deliver_city_id" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="deliver_company_name" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="deliver_tel" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="deliver_address" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="platform_so_id"/>
+                    <field name="sale_id" readonly="1"/>
+                    <field name="platform_so_state"/>
+                    <field name="api_id"/>
+                </group>
+                <group string="收货信息">
+                    <field name="receive_user" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="receive_phone" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="receiver_zip" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="receiver_state_id" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="receiver_city_id" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="receiver_district" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="receive_address" attrs="{'readonly':['|',('printed','=',True),('state','=','done')]}"/>
+                    <field name="express_id" readonly="1"/>
+                    <field name="printed" attrs="{'readonly':[('state','=','done')]}" groups="stock.group_stock_manager"/>
+                    <field name="express_printed" attrs="{'readonly':[('state','=','done')]}" groups="stock.group_stock_manager"/>
+                </group>
+            </group>
+        </notebook>
+   </field>
+</record>
+
+<!-- Picking In Form View -->
+<record model="ir.ui.view" id="yks_stock_picking_in_creater_form_view">
+     <field name="name">yks.stock.picking.in.creater.form</field>
+     <field name="model">stock.picking.in</field>
+     <field name="inherit_id" ref="stock.view_picking_form"/>
+     <field name="arch" type="xml">
+        <form position="attributes">
+        	<attribute name="create">false</attribute>
+        </form>
+        <field name="partner_id" position="after">
+            <field name="create_uid"/>
+        </field>
+     </field>
+</record>
+
+<record model="ir.ui.view" id="yks_inherit_delivery_view_picking_withcarrier_out_form">
+     <field name="name">yks.delivery_stock.picking.out.creater.form</field>
+     <field name="model">stock.picking.out</field>
+     <field name="inherit_id" ref="delivery.view_picking_withcarrier_out_form"/>
+     <field name="arch" type="xml">
+	     <field name="carrier_id" position="replace">
+	     </field>
+         <field name="carrier_tracking_ref" position="attributes">
+             <attribute name="invisible">1</attribute>
+         </field>
+         <field name="number_of_packages" position="attributes">
+             <attribute name="invisible">1</attribute>
+         </field>
+
+     </field>
+</record>
+
+<!-- local warehouse, filter picking by  SO.shop_id  -->
+ <record model="ir.actions.act_window" id="action_yks_local_stock_picking_out">
+      <field name="name">深圳1仓发货</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">stock.picking.out</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="stock.view_picking_out_tree"/>
+       <field name="search_view_id" ref="stock.view_picking_out_search"/>
+      <field name="domain">[('type','=','out'),('sale_id.shop_id.name','ilike','深圳自营1仓')]</field>
+</record>
+<menuitem id="menu_yks_local_stock_picking_out" name="深圳1仓发货"   parent="stock.menu_stock_warehouse_mgmt"  action='action_yks_local_stock_picking_out'/>
+
+<!-- delivery_carrier from  view-->
+<record model="ir.ui.view" id="yks_delivery_carrier_form_view">
+    <field name="name">delivery_carrier.form</field>
+    <field name="model">delivery.carrier</field>
+    <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+    <field name="arch" type="xml">
+        <field name="active" position="after">
+            <field name="sequence"/>
+        </field>
+    </field>
+</record>
+
+<!-- Stock move reception -->
+<record model="ir.ui.view" id="yks_stock_move_tree_view_for_purchase_price">
+    <field name="name">yks.purchase.price.stock.move.tree</field>
+    <field name="model">stock.move</field>
+    <field name="inherit_id" ref="stock.view_move_tree_reception_picking"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='product_qty']" position="after">
+            <field name="purchase_price" invisible="not context.get('product_receive',)" groups="account.group_account_invoice"/>
+        </xpath>
+        <xpath expr="//field[@name='product_id']" position="before">
+            <field name="platform_so_id" invisible="context.get('picking_type','') != 'out'"/>
+        </xpath>
+    </field>
+</record>
+
+
+<!--Quickly interl picking-->
+<record id="picking_quick_form" model="ir.ui.view">
+    <field name="name">stock.picking.form</field>
+    <field name="model">stock.picking</field>
+    <field name="arch" type="xml">
+        <form string="快速录入" version="7.0">
+        <header>
+            <button name="draft_force_assign" states="draft" string="Confirm" type="object" class="oe_highlight" groups="base.group_user"/>
+            <button name="button_cancel" states="assigned,confirmed,draft" string="_Cancel" groups="base.group_user"/>
+            <field name="state" widget="statusbar" statusbar_visible="draft,assigned,done" statusbar_colors='{"shipping_except":"red","invoice_except":"red","waiting_date":"blue"}'/>
+        </header>
+        <sheet>
+            <h1>
+                <field name="name" class="oe_inline" attrs="{'invisible': [('name','=','/')]}" readonly="1"/>
+            </h1>
+            <group>
+                <group>
+                    <field name="partner_id" on_change="onchange_partner_in(partner_id)" groups="base.group_system"/>
+                    <field name="stock_journal_id" widget="selection" groups="account.group_account_user"/>
+                    <field name="invoice_state" string="Invoice Control" groups="account.group_account_invoice" invisible="1"/>
+                    <field name="location_id" required='1'  string="源库位"/>
+                    <field name="location_dest_id" required='1'/>
+                </group>
+                <group>
+                    <field name="date"/>
+                    <field name="min_date" required='1'/>
+                    <field name="origin" placeholder="e.g. PO0032" class="oe_inline"/>
+                </group>
+            </group>
+            <notebook>
+                <page string="Products">
+                    <field name="move_lines">
+                        <tree editable="bottom">
+                            <field name="product_id" on_change="quick_product_change(product_id, parent.location_id, parent.location_dest_id, parent.min_date, context)"/>
+                            <field name="product_qty"/>
+                            <field name="product_uom" groups="base.group_system"/>
+                            <field name="location_id"  groups="base.group_system" string="源库位" widget="selection" domain="[('name','ilike','库存'),('usage','=','internal')]"/>
+                            <field name="location_dest_id"  groups="base.group_system"  widget="selection" domain="[('name','ilike','库存'),('usage','=','internal')]"/>
+                            <field name="state" readonly="1"/>
+                            <field name="date_expected" groups="base.group_system"/>
+                            <field name="product_uos" groups="product.group_uos" invisible="1"/>
+                            <field name="scrapped" invisible="1"/>
+                            <field name="prodlot_id" groups="stock.group_production_lot" invisible="1"/>
+                            <field groups="stock.group_tracking_lot" name="tracking_id" invisible="1"/>
+                            <field name="name" invisible="1"/>                                    
+                        </tree>
+                    </field>
+                    <field name="note" placeholder="Add an internal note..." class="oe_inline"/>
+                </page>
+                <page string="Additional Info">
+                    <group>
+                        <group>
+                            <field name="move_type"/>
+                            <field name="type" invisible="1"/>
+                            <field name="auto_picking" groups="base.group_user"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                            <field name="date_done" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </sheet>
+        </form>
+    </field>
+</record>
+<record id="yks_view_picking_internal_search" model="ir.ui.view">
+    <field name="name">yks.stock.picking.internal.search.inherit</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+    <field name="arch" type="xml">
+        <filter  name="done" position="after">
+        	<filter name="undone" string="未完成" domain="[('state','not in',['cancel','done'])]"/>
+        </filter>
+        <filter string="Status" position="after">
+        	<filter string="源库位"  domain="[]" context="{'group_by':'location_id'}"/>
+        	<filter string="目标库位"  domain="[]" context="{'group_by':'location_dest_id'}"/>
+        </filter>
+    </field>
+</record>
+<record id="action_picking_quick" model="ir.actions.act_window">
+    <field name="name">内部调拨输入</field>
+    <field name="res_model">stock.picking</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('type','=','internal')]</field>
+    <field name="context">{'search_default_undone':1}</field>
+    <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+</record>
+<record id="action_picking_quick_form" model="ir.actions.act_window.view">
+	<field name="sequence" eval="51"/>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="picking_quick_form"/>
+    <field name="act_window_id" ref="action_picking_quick"/>
+</record>
+<menuitem action="action_picking_quick" id="menu_action_picking_quick" parent="stock.menu_stock_warehouse_mgmt" sequence="2" groups="stock.group_stock_user"/>
+
+<!-- stock.inventory -->
+<!-- Stock move reception -->
+<record model="ir.ui.view" id="yks_stock_inventory_tree_view">
+    <field name="name">yks.stock.inventory.tree</field>
+    <field name="model">stock.inventory</field>
+    <field name="inherit_id" ref="stock.view_inventory_tree"/>
+    <field name="arch" type="xml">
+        <xpath expr="//field[@name='state']" position="after">
+            <field name="create_uid"/>
+            <field name="done_uid"/>
+        </xpath>
+    </field>
+</record>
+<record model="ir.ui.view" id="yks_stock_inventory_form_view">
+    <field name="name">yks.stock.inventory.form</field>
+    <field name="model">stock.inventory</field>
+    <field name="inherit_id" ref="stock.view_inventory_form"/>
+    <field name="arch" type="xml">
+        <button name="action_done" states="confirm" string="Validate Inventory" type="object" class="oe_highlight" groups="stock.group_stock_manager" position="replace">
+            <button name="action_done" states="confirm" string="Validate Inventory" type="object" class="oe_highlight" groups="account.group_account_manager"/>
+        </button>
+        <button name="action_cancel_inventory" states="draft,confirm,done" string="Cancel Inventory" type="object" position="replace">
+            <button name="action_cancel_inventory" states="draft,confirm,done" string="Cancel Inventory" type="object" groups="account.group_account_manager"/>
+        </button>
+    </field>
+</record>
+
+<!-- SO stock.picking.out -->
+<record model="ir.actions.act_window" id="action_sale_display_stock">
+     <field name="name">我的出库单</field>
+     <field name="type">ir.actions.act_window</field>
+     <field name="res_model">stock.picking.out</field>
+     <field name="view_type">form</field>
+     <field name="view_mode">tree,form</field>
+     <field name="view_id" ref="yks_stock_picking_out_tree_view"/>
+     <field name="search_view_id" ref="yks_view_picking_out_search"/>
+     <field name="context">{'search_default_todo':1}</field>
+     <field name="domain">[('type','=','out'),('sale_uid.id','=',uid),]</field>
+</record>
+<menuitem id="menu_yks_sale_stock_picking_out" name="我的销售出库"   parent="base.menu_sales"  action='action_sale_display_stock'/> 
+
+<!-- cancel buttton Print Delivery Order -->
+<record model="ir.ui.view" id="yks_delivery_view_delivery_order_inherit_stock">
+    <field name="name">yks.stock.picking.out.form</field>
+    <field name="model">stock.picking.out</field>
+    <field name="inherit_id" ref="delivery.view_delivery_order_inherit_stock"/>
+    <field name="arch" type="xml">
+        <button string="Print Delivery Order" states="confirmed,assigned" type="action" position="replace"/>
+        <button string="Print Delivery Order" states="done" type="action" class="oe_highlight" position="replace"/>
+    </field>
+</record>
+
+
+<!-- Location Open Stock.Inventory  
+ *view stock.inventory.inventory_line_id add context="{'default_location_id': context.get('location')}"   
+ *action_view_stock_fill_inventory add  'default_location_id': context.get('location') } -->
+<act_window 
+    id="yks_location_open_stock_inventory_action"
+    name="库位盘点"
+    res_model="stock.inventory"
+    src_model="stock.location"
+    context="{'location': active_id}"
+    view_mode="form"
+    view_type="form"/>
+    
+</data>
+</openerp>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="yks_direct_sell_template_tree_view">
+    <field name="name">yks.direct.sell.template.tree</field>
+    <field name="model">direct.sell.template</field>
+    <field name="arch" type="xml">
+        <tree string="直邮模板">
+<field name="so_id"/>
+<field name="user_id"/>
+<field name="send_mobile"/>
+<field name="name"/>
+<field name="create_date"/>
+<field name="state"/>
+<field name='bpost' /> 
+<field name='dest_department'/>
+<field name='dest_contact'/> 
+<field name='dest_street'/> 
+<field name='dest_place'/> 
+<field name='dest_house_nr'/> 
+<field name='dest_box_nr'/> 
+<field name='dest_zip_code'/> 
+<field name='dest_city'/> 
+<field name='dest_state'/> 
+<field name='dest_country'/> 
+<field name='dest_phone'/> 
+<field name='dest_mobile'/> 
+<field name='weight'/> 
+<field name='description'/> 
+<field name='category'/> 
+<field name='non_delivery'/> 
+<field name='value'/> 
+<field name='value_currency'/> 
+<field name='export_flage'/> 
+<field name='customer_reference'/> 
+<field name='number_of_items'/> 
+<field name='value_of_items'/> 
+<field name='currence'/> 
+<field name='item_description'/> 
+<field name='netto_weight'/> 
+<field name='hs_tarrif_code'/> 
+<field name='origin_of_goods'/> 
+<field name='cn_name' /> 
+<field name='cn_street' /> 
+<field name='cn_zip' /> 
+<field name='cn_phone' /> 
+<field name='cn_date' /> 
+<field name='cn_product' /> 
+<field name='need_receipt' /> 
+<field name='need_newspaper' /> 
+<field name='need_bage' /> 
+        </tree>
+    </field>
+</record>
+
+<record model="ir.ui.view" id="yks_direct_sell_template_form_view">
+    <field name="name">yks.direct.sell.template.form</field>
+    <field name="model">direct.sell.template</field>
+    <field name="arch" type="xml">
+        <form string="直邮模板" version="7.0">
+        <header>
+            <button name="action_confirm" states="draft" string="确认"  type='object' class="oe_highlight"/>
+            <button name="action_approve" states="confirm" string="已发送"  type='object'  class="oe_highlight" groups='yks.yks_group_direct_sell_template'/>
+            <button name="action_done" states="approve" string="完成"  type='object'  class="oe_highlight" groups='yks.yks_group_direct_sell_template'/>
+            <field name="state" readonly='1'  widget="statusbar"/>
+        </header>
+        
+        <goup col='6' colspan='4'>
+            <div style="color:#0088FF">
+                <h2>
+                     <label for="bpost"/>
+                     <field name="bpost" />
+                </h2>
+            </div>
+        </goup>
+        <group>
+            <group>
+                <field name="so_id" readonly='1'/>
+                
+                <field name="name"/>
+                <field name='dest_department'/>
+                <field name='dest_contact'/> 
+                <field name='dest_street'/> 
+                <field name='dest_place'/> 
+                <field name='dest_house_nr'/> 
+                <field name='dest_box_nr'/> 
+                <field name='dest_zip_code'/> 
+                <field name='dest_city'/> 
+                <field name='dest_state'/> 
+                <field name='dest_country'/> 
+                <field name='dest_phone'/> 
+                <field name='dest_mobile'/> 
+                <field name='origin_of_goods'/> 
+            </group>
+            <group>
+                <field name="user_id"/>
+                <field name='cn_name' /> 
+                <field name='cn_street' /> 
+                <field name='cn_city' /> 
+                <field name='cn_state' /> 
+                <field name='cn_zip' /> 
+                <field name='cn_phone' /> 
+                <field name='cn_date' /> 
+                <field name='cn_product' /> 
+                <field name='need_receipt' /> 
+                <field name='need_newspaper' /> 
+                <field name='need_bage' /> 
+                <field name='note' /> 
+            </group>
+            
+            <group>
+                <field name='weight'/> 
+                <field name='description'/> 
+                <field name='category'/> 
+                <field name='non_delivery'/> 
+                <field name='value'/> 
+                <field name='value_currency'/> 
+                <field name='export_flage'/> 
+                <field name='customer_reference'/> 
+                <field name='number_of_items'/> 
+                <field name='value_of_items'/> 
+                <field name='currence'/> 
+                <field name='item_description'/> 
+                <field name='netto_weight'/> 
+                <field name='hs_tarrif_code'/> 
+            </group>
+
+        </group>
+        </form>
+    </field>
+</record>
+
+ <record id="yks_direct_sell_template_search_view" model="ir.ui.view">
+     <field name="name">yks.direct.sell.template.search</field>
+     <field name="model">direct.sell.template</field>
+     <field name="arch" type="xml">
+         <search string="Search">
+             <filter string="我的直邮" name="my_dst" domain="[('user_id','=',uid)]"/>
+             <filter string="草稿" name="draft" domain="[('state','=','draft')]" />
+             <filter string="确认" name="confirm" domain="[('state','=','confirm')]" />
+             <filter string="发送" name="approve" domain="[('state','=','approve')]" />
+             <filter string="完成" name="done" domain="[('state','=','done')]" />
+             <filter string="未完成" name="undone" domain="[('state','!=','done')]" />
+        </search>
+     </field>
+</record>
+
+ <record model="ir.actions.act_window" id="action_direct_sell_template">
+       <field name="name">直邮模板</field>
+       <field name="type">ir.actions.act_window</field>
+       <field name="res_model">direct.sell.template</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="yks_direct_sell_template_tree_view"/>
+      <field name="context">{'search_default_undone':1}</field>
+ </record>
+
+<menuitem id="menu_yks_direct_sell_template" name="直邮模板"  parent="yks_outer_user_menu_sale" action="action_direct_sell_template"/>
+<!--  menuitem id="menu_yks_direct_sell_template" name="直邮模板"  parent="base.menu_sales" action="action_direct_sell_template" sequence="500"/ -->
+
+
+</data>
+</openerp>

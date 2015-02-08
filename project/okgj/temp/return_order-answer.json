@@ -1,0 +1,62 @@
+{
+    "m": {
+        "order_action": [
+            {
+                "action_note": "换成两袋禾珠东北米10KG（商品编号：6924618300328，商品总金额：110元），顾客需补差价38元，3月13日晚20:00后方便换货。", //客服备注
+                "log_time": 1363045462, //时间格式？？
+                "order_id": 82515, //销售订单ID
+                "return_type": 2, //退货类型？有哪几种？各代表什么？
+                "status": 1 //有哪几种，各代表什么
+            }
+        ], 
+        "order_id": 82515, ／／销售订单ID? 退货单ID?
+        "order_info": {
+            "add_time": 1362957928, //退换时间？
+            "address": "24区宝民花园三坊四巷九号701 (518000)", //收货地址
+            "back_id": 35, //退货ID
+            "best_time": "",  //最佳时间？
+            "confirm_time": 1363045462, //确认时间
+            "consignee": "何先生", //收件人
+            "district": 708, 
+            "how_oos": "等待所有商品备齐后再发", 
+            "mobile": "", 
+            "order_id": 82515, 
+            "order_sn": "2013031076085", 
+            "refund_amount": "0.00", //退款金额
+            "refund_type": 0, //退款类型，？？有哪几种
+            "region_id": 708, 
+            "region_name": "宝安区", 
+            "return_info": "米有虫，换其他米", //退货原因
+            "return_time": 0, //退货次数
+            "return_type": 2, 
+            "shipping_fee": "0.00", //物流费
+            "status": 1, //什么状态？什么意思
+            "tel": "", 
+            "total_fee": "0.00", 
+            "user_id": 10034, 
+            "zipcode": "518000"
+        }, 
+        "product_list": [
+            {
+                "back_id": 35, 
+                "goods_name": "一品国香清风稻花香米10kg（新老包装更换中，商品随机发放）", 
+                "goods_sn": "6924618301196", 
+                "send_number": 1
+            }
+        ], 
+        "user_info": {
+            "real_name": "沈羽霄", 
+            "user_id": 10034, 
+            "user_name": "13538284373"
+        }
+    }, 
+    "s": 1
+}
+
+
+
+bonus 订单使用优惠券金额（已完成已付款才有）
+coupon_pay 订单使用的优惠券金额 使用了就有
+
+refund_type:是否需要退款
+1 就是需要退款

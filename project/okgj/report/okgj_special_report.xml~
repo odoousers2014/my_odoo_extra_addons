@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report auto="False" 
+		id="report_okgj_purchase_return" 
+		model="okgj.purchase.return" 
+		name="okgj.purchase.return"
+                rml="okgj/report/stock_return.rml" 
+		string="采购退货"
+                usage="default"/>
+
+
+    </data>
+</openerp>

@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+	<!--供应商分类-->
+	<record id="base.menu_partner_category_form" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_finance_user'),ref('group_okgj_partner_user')])]"/>
+        </record>
+
+	<!--供应商-->
+	<record id="menu_procurement_management_supplier_name" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user'),ref('group_okgj_partner_user')])]"/>
+
+        </record>
+	
+	<!--商品分类-->
+	<record id="menu_product_category_action_form2" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_market_user')])]"/>
+
+        </record>
+
+	<!--导入商品-->
+	<record id="menu_okgj_product_import2" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager')])]"/>
+        </record>
+
+	<!--品牌-->
+	<record id="menu_product_brand" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),
+ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user'),ref('group_okgj_market_user')])]"/>
+        </record>
+	
+	<!--商品-->
+	<record id="product.menu_products" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user'),ref('group_okgj_market_user')])]"/>
+        </record>
+	
+	<!--计量单位-->
+	<record id="product.menu_product_uom_form_action" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user'),ref('group_okgj_market_user')])]"/>
+        </record>
+
+	<!--采购订单草稿-->
+	<record id="purchase.menu_purchase_rfq" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+		    
+        </record>
+	
+	<!--采购订单-->
+	<record id="purchase.menu_purchase_form_action" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--采购收货单-->
+	<record id="purchase.menu_okgj_action_picking_tree4" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--采购退货申请单-->
+	<record id="okgj.menu_action_okgj_purchase_return" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--采购退货出库单-->
+	<record id="menu_action_okgj_picking_purchase_return" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify'),ref('group_okgj_finance_user')])]"/>
+        </record>
+
+	
+	<!--销售订单-->
+	<record id="okgj.menu_sale_order" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user'),ref('group_okgj_market_user')])]"/>
+        </record>
+	
+	<!--销售出库单-->
+	<record id="menu_okgj_action_picking_tree" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user'),ref('group_okgj_market_user')])]"/>
+        </record>
+	
+	<!--出库单打印-->
+	<record id="menu_action_okgj_picking_tree_out_print" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking')])]"/>
+        </record>
+	
+	<!--出库单重打印-->
+	<record id="menu_action_okgj_picking_tree_out_reprint" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager')])]"/>
+        </record>
+	
+	<!--拣货单查询-->
+	<record id="menu_action_okgj_multi_order_reprint" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify')])]"/>
+        </record>
+
+	<!--拣货登记-->
+	<record id="menu_okgj_picking_out_reg" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_assist')])]"/>
+        </record>
+
+	<!--group_okgj_logistics_verify-->
+	<record id="okgj.menu_okgj_stock_out_verify" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_verify')])]"/>
+        </record>
+	
+	<!--送货管家-->
+	<record id="okgj.menu_okgj_logistics_car" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_manager'),ref('group_okgj_service_user')])]"/>
+        </record>
+
+	<!--装车登记-->
+	<record id="okgj.menu_okgj_logistics_more" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_verify'),ref('group_okgj_finance_user'),ref('group_okgj_logistics_dispatcher')])]"/>
+        </record>
+	
+	<!--返程登记-->
+	<record id="menu_okgj_logistics_back" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_verify'),ref('group_okgj_finance_user'),ref('group_okgj_logistics_dispatcher')])]"/>
+        </record>
+	
+	<!--回款回单-->
+	<record id="menu_okgj_logistics_back_money" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_finance_user')])]"/>
+        </record>
+
+	<!--销售退换货-->
+	<record id="okgj.menu_okgj_sale_return" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user')])]"/>
+        </record>
+
+	<!--销售退换货出库-->
+	<record id="menu_action_okgj_saleout_return" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user')])]"/>
+        </record>
+
+	<!--销售退换货入库-->
+	<record id="menu_action_okgj_salein_return" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user')])]"/>
+        </record>
+	
+	<!--物流中心-->
+	<record id="stock.menu_action_warehouse_form" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--仓库-->
+	<record id="stock.menu_action_location_form" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--批量生成货位-->
+	<record id="okgj_rack_arrange" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist')])]"/>
+        </record>
+	
+	<!--货位-->
+	<record id="okgj.menu_action_okgj_product_rack" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_dispatcher')])]"/>
+        </record>
+	
+	<!--商品货位-->
+	<record id="menu_action_okgj_product_rack_usage" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify')])]"/>
+        </record>
+
+	<!--其它入库申请单-->
+	<record id="menu_action_okgj_picking_internal_in" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager')])]"/>
+        </record>
+
+	<!--其它出库申请单-->
+	<record id="menu_action_okgj_picking_internal_out" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager')])]"/>
+        </record>
+
+	<!--其它入库-->
+	<record id="menu_action_okgj_stock_picking_internal_other_in" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager')])]"/>
+        </record>
+	
+	<!--其它出库-->
+	<record id="menu_action_okgj_stock_picking_internal_other_out" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_verify'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager')])]"/>
+        </record>
+	
+	<!--内部调拨单-->
+	<record id="menu_action_okgj_picking_internal_between" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--库存调整单-->
+	<record id="stock.menu_action_inventory_form_okgj" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+        </record>
+	
+	<!--导入库存-->
+	<record id="product.menu_okgj_stock_import2" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_finance_user')])]"/>
+        </record>
+
+	<!--保质期查询-->
+	<record id="okgj.menu_okgj_product_expiry" model="ir.ui.menu">
+	    <field name="groups_id"  eval="[(6, 0, [ref('group_okgj_purchase_user'),ref('group_okgj_purchase_manager'),ref('group_okgj_purchase_dep_manager'),ref('group_okgj_logisitcs_manager'),ref('group_okgj_logistics_keeper'),ref('group_okgj_logistics_assist'),ref('group_okgj_logistics_picking'),ref('group_okgj_logistics_verify'),ref('group_okgj_logistics_dispatcher'),ref('group_okgj_finance_user'),ref('group_okgj_service_user'),ref('group_okgj_service_manager'),ref('group_okgj_partner_user'),ref('group_okgj_market_user')])]"/>
+        </record>
+
+        <!--record id="base.menu_partner_category_form" model="ir.ui.menu">
+	    <field eval="[(5, 0, 0)]" name="groups_id"/>
+        </record-->
+
+    </data>
+</openerp>
+

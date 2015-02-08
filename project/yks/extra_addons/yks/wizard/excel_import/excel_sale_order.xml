@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<menuitem id='excel_sale_order_parent' name='销售订单导入' parent='base.menu_sales' groups="base.group_sale_salesman"  />
+<act_window
+	id="excel_beibei_sale_order_action"
+	multi="False"
+	key2="client_action_relate"
+	name="贝贝网"
+	res_model="excel.base"
+	view_mode="form"
+	target="new"
+	context="{'default_model':'beibeiwang','default_replace':'create'}"
+	view_type="form"/>
+<menuitem 
+	id="excel_beibei_sale_order_menu"
+	name="贝贝网"
+	parent="excel_sale_order_parent" 
+	sequence="3"
+	action="excel_beibei_sale_order_action"
+	groups="base.group_sale_salesman"/>
+<act_window
+	id="excel_yangmatou_sale_order_action"
+	multi="False"
+	key2="client_action_relate"
+	name="洋码头"
+	res_model="excel.base"
+	view_mode="form"
+	target="new"
+	context="{'default_model':'yangmatou','default_replace':'create'}"
+	view_type="form"/>
+<menuitem 
+	id="excel_yangmatou_sale_order_menu"
+	name="洋码头"
+	parent="excel_sale_order_parent" 
+	sequence="3"
+	action="excel_yangmatou_sale_order_action"
+	groups="base.group_sale_salesman"/>
+</data>
+</openerp>

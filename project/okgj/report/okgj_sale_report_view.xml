@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+	<!--  销售环比报表  -->
+        <record id="view_okgj_report_sales_comp_wizard_form" model="ir.ui.view">
+            <field name="name">view.okgj.report.sales.comp.wizard.form</field>
+            <field name="model">okgj.report.sales.comp.wizard</field>
+	    <field name="arch" type="xml">    
+                <form string="销售环比报表过滤" version="7.0">
+		    <group col="4" colspan="4">	
+		    	<field name="warehouse_id"/>
+		    	<field name="category_id"/>
+                    	<field name="supplier_id"/>
+		    	<field name="brand_id"/> 
+		    	<field name="product_id"/>
+		    	<newline/>
+		    	<field name="first_start_date"/>
+		    	<field name="second_start_date"/>
+		    	<field name="first_end_date"/>
+		    	<field name="second_end_date"/>
+	    	    </group>
+		    <footer>
+		    	<button string="取消" special="cancel" class="oe_highlight oe_right"/>    
+  		        <button name="action_open_window" string="查询" type="object" class="oe_highlight oe_right"/>
+	    	    </footer>
+		</form>
+	    </field>
+	</record>
+	
+        <record model="ir.actions.act_window" id="action_okgj_report_sales_comp_wizard">
+            <field name="name">销售环比报表过滤</field>
+            <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="target">new</field>
+            <field name="view_mode">form,tree</field>
+            <field name="res_model">okgj.report.sales.comp.wizard</field>
+        </record>
+
+	<menuitem name="销售报表管理" 
+		  id="okgj.menu_okgj_report_sales"
+		  parent="base.menu_reporting"  
+		  sequence="8"/>
+	
+        <menuitem id="okgj.menu_okgj_report_sales_comp_data"
+		  parent="okgj.menu_okgj_report_sales"  
+		  name="销售环比报表"
+		  sequence="50"
+		  action="okgj.action_okgj_report_sales_comp_wizard"/>
+
+	<!--  销售环比报表  -->
+        <record id="view_okgj_report_sales_comp_tree" model="ir.ui.view">
+            <field name="name">view.okgj.report.sales.comp.tree</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <tree string="销售环比报表">
+                    <field name="categ_id"/>
+                    <field name="okgj_comp_suppliernumber"/>
+                    <field name="okgj_comp_suppliername"/>
+                    <field name="default_code"/>
+                    <field name="name"/>
+                    <field name="is_group_product"/>
+                    <field name="uom_id"/>
+                    <field name="min_qty"/>
+                    <field name="variants"/>
+                    <field name="lst_price"/>
+                    <!--field name="purchaseprice"/-->
+                    <field name="other_price"/>
+                    <field name="okgj_cost_price"/>
+                    <field name="okgj_comp_lastsalecostprice"/>
+                    <field name="okgj_comp_cursalecostprice"/>
+                    <field name="okgj_comp_lastweekdataqty"/>
+                    <field name="okgj_comp_curweekdataqty"/>
+                    <field name="okgj_comp_lastweekdataamount"/>
+                    <field name="okgj_comp_curweekdataamount"/>
+                    <field name="okgj_comp_salescomp"/>
+                    <field name="okgj_comp_margincomp"/>
+		    <field name="okgj_comp_lastmargin"/>
+		    <field name="okgj_comp_curmargin"/>
+		    <field name="qty_available"/>
+		    <field name="outgoing_qty"/>
+		    <field name="okgj_comp_invamount"/>
+                    <field name="use_time"/>
+		    <field name="create_date"/>
+                </tree>
+            </field>
+	</record>
+
+        <record id="view_okgj_report_sales_comp_search" model="ir.ui.view">
+            <field name="name">view.okgj.report.sales.comp.search</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <search string="销售环比报表">
+		    <!-- field name="productcaterotyname"/>
+			 <field name="suppliernumber"/>
+			 <field name="productnumber"/>
+			 <field name="productname"/-->
+                </search>
+            </field>
+	</record>
+
+        <record model="ir.actions.act_window" id="action_okgj_report_sales_comp">
+            <field name="name">销售环比报表</field>
+            <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+            <field name="view_mode">form,tree</field>
+            <field name="res_model">product.product</field>
+        </record>
+        
+	<!--menuitem name="销售报表管理" 
+		  id="okgj.menu_okgj_report_sales"
+		  parent="base.menu_reporting"  
+		  sequence="8"/>
+        <menuitem id="okgj.menu_okgj_report_sales_comp"
+	parent="okgj.menu_okgj_report_sales"  
+		  name="销售环比报表"  sequence="50" action="okgj.action_okgj_report_sales_comp"/-->
+    </data>
+</openerp>

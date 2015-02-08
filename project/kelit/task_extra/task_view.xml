@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="task_issue_module_tree_view">
+    <field name="name">task.issue.module.tree</field>
+    <field name="model">task.issue.module</field>
+    <field name="arch" type="xml">
+    	<tree string='Task issue Module' editable='top'>
+    		<field name='name'/>
+    	</tree>
+    </field>
+</record>
+<record id="action_task_issue_module" model="ir.actions.act_window">
+	<field name="name">Task Issue Module</field>
+	<field name="res_model">task.issue.module</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+	<field name="help" type="html">
+	  <p class="oe_view_nocontent_create">
+	  </p><p>
+		Click to start creating a  Module 
+	  </p>
+	</field>
+</record>
+<menuitem id="menu_task_issue_module" name="Task Issue Module" parent="base.menu_definitions"  action='action_task_issue_module' sequence='50'/>
+
+<record model="ir.ui.view" id="task_issue_manage_tree_view">
+    <field name="name">task.issue.manage.tree</field>
+    <field name="model">task.issue.manage</field>
+    <field name="arch" type="xml">
+    	<tree string='Task Issue Manage' >
+    		<field name='name'/>
+    		<field name='module_id'/>
+    	</tree>
+    </field>
+</record>
+<record model="ir.ui.view" id="task_issue_manage_tree_form">
+    <field name="name">task.issue.manage.form</field>
+    <field name="model">task.issue.manage</field>
+    <field name="arch" type="xml">
+    	<form string='Task Issue Manage' version='7.0'>
+    		<group>
+    			<group colspan='4'>
+		   		<field name='name'/>
+		   		<field name='module_id'/>
+		   		</group>
+		   		<newline/>
+		   		<notebook>
+			   		<page string='Tasks'>
+			   		    <field name='task_ids'/>
+			   		</page>
+			   		<page string='Issues'>
+			   		    <field name='issue_ids'/>
+			   		</page>
+		   		</notebook>
+    		</group>
+    	</form>
+    </field>
+</record>
+<record model="ir.ui.view" id="task_issue_manage_search_view">
+    <field name="name">task.issue.manage.search</field>
+    <field name="model">task.issue.manage</field>
+    <field name="arch" type="xml">
+    	<search string='Task Issue Manage'>
+    		<field name="name" string="Name"/>
+    		<field name='module_id' string='Module'/>
+    		<group string="Group By..." expand="0">
+    			<filter string="Module" context="{'group_by':'module_id'}"/>
+    		</group>
+    	</search>
+    </field>
+</record>
+<record id="action_task_issue_manage" model="ir.actions.act_window">
+	<field name="name">Task Issue Manage</field>
+	<field name="res_model">task.issue.manage</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+	<field name="help" type="html">
+	  <p class="oe_view_nocontent_create">
+	  </p><p>
+		Click to start creating a Manage 
+	  </p>
+	</field>
+</record>
+<menuitem id="menu_task_issue_manage" name="Task Issue Manage" parent="project.menu_project_management"  action='action_task_issue_manage' sequence='51'/>
+
+
+
+
+
+
+
+
+<record model="ir.ui.view" id="inherit_view_task_tree2">
+    <field name="name">task_extra.project.task.tree</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.view_task_tree2"/>
+    <field name="arch" type="xml">
+        <xpath expr="//tree" position="inside">
+            <field name='manage_ids'/>
+        </xpath>
+    </field>
+</record>
+<record model="ir.ui.view" id="inherit_view_task_form2">
+    <field name="name">task_extra.project.task.form</field>
+    <field name="model">project.task</field>
+    <field name="inherit_id" ref="project.view_task_form2"/>
+    <field name="arch" type="xml">
+        <xpath expr="//notebook" position="before" >
+            <label for='manage_ids' string='Issue Manage'/>
+            <field name='manage_ids' widget='many2many_tags'/>
+            <newline/>
+        </xpath>
+    </field>
+</record>
+<record model="ir.ui.view" id="inherit_project_issue_tree_view">
+    <field name="name">task_extra.project.issue.tree</field>
+    <field name="model">project.issue</field>
+    <field name="inherit_id" ref="project_issue.project_issue_tree_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//tree" position="inside">
+            <field name='manage_ids'/>
+        </xpath>
+    </field>
+</record>
+<record model="ir.ui.view" id="inherit_project_issue_form_view">
+    <field name="name">task_extra.project.issue.form</field>
+    <field name="model">project.issue</field>
+    <field name="inherit_id" ref="project_issue.project_issue_form_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//notebook" position="before">
+        	<label for='manage_ids' string='Issue Manage'/>
+            <field name='manage_ids' widget='many2many_tags'/>
+            <newline/>
+        </xpath>
+    </field>
+</record>
+
+
+
+
+</data>
+</openerp>
+
+

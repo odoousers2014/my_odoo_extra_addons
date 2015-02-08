@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+
+<!--  jon.chow#elico-corp.com Nov 19, 2013
+https://code.launchpad.net/~openerp-dev/openobject-addons/trunk-bug-1167393-nco
+-->
+
+<record model="ir.rule" id="stock.stock_picking_out_rule">
+     <field name="name">stock_picking_out multi-company</field>
+        <field name="model_id" search="[('model','=','stock.picking.out')]" model="ir.model"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+</record>
+
+<record model="ir.rule" id="stock.stock_picking_in_rule">
+     <field name="name">stock_picking_in multi-company</field>
+        <field name="model_id" search="[('model','=','stock.picking.in')]" model="ir.model"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id','child_of',[user.company_id.id])]</field>
+</record>
+
+
+<!-- jon  Sale man see only his Deliver Order
+<record id="ir_rule_sale_man_own_do" model="ir.rule">
+    <field name="model_id" search="[('model','=','stock.picking')]" model="ir.model"/>
+    <field name="domain_force">[('salesman_id','=',user.id)]</field>
+    <field name="name">Sale man only own Deliver order</field>
+    <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+    <field eval="1" name="perm_unlink"/>
+    <field eval="1" name="perm_write"/>
+    <field eval="1" name="perm_read"/>
+    <field eval="1" name="perm_create"/>
+</record>
+-->  
+
+
+<!--  SaleMan Delivery Order only for own    jon.chow#elico-corp.com Nov 28, 2013-->
+
+<record id="stock.vpicktree" model="ir.ui.view">
+    <field name="name">stock.picking.tree</field>
+    <field name="model">stock.picking</field>
+    <field name="arch" type="xml">
+        <tree create='0'  colors="blue:state == 'draft';grey:state == 'cancel';red:state not in ('cancel', 'done') and date &lt; current_date" string="Picking list">
+            <field name="partner_id"/>
+            <field name="name"/>
+            <field name="backorder_id"/>
+            <field name="origin"/>
+            <field name="date"/>
+            <field name="min_date"/>
+            <field name="invoice_state"/>
+            <field name="state" groups="stock.group_stock_user"/>
+            <field name="salesman_id"/>
+            <field name="stock_journal_id" widget="selection" groups="stock.group_stock_user"/>
+        </tree>
+    </field>
+</record>
+<record id="action_open_delivery2invoice" model="ir.actions.act_window">
+	<field name="name">Delivery to Invoice</field>
+	<field name="res_model">stock.picking</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree</field>
+	<field name="domain">[('salesman_id','=',uid),('type','=','out')]</field>
+	<field name='tree_view_id' ref='stock.vpicktree'/>
+</record>
+<menuitem action="action_open_delivery2invoice" id="sale_stock.menu_action_picking_list_to_invoice" parent="base.menu_invoiced" groups="base.group_sale_salesman" sequence="20"/>
+
+
+
+         <act_window name="Return Shipment"
+            groups='stock.group_stock_user'
+            res_model="stock.return.picking"
+            src_model="stock.picking"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="stock.act_stock_return_picking"/>
+         <act_window name="Return Shipment"
+            groups='stock.group_stock_user'
+            res_model="stock.return.picking"
+            src_model="stock.picking.in"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="stock.act_stock_return_picking_in"/>
+         <act_window name="Return Shipment"
+            groups='stock.group_stock_user'
+            res_model="stock.return.picking"
+            src_model="stock.picking.out"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="stock.act_stock_return_picking_out"/>
+
+
+<!--  jon.chow#elico-corp.com 2013-12-10
+<record id="stock.act_stock_return_picking" model="ir.actions.act_window">
+	<field name="name">Return Shipment</field>
+	<field name="res_model">stock.return.picking</field>
+	<field name="src_model">stock.picking</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+	<field name='groups_id' eval="[(6,0,[ref('stock.group_stock_user'),])]"/>
+	<field name='target'>new</field>
+	<field name='key2'>client_action_multi</field>
+	<field name='multi'>True</field>
+</record>
+<record id="stock.act_stock_return_picking_in" model="ir.actions.act_window">
+	<field name="name">Return Shipment</field>
+	<field name="res_model">stock.return.picking</field>
+	<field name="src_model">stock.picking.in</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+	<field name='groups_id' eval="[(6,0,[ref('stock.group_stock_user'),])]"/>
+	<field name='target'>new</field>
+	<field name='key2'>client_action_multi</field>
+	<field name='multi'>True</field>
+</record>
+<record id="stock.act_stock_return_picking_out" model="ir.actions.act_window">
+	<field name="name">Return Shipment</field>
+	<field name="res_model">stock.return.picking</field>
+	<field name="src_model">stock.picking.out</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,form</field>
+	<field name='groups_id' eval="[(6,0,[ref('stock.group_stock_user'),])]"/>
+	<field name='target'>new</field>
+	<field name='key2'>client_action_multi</field>
+	<field name='multi'>True</field>
+</record>
+-->
+
+<!-- My Invoice   jon.chow#elico-corp.com Nov 28, 2013-->
+
+<record id="invoice_tree_my_invoice" model="ir.ui.view">
+    <field name="name">account.invoice.tree</field>
+    <field name="model">account.invoice</field>
+    <field name="arch" type="xml">
+        <tree create='false' colors="blue:state == 'draft';black:state in ('proforma','proforma2','open');gray:state == 'cancel'" string="Invoice">
+            <field name="partner_id" groups="base.group_user"/>
+            <field name="date_invoice"/>
+            <field name="number"/>
+            <field name="reference" invisible="1"/>
+            <field name="name" invisible="1"/>
+            <field name="journal_id" invisible="1"/>
+            <field name="period_id" invisible="1" groups="account.group_account_user"/>
+            <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+            <field name="user_id"/>
+            <field name="date_due"/>
+            <field name="origin"/>
+            <field name="currency_id" groups="base.group_multi_currency"/>
+            <field name="residual" sum="Residual Amount"/>
+            <field name="amount_untaxed" sum="Untaxed Amount"/>
+            <field name="amount_total" sum="Total Amount"/>
+            <field name="state"/>
+            <field name="shop_id"/>
+        </tree>
+    </field>
+</record>
+
+<record id="action_my_kelit_invoice_tree" model="ir.actions.act_window">
+    <field name="name">My Invoices</field>
+    <field name="res_model">account.invoice</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree</field>
+    <field ref="invoice_tree_my_invoice" name="view_id"/>
+    <field name="domain">[('type','=','out_invoice'),('user_id','=',uid)]</field>
+    <field name="context">{'default_type':'out_invoice', 'type':'out_invoice', 'journal_type': 'sale'}</field>
+    <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+</record>
+
+<menuitem action="action_my_kelit_invoice_tree" id="menu_my_kelit_invoice" parent="base.menu_invoiced" sequence="21"/>
+            
+
+
+<record id="account.action_account_invoice_confirm" model="ir.actions.act_window">
+	<field name="name">Confirm Invoices</field>
+	<field name="res_model">account.invoice.confirm</field>
+	<field name="src_model">account.invoice</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">form</field>
+	<field name='groups_id' eval="[(6,0,[ref('account.group_account_invoice'),])]"/>
+	<field name='target'>new</field>
+	<field name='key2'>client_action_multi</field>
+	<field name='multi'>True</field>
+</record>
+
+
+
+</data>
+</openerp>

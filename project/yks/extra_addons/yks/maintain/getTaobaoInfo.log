@@ -1,0 +1,10 @@
+Thu, 18 Dec 2014 12:0437 get_taobao_info.py[line:256] ERROR 开始获取收件人信息，需要获取的账号在文件中
+Thu, 18 Dec 2014 12:0437 get_taobao_info.py[line:256] ERROR 当前登陆的淘宝账号为：pengjielaiye
+Thu, 18 Dec 2014 12:0438 get_taobao_info.py[line:256] ERROR 账号pengjielaiye没有处于草稿状态且收件人信息模糊的订单
+Thu, 18 Dec 2014 12:0438 get_taobao_info.py[line:256] ERROR 当前登陆的淘宝账号为：tb3308202_2011
+Thu, 18 Dec 2014 12:0439 get_taobao_info.py[line:256] ERROR 账号tb3308202_2011没有处于草稿状态且收件人信息模糊的订单
+Thu, 18 Dec 2014 12:0439 get_taobao_info.py[line:256] ERROR 当前登陆的淘宝账号为：小小白熊00
+Thu, 18 Dec 2014 12:0439 get_taobao_info.py[line:256] ERROR 账号小小白熊00没有处于草稿状态且收件人信息模糊的订单
+Thu, 18 Dec 2014 12:0439 get_taobao_info.py[line:256] ERROR 当前登陆的淘宝账号为：yks海外专营店
+Thu, 18 Dec 2014 12:0440 get_taobao_info.py[line:256] ERROR 账号yks海外专营店没有处于草稿状态且收件人信息模糊的订单
+Thu, 18 Dec 2014 12:0440 get_taobao_info.py[line:256] ERROR 所有账号信息获取完成，请查看

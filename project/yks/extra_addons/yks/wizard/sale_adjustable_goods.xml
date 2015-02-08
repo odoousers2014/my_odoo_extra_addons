@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	<record model="ir.ui.view" id="yks_sale_adjustable_goods">
+		<field name="name">yks.sale.adjustable.goods.form</field>
+		<field name="model">sale.adjustable.goods</field>
+		<field name="arch" type="xml">
+			<form string='从其他仓调货' version='7.0'>
+				<sheet>
+					<group>
+						<group>
+							<field name="location_id" domain="[('usage','=','internal'),('name','ilike','库存')]"/>
+							<field name="location_dest_id" readonly="1"/>
+						</group>
+						<group>
+							<field name="carrier_id"/>
+							<field name="need_express_count"/>
+						</group>
+=
+					</group>
+					<notebook>
+						<page string='调拨详情'>
+							<field name="lines">
+								<tree editable="buttom">
+									<field name="product_id" readonly="1"/>
+									<field name="product_qty" readonly="1"/>
+									<field name="move_qty"/>
+								</tree>
+							</field>
+						</page>
+					</notebook>
+				</sheet>
+				<footer>
+					<button name="apply" string="确认提交" type="object" class="oe_highlight" />
+					or
+					<button string="Cancel" class="oe_link" special='cancel'/> 
+				</footer>
+			</form>
+		</field>
+	</record>
+	</data>
+</openerp>

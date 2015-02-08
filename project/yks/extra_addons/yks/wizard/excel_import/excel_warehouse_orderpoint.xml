@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<act_window
+			id="excel_warehouse_orderpoint_action"
+			multi="False"
+			key2="client_action_relate"
+			name="库存预警导入"
+			res_model="excel.base"
+			view_mode="form"
+			target="new"
+			context="{'default_model':'orderpoint','default_replace':'update'}"
+			view_type="form"/>
+		<menuitem 
+			id="excel_warehouse_orderpoint_purchase_menu"
+			name="库存预警导入"
+			parent='purchase.menu_product_in_config_purchase' 
+			sequence="3"
+			action="excel_warehouse_orderpoint_action"
+			groups="purchase.group_purchase_manager"/>
+	    <menuitem 
+			id="excel_warehouse_orderpoint_stock_menu"
+			name="库存预警导入"
+			parent="stock.menu_stock_product" 
+			sequence="3"
+			action="excel_warehouse_orderpoint_action"
+			groups="stock.group_stock_manager"/>
+	</data>
+</openerp>

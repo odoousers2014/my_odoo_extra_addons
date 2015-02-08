@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+<!-- SO SOL access rule -->
+<record id="sale.sale_order_see_all" model="ir.rule">
+    <field name="name">sale.order.sale_charge</field>
+    <field ref="sale.model_sale_order" name="model_id"/>
+    <field name="domain_force">[('section_id','in', [x.id for x in user.section_ids])]</field>
+    <field name="groups" eval="[(4, ref('base.group_sale_salesman_all_leads'))]"/>
+</record>
+<record id="yks_sale_order_see_all" model="ir.rule">
+    <field name="name">sale.order.sale_manager</field>
+    <field ref="sale.model_sale_order" name="model_id"/>
+    <field name="domain_force">[(1,'=',1)]</field>
+    <field name="groups" eval="[(6,0,[ref('base.group_sale_manager')])]"/>
+</record>
+<record id="sale.sale_order_line_see_all" model="ir.rule">
+    <field name="name">sale.order.line.sale_charge</field>
+    <field ref="sale.model_sale_order_line" name="model_id"/>
+    <field name="domain_force">[('order_id.section_id.user_id','=',user.id)]</field>
+    <field name="groups" eval="[(6,0, [ref('base.group_sale_salesman_all_leads')])]"/>
+</record>
+<record id="yks_sale_order_line_sale_manager" model="ir.rule">
+    <field name="name">sale.order.line.sale_manager</field>
+    <field ref="sale.model_sale_order_line" name="model_id"/>
+    <field name="domain_force">[(1,'=',1)]</field>
+    <field name="groups" eval="[(6,0,[ref('base.group_sale_manager')])]"/>
+</record>
+
+<!-- SO Form View --> 
+<record model="ir.ui.view" id="yks_sale_order_form_view">
+	<field name="name">yks.sale.order.form</field>
+	<field name="model">sale.order</field>
+	<field name="inherit_id" ref="sale.view_order_form"/>
+	<field name="arch" type="xml">
+	
+        <h1 position="replace">
+        	<h3>
+            <label string="Quotation " attrs="{'invisible': [('state','not in',('draft','sent'))]}"/>
+            <label string="Sales Order " attrs="{'invisible': [('state','in',('draft','sent'))]}"/>
+            <field name="name" class="oe_inline" readonly="1"/>
+            </h3>
+        </h1>
+        	
+        <button name="print_quotation" position='replace'/>
+        <button name="print_quotation" position='replace'/>
+        <button name="action_button_confirm" states="draft" string="Confirm Sale" type="object" groups="base.group_user" position='replace'/>
+        <button name="action_button_confirm" states="sent" string="Confirm Sale" class="oe_highlight" type="object" position='replace'/>
+        <button name="action_quotation_send" string="Send by Email" type="object" states="draft" class="oe_highlight" groups="base.group_user" position='replace'/>
+        <button name="action_quotation_send" string="Send by Email" type="object" states="sent,progress,manual" groups="base.group_user" position='replace'/>
+	   
+		<field name="state" position="replace">
+		   <field name="state" widget="statusbar" statusbar_visible="draft,wait_account,sent,progress,shipped,sign_in,done" statusbar_colors="{&quot;invoice_except&quot;:&quot;red&quot;,&quot;waiting_date&quot;:&quot;blue&quot;}"/>
+		</field>
+		<button name="invoice_recreate" states="invoice_except" string="Recreate Invoice" groups="base.group_user" position="before">
+		      <button name="sale_man_approve" string="业务员确认" states="draft"  type="object" class="oe_highlight" groups="base.group_sale_salesman"/>
+		      <button name="account_approve" string="财务审核"  states="wait_account"  type="object"  class="oe_highlight" groups="account.group_account_manager"/>
+		      <button name="sale_charge_approve" states="sent" string="主管审核" class="oe_highlight" type="object" groups="base.group_sale_salesman_all_leads"/>
+		      <button name="return_draft" string="退回草稿" type="object" states="sent,wait_account" class="oe_highlight" groups="base.group_sale_salesman"/>
+		      <button name="make_sign_in" states="shipped" string="标为签收" class="oe_highlight" type="object" groups="base.group_sale_salesman_all_leads" />
+		      <button name="reget_order" string="重新同步" type="object" states="draft" class="oe_highlight" groups="base.group_sale_salesman"/>
+		      <button name="set_to_manual" string="设为手工单" attrs="{'invisible':['|',('create_type','=','manual'),('state','not in',['draft'])]}"  type="object"  class="oe_highlight"/>
+		      <button name="express_post" string="快递上传" type="object" class="oe_highlight" groups="base.group_sale_salesman"
+		        attrs="{ 'invisible':['|',('state','not in',['shipped', 'done']),('platform_so_state','not in',['WAIT_SELLER_SEND_GOODS','ORDER_PAYED','ORDER_WAIT_SEND','ORDER_TRUNED_TO_DO','waitsellersend','10'])]}"/>
+		      <button name="sign_in_by_express" string="根据快递签收" states="shipped" type="object" groups="base.group_system"/>
+		      <button name="rush_platform_so_state" string="平台状态刷新" type="object" groups="base.group_system"/>
+		      <button name="check_stock_enough" string="检查库存" type="object"/>
+		</button>
+		
+		<field name="partner_invoice_id" position="after">
+		  <button name="replace_deliver_info_df" states="draft" string="代发货使用客户信息" type="object"/>
+		  <button name="replace_deliver_info_default" states="draft" string="使用系统默认发货信息" type="object"/>
+		</field>
+		<notebook  position="before">
+		  <group>
+		    <group >
+		    	<field name="is_drop_shopping" invisible="1"/>
+	            <field name="deliver_name" attrs="{'required':1}"/>
+	            <field name="deliver_tel" attrs="{'required':1}"/>
+	            <field name="deliver_company_name"/>
+	            <field name="deliver_city_id"/>
+	            <field name="deliver_address" attrs="{'required':1}"/>
+	            <field name="unneed_express" on_change="onchage_unneed_express(unneed_express)" attrs="{'readonly':[('state','!=','draft')]}"/>
+	            <field name="carrier_id" attrs="{'invisible':[('unneed_express','=',True)],'required':[('unneed_express','=',False)]}" />
+	            <field name="need_express_count" attrs="{'invisible':[('unneed_express','=',True)]}"/>
+	            
+		    </group>
+		    <group >
+				<field name="receive_user" attrs="{'required':1, 'readonly':[('state','not in',['draft','sent'])]}"/>
+			    <field name="receive_phone" attrs="{'required':1, 'readonly':[('state','not in',['draft','sent'])]}"/>
+				<field name="receiver_zip" attrs="{ 'readonly':[('state','not in',['draft','sent'])]}"/>
+				<field name="receiver_state_id" attrs="{ 'readonly':[('state','not in',['draft','sent'])]}"/>
+	            <field name="receiver_city_id" attrs="{ 'readonly':[('state','not in',['draft','sent'])]}"/>
+	            <field name="receiver_district" attrs="{ 'readonly':[('state','not in',['draft','sent'])]}"/>
+				<field name="receive_address" on_change="onchange_receive_address(receive_address)" attrs="{'required':1, 'readonly':[('state','not in',['draft','sent'])]}"/>
+			</group>
+			<group >
+	            <field name="platform_create_time"  attrs="{'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])]}" />
+	            <field name="platform_pay_time" attrs="{ 'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])]}" />
+	            <field name="platform_seller_id" attrs="{ 'required':[('yks_type','=','online')], 'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])]}" />
+	            <field name="platform_user_id" attrs="{ 'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])]}" />
+	            <field name="platform_so_id"  attrs="{ 'required':[('yks_type','=','online')], 'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])]}" />
+	            <field name="platform_so_state" readonly="1"/>
+	            <field name="seller_pay_no" attrs="{ 'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])]}" />
+	            <field name="buyer_pay_no" invisible='1'/>
+	            <field name="payment_number" attrs="{'readonly':['|',('create_type','=','auto'),('state','not in',['draft'])], 'required':[('yks_type','=','offline')]}"/>
+	            
+			</group>
+			<group >
+	            <field name="sale_model" on_change="onchange_sale_model(sale_model,carrier_id,need_express_count)"/>
+	            <field name="yks_type" attrs="{ 'readonly':[('state','not in',['draft','sent'])]}"  on_change="onchange_yks_type(yks_type)"/>
+	            <field name="api_id" attrs="{ 'readonly':['|',('create_type','=','auto'),('state','not in',['draft','sent'])]}"/>
+	            <field name="create_type" readonly="1"/>
+	            <field name="need_split_picking"/>
+	            <field name="payment" readonly="1"/>
+			</group>
+		  </group>   
+		</notebook>
+
+		<xpath expr="//field[@name='order_line']"  position='attributes'>
+		    <attribute name="attrs">{'readonly':['|',('create_type','=','auto'),('state','!=','draft')]}</attribute>
+		</xpath>
+		<xpath expr="//field[@name='order_line']/tree"  position='inside'>
+		    <field name="platform_sol_id" groups='base.group_system'/>
+		</xpath>
+		<xpath expr="//field[@name='user_id']"  position='replace'>
+		    <field name="user_id" attrs="{'readonly':[('state','not in',['draft','sent'])], 'required':True}"/>
+		</xpath>
+		
+		<page string="Other Information" position="after">
+			<page string="供应商代发货" attrs="{'invisible':[('sale_model','=','normal')]}">
+				<group>
+					<group>
+						<field name="rdo_id" readonly="1"/>
+					</group>					
+					<button name="create_rdo" string="创建需求分配" type="object"
+						   groups="base.group_sale_salesman" attrs="{'invisible':[('rdo_id','!=',False)]}"/>
+				</group>
+			</page>
+		</page>
+		
+		 <field name="client_order_ref" position='attributes'>
+		 	<attribute name="invisible">1</attribute>
+		 </field>
+		<xpath expr="//field[@name='order_line']/tree/field[@name='name']"  position='attributes'>
+			<attribute name='groups'>base.group_system</attribute>
+		</xpath>
+
+	</field>
+</record>
+
+<!-- YKS draft SO tree view -->
+ <record model="ir.ui.view" id="yks_sale_quotation_tree_view">
+    <field name="name">yks.sale.order.tree</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_quotation_tree"/>
+    <field name="arch" type="xml">
+        <field name='name' position='after'>
+            <field name="platform_so_id" select="1" />
+            <field name="platform_create_time"/>
+            <field name="platform_user_id"/>
+            <field name="receive_user"/>
+            <field name="platform_seller_id" invisible="1"/>
+            <field name="api_id"/>
+        </field>
+        <xpath expr="//field[@name='user_id']" position='after'>
+            <field name='section_id'/>
+        </xpath>
+        <xpath expr="//field[@name='date_order']" position='attributes'>
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='date_order']" position='after'>
+            <field name="create_date"/>
+        </xpath>
+        
+       <tree position="attributes">
+           <attribute name="colors">grey:state=='cancel';blue:state in ('wait_account','sent');red:state=='progress'</attribute>
+       </tree>
+    </field>
+</record>
+
+<!-- YKS  SO tree view -->
+ <record model="ir.ui.view" id="yks_sale_order_tree_view">
+    <field name="name">yks.sale.order.tree</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_tree"/>
+    <field name="arch" type="xml">
+        <field name='name' position='after'>
+            <field name="platform_so_id" select="1"/>
+            <field name="shipped"/>
+            <field name="express_sign"/>
+            <field name="platform_create_time"/>
+            <field name="platform_user_id"/>
+            <field name="receive_user"/>
+            <field name="platform_seller_id" invisible="1"/>
+            <field name="api_id"/>
+        </field>
+        <xpath expr="//field[@name='user_id']" position='after'>
+            <field name='section_id'/>
+        </xpath>
+        <xpath expr="//field[@name='date_order']" position='attributes'>
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='date_order']" position='after'>
+            <field name="create_date"/>
+        </xpath>
+       <tree position="attributes">
+           <attribute name="colors">red:state=='progress';green:state=='shipped'</attribute>
+       </tree>
+    </field>
+</record>
+<!-- SO Search view -->
+ <record id="yks_sale_order_search_view" model="ir.ui.view">
+	<field name="name">yks.sale.order.search</field>
+	<field name="model">sale.order</field>
+	<field name="inherit_id" ref="sale.view_sales_order_filter"/>
+	<field name="arch" type="xml">
+	   <field name="name" position='after'>
+	      <filter string="列表编辑" context="{'tree_edit': True}"/>
+	      
+	      <filter name="state_draft" string="待业务确认"  domain="[('state','=','draft')]"/>
+	      <filter name="state_wait_account" string="待财务确认"  domain="[('state','=','wait_account')]"/>
+	      <filter name="state_sent" string="待主管审核"  domain="[('state','=','sent')]"/>
+	      <filter name="state_progress" string="待发货"  domain="[('state','=','progress')]"/>
+	      <filter name="state_shipped" string="已发待签"  domain="[('state','=','shipped')]"/>
+	      <filter name="platform_state_to_send" string="平台状态待发货"  domain="[('platform_so_state','in',['WAIT_SELLER_SEND_GOODS','ORDER_PAYED','ORDER_TRUNED_TO_DO','ORDER_WAIT_SEND','ORDER_TRUNED_TO_DO','waitsellersend','10'])]"/>
+	      <filter name="platform_state_no_end" string="平台状态未完成"  domain="[('platform_so_state','not in',['TRADE_FINISHED', 'TRADE_CLOSED', 'TRADE_CLOSED_BY_TAOBAO', 'ORDER_FINISH', 'ORDER_CANCEL', '30', '40', 'success', 'cancel'])]"/>
+	      <filter name="state_done" string="完成"  domain="[('state','=','done')]"/>
+	      <field name="platform_so_id" string="平台交易号" filter_domain="[('platform_so_id','ilike',self)]"/>
+	      <field name="platform_user_id" string="买家昵称" filter_domain="[('platform_user_id','ilike',self)]"/>
+	      <field name="receive_user" string="收件人" filter_domain="[('receive_user','ilike',self)]"/>
+	      <filter name="today_order" string="今日订单"  domain="[('date_order','=',context_today().strftime('%%Y-%%m-%%d'))]"/>
+	      <filter name="week_order" string="本周订单"  domain="[('date_order','&lt;=', (context_today() + relativedelta(weeks=0,day=7, weekday=-1)).strftime('%%Y-%%m-%%d')),('date_order','&gt;=',(context_today() - relativedelta(weeks=1, weekday=0)).strftime('%%Y-%%m-%%d'))]" />
+	   </field>
+	   <filter string="Salesperson"  position='after'>
+	        <filter string="平台帐号"  domain="[]"  context="{'group_by':'api_id'}"/>
+	        <filter string="平台状态"  domain="[]"  context="{'group_by':'platform_so_state'}"/>
+	        <filter string="销售团队"  domain="[]"  context="{'group_by':'section_id'}"/>
+	        <filter string="阶段"  domain="[]"  context="{'group_by':'stage'}"/>
+	   </filter>
+	   
+	   
+	</field>
+</record>
+
+<!-- Action Quotations -->
+<record id="sale.action_quotations" model="ir.actions.act_window">
+    <field name="name">Quotations</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">sale.order</field>
+    <field name="view_type">form</field>
+    <field name="view_id" ref="sale.view_quotation_tree"/>
+    <field name="view_mode">tree,form,calendar,graph</field>
+    <field name="context">{}</field>
+    <field name="domain">[('state','in',('draft','sent','cancel','wait_account'))]</field>
+    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+</record>
+<!-- Action Order -->
+<record id="sale.action_orders" model="ir.actions.act_window">
+    <field name="name">Sales Orders</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">sale.order</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form,calendar,graph</field>
+    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+    <field name="context">{}</field>
+    <field name="domain">[('state','not in',('draft','sent','cancel','wait_account'))]</field>
+</record>
+
+
+<record model="ir.ui.view" id="yks_sale_stock_so_form_view">
+     <field name="name">yks.sale_stock.sale.order.form</field>
+     <field name="model">sale.order</field>
+     <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+     <field name="arch" type="xml">
+        <field name="shop_id" position="attributes">
+            <atrribute  name="string">商店仓库</atrribute>
+        </field>
+        <button name="action_view_delivery"  position="replace">
+            <button name="action_view_delivery" string="View Delivery Order" type="object" class="oe_highlight"
+                    attrs="{'invisible': ['|',('picking_ids','=',False),('picking_ids','=',[])]}" groups="base.group_user"/>
+        </button>        
+     </field>
+ </record>
+  
+ <!-- SOL Tree View-->
+<record model="ir.ui.view" id="yks_sale_order_line_tree_view">
+   <field name="name">yks.sale_order_line.tree</field>
+   <field name="model">sale.order.line</field>
+   <field name="arch" type="xml">
+       <tree string="销售明细" create="false">
+           <field name='order_id' />
+           <field name='platform_so_id'/>
+           <field name='product_id'/>
+           <field name='product_uom_qty' sum="QTY"/>
+           <field name='price_unit' />
+           <field name='price_subtotal' sum="Total"/>
+           <field name='salesman_id' />
+           <field name='state'/>
+           <field name='date_order'/>
+       </tree>
+   </field>
+</record>
+<!-- SOL search View -->
+ <record id="yks_sales_order_line_search_view" model="ir.ui.view">
+     <field name="name">yks.sales_order_line.search</field>
+     <field name="model">sale.order.line</field>
+      <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
+     <field name="arch" type="xml">
+        <field name="order_id" position="after">
+            <filter name="month" string="本月" domain="[('date_order','ilike',context_today().strftime('%%Y-%%m'))]"/>
+            <field name="date_order" string="日期大于" filter_domain="[('date_order','&gt;=',self)]"/>
+            <field name="date_order" string="日期小于" filter_domain="[('date_order','&lt;=',self)]"/>
+            <filter name="no_service" string="非费用SKU"  domain="[('product_id.type','=','product')]"/>
+            <filter name="no_quataion" string="已确认"  domain="[('state','not in',('draft','sent','cancel'))]"/>
+            <filter name="month_sale_product" string="本月已销售SKU"  domain="[('date_order','ilike',context_today().strftime('%%Y-%%m')),('product_id.type','=','product'),('state','not in',('draft','sent','cancel'))]"/>
+        </field>
+        <filter string="Status" position="after">
+            <filter string="日期" context="{'group_by':'date_order'}"/>
+        </filter>
+     </field>
+</record>
+
+<record model="ir.actions.act_window" id="action_yks_sale_order_line">
+	<field name="name">销售明细</field>
+	<field name="type">ir.actions.act_window</field>
+	<field name="res_model">sale.order.line</field>
+	<field name="view_type">form</field>
+	<field name="view_mode">tree,from</field>
+	<field name="view_id" ref="yks_sale_order_line_tree_view"/>
+	<field name="context">{'search_default_month_sale_product':1}</field>
+</record>
+  
+<menuitem id="menu_yks_sale_order_line" name="销售明细" parent="base.menu_sales" action="action_yks_sale_order_line"/>
+ 
+
+<!-- YKS draft SO edit.tree view  readonly="not context.get('tree_edit')" -->
+ <record model="ir.ui.view" id="yks_sale_quotation_tree_edit_view">
+    <field name="name">yks.sale.order.tree.edit</field>
+    <field name="model">sale.order</field>
+    <field name="arch" type="xml">
+        <tree string="Quotation" editable="bottom" fonts="bold:message_unread==True" colors="grey:state=='cancel';blue:state in ('waiting_date','manual');red:state in ('invoice_except','shipping_except')">
+            <button name="oepnerp_form_view" type="object" icon="STOCK_SELECT_COLOR" />
+            <field name="message_unread" invisible="1" readonly="1"/>
+            <field name="name" string="Quotation Number" readonly="1"/>
+            <field name="platform_so_id" select="1" readonly="1"/>
+            <field name="platform_create_time" readonly="1"/>
+            <field name="platform_user_id" readonly="1"/>
+            <field name="receive_user" readonly="1"/>
+            <field name="platform_seller_id" readonly="1"/>
+            <field name="date_order" readonly="1" invisible="1"/>
+            <field name="partner_id" readonly="1"  invisible="1"/>
+            <field name="user_id" readonly="1"/>
+            <field name="amount_total" sum="Total Tax Included"/>
+            <field name="state" readonly="1"/>
+        </tree>
+    </field>
+</record>
+<record id="yks_action_edit_quotations" model="ir.actions.act_window">
+    <field name="name">报价单 列表修改</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">sale.order</field>
+    <field name="view_type">form</field>
+    <field name="view_id" ref="yks_sale_quotation_tree_edit_view"/>
+    <field name="view_mode">tree,form,calendar,graph</field>
+    <field name="context">{}</field>
+    <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
+    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+    <field name="help" type="html">
+    </field>
+</record>
+<!--   menuitem id="yks_menu_edit_quotations" action="yks_action_edit_quotations" parent="base.menu_sales" sequence="4" groups='base.group_system'/  -->
+
+<!-- 销售业绩统计报表 去除费用SKU，过滤没确认和已取消的订单 -->
+<record id="yks_action_order_report_all" model="ir.actions.act_window">
+    <field name="name">销售业绩统计表</field>
+    <field name="res_model">sale.report</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,graph</field>
+    <field name="domain">[('product_id.type','=','product'),('state','not in',['draft','sent','cancel','wait_account'])]</field>
+    <field name="search_view_id" ref="sale.view_order_product_search"/>
+    <field name="view_id" ref="sale.view_order_product_tree"/>
+    <field name="context">{'search_default_year':1,'search_default_month':1,'search_default_User':1,'group_by_no_leaf':1,'group_by':[]}</field>
+</record>
+<menuitem id="yks_menu_order_report_all" action="yks_action_order_report_all" parent="base.next_id_64" sequence="9"/>
+
+<!--  -->
+<record id="delivery.view_order_withcarrier_form" model="ir.ui.view">
+    <field name="name">yks.remove.delivery.sale.order_withcarrier.form.view</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//group[@name='sale_total']" position="after">
+            <group style="width: 65%%">
+            </group>
+        </xpath>
+    </field>
+</record>
+
+<!-- SO graph -->
+<record model="ir.ui.view" id="yks_view_sale_order_graph">
+    <field name="name">yks.sale.order.graph</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_sale_order_graph"/>
+    <field name="arch" type="xml">
+    	<field name="partner_id" position="replace">
+			<field name="user_id"/>
+		</field>
+    </field>
+</record>
+
+<!-- kanban -->
+<record model="ir.ui.view" id="yks_sale_order_kanban_view">
+    <field name="name">Sale Order</field>
+    <field name="model">sale.order</field>
+    <field name="type">kanban</field>
+    <field name="arch" type="xml">
+        <kanban>
+            <field name="name"/>
+            <field name="state"/>
+            <field name="user_id"/>
+            <field name="platform_so_id"/>
+            <field name="order_line"/>
+            <field name="message_follower_ids"/>
+            <templates>
+                <t t-name="kanban-box">
+                <div class="oe_kanban_vignette oe_semantic_html_override">
+                	<a type="open">
+	                    <h4>
+	                        <a type="open"><field name="name"/></a>
+	                    </h4>
+                	</a>
+	               	<div class="oe_kanban_details">
+						<span class="oe_kanban_list_many2many">
+							<field name="message_follower_ids">
+								<tree>
+									<field name="name"/>
+								</tree>
+							</field>
+						</span>
+                	</div>
+                	<div class="oe_kanban_details">
+						<field name="order_line"/>
+                	</div>
+	                <div class="oe_resource_details">
+	                    <ul>
+	                    	<li>交易编号: <field name="platform_so_id"/></li>
+	                        <li>业务员: <field name="user_id"></field></li>
+	                        <li>状态: <field name="state"></field></li>
+	                        <li>阶段: <field name="stage"></field></li>
+	                    </ul>
+	                </div>
+	                <li>主管审批:<button name="sale_charge_approve"  states="sent"  string="主管审批" type="object" icon="icon"/> </li>         
+                </div>
+                </t>
+            </templates>
+        </kanban>
+    </field>
+</record>
+<record id="yks_action_sale_order_kanban" model="ir.actions.act_window">
+    <field name="name">销售订单</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">sale.order</field>
+    <field name="view_type">tree</field>
+    <field name="view_id" ref="yks_sale_order_kanban_view"/>
+    <field name="view_mode">tree,kanban,form</field>
+    <field name="context">{}</field>
+    <field name="domain">[('state','in',('wait_account','sent','progress'))]</field>
+    <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+</record>
+<menuitem id="menu_yks_sale_order_kanban" name="销售看板" parent="base.menu_sales" action="yks_action_sale_order_kanban" groups="base.group_system"/>
+ 
+ 
+</data>
+</openerp>

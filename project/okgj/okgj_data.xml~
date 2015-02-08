@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+
+        <record id="okgj_purchase_stock_in_first" model="stock.journal">
+            <field name="name">采购收货</field>
+        </record>
+
+        <record id="okgj_purchase_stock_in_second" model="stock.journal">
+            <field name="name">采购入库</field>
+        </record>
+
+
+        <record id="okgj_purchase_stock_out_first" model="stock.journal">
+            <field name="name">采购退货</field>
+        </record>
+
+        <record id="okgj_sale_stock_in_first" model="stock.journal">
+            <field name="name">销售拣货</field>
+        </record>
+
+        <record id="okgj_sale_stock_in_second" model="stock.journal">
+            <field name="name">销售复核</field>
+        </record>
+
+        <record id="okgj_sale_return_stock_out" model="stock.journal">
+            <field name="name">销售退货出库</field>
+        </record>
+
+        <record id="okgj_sale_return_stock_in" model="stock.journal">
+            <field name="name">销售退货入库</field>
+        </record>
+
+    </data>
+</openerp>
+

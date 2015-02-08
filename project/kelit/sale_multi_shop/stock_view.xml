@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+	
+	<!-- stock_picking_out form view  jon.chow#elico-corp.com Jun 13, 2013-->
+	<record model="ir.ui.view" id="inherit_stock_picking_out">
+	     <field name="name">stock_picking.form</field>
+	     <field name="model">stock.picking.out</field>
+	     <field name="inherit_id" ref="stock.view_picking_form"/>
+	     <field name="arch" type="xml">
+	         <xpath expr="//field[@name='origin']" position="after">
+	             <field name="shop_id"/>
+	         </xpath>
+	     </field>
+	</record>
+	 
+	<!-- stock_picking_out tree view  jon.chow#elico-corp.com Jun 13, 2013--> 
+	<record model="ir.ui.view" id="inherit_view_picking_out_tree">
+         <field name="name">stock.picking.out.tree</field>
+         <field name="model">stock.picking.out</field>
+	     <field name="inherit_id" ref="stock.view_picking_out_tree"/>
+	     <field name="arch" type="xml">
+	         <xpath expr="//tree" position="inside">
+	             <field name="shop_id"/>
+	         </xpath>
+	     </field>
+	 </record>
+	 
+	 <!-- stock_picking_out search view  jon.chow#elico-corp.com Jun 13, 2013-->
+     <record id="inherit_view_picking_out_search" model="ir.ui.view">
+         <field name="name">stock.picking.out.search</field>
+         <field name="model">stock.picking.out</field>
+         <field name="inherit_id" ref="stock.view_picking_out_search"/>
+	     <field name="arch" type="xml">
+	         <xpath expr="//search/group" position="inside">
+	             <filter string="Shop" icon="terp-folder-orange" domain="[]" context="{'group_by':'shop_id'}"/>
+	         </xpath>
+	     </field>
+	 </record>
+	 
+<!--  account.invoice_form  jon.chow#elico-corp.com Nov 22, 2013  -->
+       <record model="ir.ui.view" id="inherit_account_invoice">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="shop_id" readonly='1'/>
+                </xpath>
+            </field>
+        </record>
+
+       <record model="ir.ui.view" id="inherit_account_invoice_tree">
+            <field name="name">account.invoice.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <field name="shop_id" readonly='1'/>
+                </xpath>
+            </field>
+        </record>
+       <record model="ir.ui.view" id="inherit_account_invoice_search">
+            <field name="name">account.invoice.search</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@string='Group By...']" position="inside">
+                     <filter string="Shop" icon="terp-go-month" domain="[]" context="{'group_by':'shop_id'}"/>
+                </xpath>
+            </field>
+        </record>
+
+
+
+</data>
+</openerp>

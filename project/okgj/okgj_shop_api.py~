@@ -1,0 +1,878 @@
+# -*- coding: utf-8 -*-
+
+from osv import fields, osv
+import openerp.tools.config as config
+import openerp.addons.decimal_precision as dp
+import logging
+from openerp import netsvc
+from openerp.tools.translate import _
+import redis
+import uuid
+import json
+import time
+import datetime
+from dateutil.relativedelta import relativedelta
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp import pooler
+
+_logger = logging.getLogger(__name__)
+
+try:
+    redis_pool = redis.ConnectionPool(host=config.get('redis_interface', '127.0.0.1'), port=int(config.get('redis_port', 6379)))
+except:
+    _logger.error('Can not connect to redis server!')
+
+
+#REDIS设计思路参见org文件
+## pipe.sadd("do_product_new", "goods_no:001");
+## pipe.hset("do_product_new:goods_no:001","goods_name","001");
+
+def redis_do (redispool, table, p_key, p_value, arg):
+    r = redis.StrictRedis(connection_pool=redispool)
+    pipe = r.pipeline()
+    if not arg:
+        arg = []
+    list_key = table + '_list'
+    list_value = p_key + ':' + p_value
+    set_table = table
+    set_str = p_key + ':' + p_value
+    pipe.lpush(list_key, list_value).execute()
+    pipe.sadd(set_table, set_str).execute()
+    if arg:
+        hash_table = set_table + ':' + set_str
+        pipe.hmset(hash_table, arg).execute()
+    pipe.reset()
+    return True
+
+def redis_get (redispool, table, done_table, detail_table, p_column):
+    r = redis.StrictRedis(connection_pool=redispool)
+    pipe = r.pipeline()
+    all_keys = list(pipe.sdiff(table, done_table).execute()[0])
+    answers = []
+    for p_key in all_keys:
+        hash_table = detail_table + ':' + p_key
+        value = pipe.hget(hash_table, p_column).execute()
+        answers.append(value[0])
+    pipe.reset()
+    return answers
+
+def redis_check (redispool, table, done_table):
+    r = redis.StrictRedis(connection_pool=redispool)
+    pipe = r.pipeline()
+    all_keys = list(pipe.sdiff(table, done_table).execute()[0])
+    pipe.reset()
+    return all_keys
+
+def redis_check_done (redispool, done_table, done_key, done_value):
+    r = redis.StrictRedis(connection_pool=redispool)
+    pipe = r.pipeline()
+    if isinstance(done_value, (int, long)):
+        done_value = str(done_value)
+    done_str = done_key +':' + done_value
+    pipe.sadd(done_table, done_str).execute()
+    pipe.reset()
+    return True
+
+def redis_check_done_remove (redispool, remove_table, remove_key, remove_value):
+    r = redis.StrictRedis(connection_pool=redispool)
+    pipe = r.pipeline()
+    if isinstance(remove_value, (int, long)):
+        remove_value = str(remove_value)
+    remove_str = remove_key +':' + remove_value
+    pipe.sadd(remove_table, remove_str).execute()
+    pipe.reset()
+    return True
+
+##专门用于错误处理，方便以后扩展手机通知功能
+def okgj_api_log_error(error_category, error_no, error_reason):
+    ##TODO:通过错误类型执行其它处理
+    ##暂定类别:Basic, Sales Order, Return Order, Product, Start
+    error_str = error_category + ': ' + error_no + '\t' + error_reason
+    _logger.error('%s', error_str)
+    return True
+
+#普通商品
+class okgj_product_product_api(osv.osv):
+    _inherit = 'product.product'
+
+    def action_stock_change(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        redis_table = "do_stock_change"
+        p_key = "goods_no"
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        for one_product in self.browse(cr, uid, ids, context):
+            p_value = one_product.default_code
+            arg = {'total_count':int(one_product.qty_available)}
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return True
+                   
+    def action_all_stock_change(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        redis_table = "do_stock_change"
+        p_key = "goods_no"
+        ids = self.search(cr, uid, [], context=context)
+        for one_product in self.browse(cr, uid, ids, context):
+            if not one_product.is_group_product:
+                p_value = one_product.default_code
+                arg = {'total_count':int(one_product.qty_available)}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return True
+
+    def create(self, cr, uid, vals, context=None):
+        new_product_id = super(okgj_product_product_api,self).create(cr, uid, vals, context=context)
+        goods_no = vals.get('default_code', False)
+        goods_name = vals.get('name', False)
+        redis_table = "do_product_new"
+        p_key = "goods_no"
+        p_value = goods_no
+        arg = {"name":goods_name}
+        redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if vals.get('list_price', False):
+            redis_table = "do_shop_price_change"
+            p_key = "goods_no"
+            p_value = goods_no + '_' + uuid.uuid4().hex
+            arg = {"shop_price":float(vals.get('list_price'))}
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if vals.get('other_price', False):
+            redis_table = "do_market_price_change"
+            p_key = "goods_no"
+            p_value = goods_no + '_' + uuid.uuid4().hex
+            arg = {"market_price":float(vals.get('other_price'))}
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if vals.get('weight', False):
+            redis_table = "do_goods_weight_change"
+            p_key = "goods_no"
+            p_value = goods_no + '_' + uuid.uuid4().hex
+            arg = {"weight":int(vals.get('weight'))}
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return new_product_id
+
+    def write(self, cr, uid, ids, vals, context=None):
+        if vals.get('default_code', False):
+            vals.pop('default_code')
+            #raise osv.except_osv(_('Error!'), _(u'编码不允许修改.'))
+        super(okgj_product_product_api, self).write(cr, uid, ids, vals, context=context)
+        if vals.get('name', False):
+            for one_product in self.browse(cr, uid, ids, context=context):
+                goods_no = one_product.default_code
+                goods_name = vals.get('name')
+                redis_table = "do_product_name_change"
+                p_key = "goods_no"
+                p_value = goods_no + '_' + uuid.uuid4().hex
+                arg = {"name":goods_name}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if vals.get('list_price', False):
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            redis_table = "do_shop_price_change"
+            p_key = "goods_no"
+            for one_product in self.browse(cr, uid, ids, context=context):
+                goods_no = one_product.default_code + '_' + uuid.uuid4().hex
+                p_value = goods_no
+                arg = {"shop_price":float(vals.get('list_price'))}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if vals.get('other_price', False):
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            redis_table = "do_market_price_change"
+            p_key = "goods_no"
+            for one_product in self.browse(cr, uid, ids, context=context):
+                goods_no = one_product.default_code + '_' + uuid.uuid4().hex
+                p_value = goods_no
+                arg = {"market_price":float(vals.get('other_price'))}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if vals.get('weight', False):
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            redis_table = "do_goods_weight_change"
+            p_key = "goods_no"
+            for one_product in self.browse(cr, uid, ids, context=context):
+                goods_no = one_product.default_code + '_' + uuid.uuid4().hex
+                p_value = goods_no
+                arg = {"weight":int(vals.get('weight'))}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return True
+
+##组合品
+class okgj_mrp_bom_api(osv.osv):
+    _inherit = 'mrp.bom'
+    def create(self, cr, uid, vals, context=None):
+        bom_id = super(okgj_mrp_bom_api,self).create(cr, uid, vals, context=context)
+        if vals.get('type', False) == 'phantom':
+            product_obj = self.pool.get('product.product')
+            parent_product_id = vals.get('product_id')
+            parent_goods_no = product_obj.read(cr, uid, parent_product_id, ['default_code'], context=context)['default_code']
+            subproduct = vals.get('bom_lines')
+            parent_goods_qty = vals.get('product_qty') or 1
+            subproduct_str = '{' + '"' + parent_goods_no + '"' + ':' + str(parent_goods_qty) + '}'
+            ## if subproduct:
+            ##     for one_line in subproduct:
+            ##         subproduct_id = one_line[2]['product_id']
+            ##         subgoods_no = product_obj.read(cr, uid, subproduct_id, ['default_code'], context=context)['default_code']
+            ##         subgoods_qty = one_line[2]['product_qty']
+            ##         subproduct_str =  subproduct_str + '"' + subgoods_no + '"' + ':' + str(subgoods_qty) +','
+            ##     subproduct_str = subproduct_str[:-1]
+            ##     subproduct_str = '{' + subproduct_str + '}'
+            redis_table = "combine_product_new"
+            p_key = "parent_goods_no"
+            p_value = parent_goods_no  ## + '_' + uuid.uuid4().hex
+            arg = {"sub_goods_dict":subproduct_str}
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        if (vals.get('type', False) == 'normal') and vals.get('bom_id', False):
+            parent_bom_id = vals.get('bom_id')
+            bom_data = self.browse(cr, uid, parent_bom_id, context=context)
+            parent_goods_no = bom_data.bom_id.product_id.default_code
+            subproduct_str = ''
+            for one_line in bom_data.bom_lines:
+                subgoods_no = one_line.product_id.default_code
+                subgoods_qty = one_line.product_qty
+                sub_goods_uom = one_line.product_uom.id
+                sub_goods_default_uom = one_line.product_id.uom_id.id
+                if sub_goods_default_uom != sub_goods_uom:
+                    subgoods_qty = uom_obj._compute_qty(cr, uid, sub_goods_uom, product_qty, sub_goods_default_uom)
+                subproduct_str =  subproduct_str + '"' + subgoods_no + '"' + ':' + str(subgoods_qty) +','
+            subproduct_str = subproduct_str[:-1]
+            subproduct_str = '{' + subproduct_str + '}'
+            redis_table = "combine_product_update"
+            p_key = "parent_goods_no"
+            p_value = parent_goods_no  # + '_' + uuid.uuid4().hex
+            arg = {"sub_goods_dict":subproduct_str}
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return bom_id
+     
+    def write(self, cr, uid, ids, vals, context=None):
+        super(okgj_mrp_bom_api, self).write(cr, uid, ids, vals, context=context)
+        redis_table = "combine_product_update"
+        p_key = "parent_goods_no"
+        uom_obj = self.pool.get('product.uom')
+        for one_bom_data in self.browse(cr, uid, ids, context=context):
+            if one_bom_data.bom_id and (one_bom_data.type=='normal'):
+                parent_goods_no = one_bom_data.bom_id.product_id.default_code
+                subproduct_str = ''
+                for one_line in one_bom_data.bom_id.bom_lines:
+                    subgoods_no = one_line.product_id.default_code
+                    subgoods_qty = one_line.product_qty
+                    sub_goods_uom = one_line.product_uom.id
+                    sub_goods_default_uom = one_line.product_id.uom_id.id
+                    if sub_goods_default_uom != sub_goods_uom:
+                        subgoods_qty = uom_obj._compute_qty(cr, uid, sub_goods_uom, subgoods_qty, sub_goods_default_uom)
+                    subproduct_str =  subproduct_str + '"' + subgoods_no + '"' + ':' + str(subgoods_qty) +','
+                subproduct_str = subproduct_str[:-1]
+                subproduct_str = '{' + subproduct_str + '}'
+                p_value = parent_goods_no  # + '_' + uuid.uuid4().hex
+                arg = {"sub_goods_dict":subproduct_str}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+            if one_bom_data.bom_lines and (one_bom_data.type=='phantom'):
+                parent_goods_no = one_bom_data.product_id.default_code
+                subproduct_str = ''
+                for one_line in one_bom_data.bom_lines:
+                    subgoods_no = one_line.product_id.default_code
+                    subgoods_qty = one_line.product_qty
+                    sub_goods_uom = one_line.product_uom.id
+                    sub_goods_default_uom = one_line.product_id.uom_id.id
+                    if sub_goods_default_uom != sub_goods_uom:
+                        subgoods_qty = uom_obj._compute_qty(cr, uid, sub_goods_uom, subgoods_qty, sub_goods_default_uom)
+                    subproduct_str =  subproduct_str + '"' + subgoods_no + '"' + ':' + str(subgoods_qty) +','
+                subproduct_str = subproduct_str[:-1]
+                subproduct_str = '{' + subproduct_str + '}'
+                p_value = parent_goods_no  # + '_' + uuid.uuid4().hex
+                arg = {"sub_goods_dict":subproduct_str}
+                redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return True
+
+    def unlink(self, cr, uid, ids, context=None):
+        redis_table = "combine_product_remove"
+        p_key = "parent_goods_no"
+        for one_bom in self.browse(cr, uid, ids, context=context):
+            parent_goods_no = one_bom.product_id.default_code
+            p_value = parent_goods_no # + '_' + uuid.uuid4().hex
+            arg = False
+            redis_do(redis_pool, redis_table, p_key, p_value, arg)
+        return super(okgj_mrp_bom_api, self).unlink(cr, uid, ids, context=context)
+
+##销售订单
+class okgj_sale_order_api(osv.osv):
+    _inherit = 'sale.order'
+    _order = 'create_date desc'
+    _columns = {
+        'okgj_address':fields.char(u'收货地址', size=32),
+        'best_time':fields.char(u'送货时间', size=32),
+        'bonus': fields.float(u'奖金', digits_compute=dp.get_precision('Product Price')),
+        'bonus_pay': fields.float(u'奖金支付', digits_compute=dp.get_precision('Product Price')),
+        'consignee':fields.char(u'收货人', size=16),
+        'coupon_pay': fields.float(u'优惠券抵扣', digits_compute=dp.get_precision('Product Price')),
+        'discount': fields.float(u'折扣金额', digits_compute=dp.get_precision('Product Price')),
+        'goods_amount': fields.float(u'商品总价', digits_compute=dp.get_precision('Product Price')),
+        'inv_amount': fields.float(u'开票金额', digits_compute=dp.get_precision('Product Price')),
+        'inv_content':fields.text(u'发票内容'),
+        'inv_payee':fields.text(u'发票抬头'),
+        'inv_state': fields.selection([
+            ('1', u'未开票'),
+            ('2', u'已开票'),
+            ('3', u'发票已退回'),
+            ], u'开票状态', readonly=True),
+        'inv_type': fields.selection([
+            ('1', u'普通发票'),
+            ('2', u'增值税发票'),
+            ], u'开票种类',readonly=True),
+        'mobile':fields.char(u'手机', size=16),
+        'money_paid': fields.float(u'已支付', digits_compute=dp.get_precision('Product Price')),
+        'money_own': fields.float(u'货到付款金额', digits_compute=dp.get_precision('Product Price')),
+        'okgj_user_id':fields.char(u'会员ID', size=32),
+        'order_amount': fields.float(u'还应支付', digits_compute=dp.get_precision('Product Price')),
+        'order_weight': fields.float(u'商品总重量', digits_compute=dp.get_precision('Product Price')),
+        'pay_id': fields.char(u'付款方式', readonly=True, size=64, select=True),
+        'pay_time': fields.datetime(u'付款时间', readonly=True, select=True),
+        'pay_name': fields.char(u'付款名称', readonly=True, size=64, select=True),
+        'pay_status':fields.selection([
+            ('0', u'0'),
+            ('2', u'2'),
+            ], u'付款状态', readonly=True),
+        'recharge_bonus': fields.float(u'乐享奖金', digits_compute=dp.get_precision('Product Price')),
+        'reconment':fields.text(u'订单备注'),
+        'okgj_city':fields.char(u'收货城市', size=32),
+        'region_name':fields.text(u'收货区域'),
+        'send_time_content':fields.text(u'送货备注'),
+        'shipping_status':fields.selection([
+            ('', ''),
+            ('1', u'已发货'),
+            ('2', u'已收货'),
+            ('3', u'配货中'),
+            ], u'付款状态', readonly=True),
+        'shipping_fee': fields.float(u'物流费', digits_compute=dp.get_precision('Product Price')),
+        'ship_fee': fields.float(u'基本运费', digits_compute=dp.get_precision('Product Price')),
+        'weight_fee': fields.float(u'续重费', digits_compute=dp.get_precision('Product Price')),
+        'okgj_tel':fields.char(u'联系电话', size=16),
+        'okgj_shop_order_id':fields.char(u'商城订单ID', size=64),
+        'send_time':fields.char(u'要求送货时间', size=128),
+        'date_order2': fields.datetime(u'商城下单时间', readonly=True),
+        'okgj_shop_cancel':fields.boolean(u'复核后取消', readonly=True),
+        'okgj_ordinal':fields.integer(u'下单次数', readonly=True),
+        'by_okgj_shop':fields.boolean(u'商城下单', readonly=True),
+    }
+
+    def okgj_sale_order_cron(self, cr, uid, use_new_cursor=False, context=None):
+        if context is None:
+            context = {}
+        if use_new_cursor:
+            cr = pooler.get_db(use_new_cursor).cursor()
+        redis_table = "get_order_queue"
+        done_table = "get_order_queue_done"
+        remove_table = "do_order_queue_remove"
+        detail_table = "get_order_detail"
+        p_column = "answer"
+        done_key = "order_no"
+        remove_key = "order_id"
+        order_str_datas = redis_get(redis_pool, redis_table, done_table, detail_table, p_column)
+        product_obj = self.pool.get('product.product')
+        picking_obj = self.pool.get('stock.picking.out')
+        sale_line_obj = self.pool.get('sale.order.line')
+        wf_service = netsvc.LocalService("workflow")
+        #经讨论顾客管理不在res.partner中进行，为便于以后查询与统计，直接添加到订单对象中 okgj_user_id
+        customer_id = self.pool.get('res.partner').search(cr, uid, [('is_ok', '=', True)], context=context)
+        if not customer_id:
+            okgj_api_log_error('Basic', 'Unknown', 'Default customer has been deleted')
+            return {}
+        pricelist_id = self.onchange_partner_id(cr, uid, [], customer_id[0])['value']['pricelist_id']
+        count = 10
+        for one_order_str in order_str_datas:
+            count -= 1
+            try:
+                one_order_dict = json.loads(one_order_str)
+            except:
+                okgj_api_log_error('Sales Order', one_order_str, 'Can not dump json string!')
+                continue
+            order_no = one_order_dict['order_no']
+            done_value = order_no
+            remove_value = one_order_dict['order_id']
+            okgj_api_log_error('Sales Order', order_no, 'start processing!')
+            if isinstance(order_no, (int, long)):
+                order_no = str(order_no)
+            order_id = self.search(cr, uid, [('name', '=', order_no)], context=context)
+            if order_id:
+                okgj_api_log_error('Sales Order', one_order_dict['order_no'], 'Fail to create, it has been in the system, has move to done queue!')
+                redis_check_done(redis_pool, done_table, done_key, done_value)
+                continue
+            vals = {}
+            try:
+                vals.update({
+                    'name' : one_order_dict['order_no'],
+                    'state' : 'draft',
+                    'okgj_shop_order_id':one_order_dict['order_id'],
+                    'partner_id':customer_id and customer_id[0], 
+                    'partner_invoice_id':customer_id and customer_id[0], 
+                    'partner_shipping_id':customer_id and customer_id[0],
+                    'pricelist_id':1, #TODO: 需要与其它部门讨论
+                    'date_order2':(datetime.datetime.fromtimestamp(one_order_dict['order_info']['add_time']) + relativedelta(hours=8)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    #time.strftime(DEFAULT_SERVER_DATETIME_FORMAT, time.localtime(one_order_dict['order_info']['add_time'])),
+                    'okgj_address' : one_order_dict['order_info']['address'],
+                    'best_time' : one_order_dict['order_info']['best_time'],
+                    'bonus' : one_order_dict['order_info']['bonus'],
+                    'bonus_pay' : one_order_dict['order_info']['bonus_pay'],
+                    'goods_amount' : one_order_dict['order_info']['goods_amount'],
+                    'coupon_pay' : one_order_dict['order_info']['coupon_pay'],
+                    'discount' : one_order_dict['order_info']['discount'] or 0,
+                    'consignee':one_order_dict['order_info']['consignee'],
+                    'okgj_tel':one_order_dict['order_info']['mobile'],
+                    'send_time':one_order_dict['order_info']['send_time'],
+                    'okgj_ordinal':one_order_dict['order_info']['ordinal'],
+                    'picking_policy' : 'one',
+                    'inv_amount' : one_order_dict['order_info']['inv_amount'],
+                    'inv_content' : one_order_dict['order_info']['inv_content'],
+                    'inv_payee' : one_order_dict['order_info']['inv_payee'],
+                    'okgj_user_id' : one_order_dict['user_info'] and one_order_dict['user_info']['user_name'] or False,
+                    'inv_state' : '1',
+                    'inv_type' : '1',
+                    'money_paid' : one_order_dict['order_info']['money_paid'],
+                    'order_amount' : one_order_dict['order_info']['order_amount'],
+                    'order_weight' : one_order_dict['order_info']['order_weight'],
+                    'recharge_bonus' : one_order_dict['order_info']['recharge_bonus'],
+                    'send_time_content' : one_order_dict['order_info']['send_time_content'],
+                    'reconment' : one_order_dict['order_info']['reconment'],
+                    'pay_id' : one_order_dict['order_info']['pay_name'],
+                    'pay_name' : one_order_dict['order_info']['pay_name'],
+                    'pay_status' : str(one_order_dict['order_info']['pay_status']),
+                    'pay_time' :(datetime.datetime.fromtimestamp(one_order_dict['order_info']['pay_time']) + relativedelta(hours=8)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    #time.strftime(DEFAULT_SERVER_DATE_FORMAT, time.localtime(one_order_dict['order_info']['pay_time'])),
+                    'shipping_fee' : one_order_dict['order_info']['shipping_fee'],
+                    'ship_fee' : one_order_dict['order_info']['ship_fee'],
+                    'weight_fee':one_order_dict['order_info']['weight_fee'],
+                    'region_name' : one_order_dict['order_info']['region_name'],
+                    'by_okgj_shop':True
+                    })
+            except:
+                #数据异常
+                okgj_api_log_error('Sales Order', one_order_dict['order_no'], 'Fail to get order, Data errors, remove to done queue!')
+                redis_check_done(redis_pool, done_table, done_key, done_value)
+                continue
+            order_lines = []
+            for one_product in one_order_dict['product_list']:
+                goods_sn = one_product['goods_sn']
+                if isinstance(goods_sn, (int, long)):
+                    goods_sn = str(goods_sn)
+                product_id = product_obj.search(cr, uid, [('default_code', '=', goods_sn)], context=context)
+                if isinstance(product_id, (long, int)):
+                    product_id = [product_id]
+                if len(product_id) != 1:
+                    #未找到商品或发现多个相同编码商品
+                    okgj_api_log_error('Product', goods_sn, 'Not found in ERP')
+                    continue
+                product_data = product_obj.read(cr, uid, product_id[0], ['uom_id', 'okgj_cost_price'], context=context)
+                uom_id = product_data['uom_id'][0]
+                #更新采购价
+                purchase_price = product_data['okgj_cost_price']
+                ## purchase_price = sale_line_obj.product_id_change(
+                ##     cr, uid, [],
+                ##     pricelist=pricelist_id,
+                ##     product=product_id[0],
+                ##     qty=one_product['goods_number'],
+                ##     uom=uom_id,
+                ##     partner_id = customer_id[0],
+                ##     )['value']['purchase_price']
+                order_lines.append((0, 0, {'name':one_product['goods_name'],
+                                           'product_id' : product_id[0],
+                                           'product_uom':uom_id,
+                                           'price_unit' : one_product['goods_price'],
+                                           'purchase_price':purchase_price,
+                                           'product_uom_qty' : one_product['goods_number']}))
+            vals.update({'order_line':order_lines})
+            try:
+                sale_order_id = self.create(cr, uid, vals, context=context)
+            except:
+                #订单创建异常
+                okgj_api_log_error('Sales Order', one_order_dict['order_no'], 'Fail to create sale order!')
+                continue
+            try:
+                cr.commit()
+            except:
+                continue
+            _logger.info('Get order %s succeed!', one_order_dict['order_no'])
+            redis_check_done(redis_pool, done_table, done_key, done_value)
+            redis_check_done_remove(redis_pool, remove_table, remove_key, remove_value)
+            try:
+                wf_service.trg_validate(uid, "sale.order", sale_order_id, 'order_confirm', cr)
+            except:
+                #订单确认异常
+                okgj_api_log_error('Sales Order', one_order_dict['order_no'], 'Fail to confirm sale order!')
+                continue
+            picking_id = picking_obj.search(cr, uid, [('sale_id', '=', sale_order_id), ('type', '=', 'out')], context=context)
+            if picking_id:
+                try:
+                    picking_obj.action_assign(cr, uid, picking_id)
+                    ## picking_obj.draft_force_assign(cr, uid, picking_id)
+                    ## picking_obj.force_assign(cr, uid, picking_id)
+                except:
+                    #发货单确认异常
+                    okgj_api_log_error('Sales Order', one_order_dict['order_no'], 'Fail to confirm delivery order!')
+            if count <= 1:
+                count = 10
+                cr.commit()
+        cr.commit()
+        if use_new_cursor:
+            cr.close()
+        return {}
+
+    def okgj_sale_order_cancel_cron(self, cr, uid, use_new_cursor=False, context=None):
+        if context is None:
+            context = {}
+        if use_new_cursor:
+            cr = pooler.get_db(use_new_cursor).cursor()
+        redis_table = "get_order_cancel_list"
+        done_table = "get_order_cancel_list_done"
+        remove_table = "do_order_cancel_queue_remove"
+        p_column = "answer"
+        done_key = "order_no"
+        remove_key = "order_id"
+        order_str_datas = redis_check(redis_pool, redis_table, done_table)
+        picking_obj = self.pool.get('stock.picking')
+        wf_service = netsvc.LocalService("workflow")
+        sale_return_obj = self.pool.get('okgj.sale.return')
+        count = 10
+        for one_order_no in order_str_datas:
+            count -= 1
+            done_state = False
+            order_no = one_order_no[9:]
+            done_value = order_no
+            okgj_api_log_error('Cancel Order', order_no, 'start processing!')
+            order_id = self.search(cr, uid, [('name', '=', order_no)], context=context)
+            if isinstance(order_id, (long, int)):
+                order_id = [order_id]
+            if len(order_id) != 1:
+                #未找到销售订单
+                okgj_api_log_error('Return Order', order_no, 'Fail to get order, not found!')
+                continue
+            #查找发货单并取消
+            picking_id = picking_obj.search(cr, uid, [('sale_id', '=', order_id[0]), ('type', '=', 'out')], context=context)
+            if picking_id:
+                picking_state = picking_obj.browse(cr, uid, picking_id[0], context=context).state
+                if picking_state == 'done':
+                    warehouse_id = self.browse(cr, uid, order_id[0], context=context).shop_id.warehouse_id.id
+                    return_data = {}
+                    #获取源销售订单信息
+                    return_data.update(sale_return_obj.onchange_order_id(cr, uid, [], order_id[0], context)['value'])
+                    return_data.update({
+                        'name': self.pool.get('ir.sequence').get(cr, uid, 'okgj.sale.return'),
+                        'sale_order_id':order_id[0],
+                        'invoice_state':'none',
+                        'warehouse_id':warehouse_id,
+                        'by_okgj_shop':True,
+                        'date_planned':time.strftime(DEFAULT_SERVER_DATETIME_FORMAT),})
+                    try:
+                        return_id = sale_return_obj.create(cr, uid, return_data, context=context)
+                    except:
+                        #创建退货单失败,不再继续创建
+                        okgj_api_log_error('Return Order', order_no, 'Fail to create return order and move to done queue!')
+                        redis_check_done(redis_pool, done_table, done_key, done_value)
+                        continue
+                    try:
+                        cr.commit()
+                    except:
+                        continue
+                    _logger.info('Create Return order Succeed, Cancel order %s.', order_no)
+                    self.write(cr, uid, order_id[0], {'okgj_shop_cancel':True}, context=context)
+                    redis_check_done(redis_pool, done_table, done_key, done_value)
+                    try:
+                        sale_return_obj.action_confirm(cr, uid, return_id, context=context)
+                    except:
+                        #确认退换货失败
+                        okgj_api_log_error('Return Order', order_no, 'Fail to confirm return order!')
+                    try:
+                        cr.commit()
+                    except:
+                        continue
+                    _logger.info('Cancel order %s Succeed. Has create return order!', order_no)
+                    remove_value = self.browse(cr, uid, order_id[0], context=context).okgj_shop_order_id
+                    redis_check_done_remove(redis_pool, remove_table, remove_key, remove_value)
+                else:
+                    try:
+                        wf_service.trg_validate(uid, "stock.picking", picking_id[0], 'button_cancel', cr)
+                        #形式发票未进行处理，取消该订单
+                    except:
+                        #取消发货单失败，不再取消
+                        okgj_api_log_error('Sales Order', order_no, 'Cancel picking order failed!')
+                        redis_check_done(redis_pool, done_table, done_key, done_value)
+                        continue
+                    try:
+                        self.action_cancel(cr, uid, order_id, context=context)
+                    except:
+                        #取消销售订单失败，不再取消
+                        okgj_api_log_error('Sales Order', order_no, 'Cancel sale order failed!')
+                        redis_check_done(redis_pool, done_table, done_key, done_value)
+                        continue
+                    _logger.info('Cancel order %s Succeed.', order_no)
+                    redis_check_done(redis_pool, done_table, done_key, done_value)
+                    remove_value = self.browse(cr, uid, order_id[0], context=context).okgj_shop_order_id
+                    redis_check_done_remove(redis_pool, remove_table, remove_key, remove_value)
+            else:
+                try:
+                    self.action_cancel(cr, uid, order_id, context=context)
+                except:
+                    #未出库单，且取消销售订单失败
+                    okgj_api_log_error('Sales Order', order_no, 'Cancel sale order failed!')
+                    redis_check_done(redis_pool, done_table, done_key, done_value)
+                    continue
+                cr.commit()
+                _logger.info('Cancel order %s Succeed.', order_no)
+                redis_check_done(redis_pool, done_table, done_key, done_value)
+                remove_value = self.browse(cr, uid, order_id[0], context=context).okgj_shop_order_id
+                redis_check_done_remove(redis_pool, remove_table, remove_key, remove_value)
+            if count <= 1:
+                count = 10
+                cr.commit()
+        cr.commit()
+        if use_new_cursor:
+            cr.close()
+        return {}
+
+##销售退换货单
+class okgj_sale_return_order_api(osv.osv):
+    _inherit = 'okgj.sale.return'
+    _columns = {
+        'add_time': fields.datetime(u'退货时间', readonly=True, select=True),
+        'confirm_time':fields.datetime(u'确认时间'),
+        'mobile':fields.char(u'手机', size=16),
+        ##'order_id':fields.char(u'原销售订单ID', size=32),
+        'log_time': fields.datetime(u'客服记录时间', readonly=True, select=True),
+        'picking_policy': fields.selection([
+            ('direct', 'Deliver each product when available'),
+            ('one', 'Deliver all products at once')
+            ], 'Shipping Policy', required=True),
+        'return_type':fields.selection([
+            ('1', u'退货单'),
+            ('2', u'换货单'),
+            ('3', u'退换货单'),
+            ], u'单据类型', required=True),
+        'refund_type':fields.selection([
+            ('0', u'不需要'),
+            ('1', u'需要退款'),
+            ], u'退款', required=True),
+        'region_name':fields.text(u'收货区域'),
+        'return_time':fields.text(u'退换次数'),
+        ## 'status':fields.selection([
+        ##     ('1', u'需要退款'),
+        ##     ('2', u'不需要'),
+        ##     ], u'订单状态', required=True),
+        'total_fee': fields.float(u'总费用', digits_compute=dp.get_precision('Product Price')),
+        'okgj_user_id':fields.char(u'会员账号', size=32),
+        'by_okgj_shop':fields.boolean(u'商城下单', readonly=True),
+    }
+        
+    _defaults = {
+        'return_type': '1',
+        'refund_type':'1',
+        'picking_policy':'one',
+    }
+
+    def okgj_sale_return_order_cron(self, cr, uid, use_new_cursor=False, context=None):
+        if context is None:
+            context = {}
+        if use_new_cursor:
+            cr = pooler.get_db(use_new_cursor).cursor()
+        redis_table = "get_order_return_list"
+        done_table = "get_order_return_list_done"
+        remove_table = "do_order_return_queue_remove"
+        detail_table = "get_order_return_detail"
+        done_key = "back_id"
+        remove_key = "back_id"
+        p_column = "answer"
+        order_str_datas = redis_get(redis_pool, redis_table, done_table, detail_table, p_column)
+        product_obj = self.pool.get('product.product')
+        wf_service = netsvc.LocalService("workflow")
+        sale_obj = self.pool.get('sale.order')
+        sale_line_obj = self.pool.get('sale.order.line')
+        count = 10
+        for one_order_str in order_str_datas:
+            count -= 1
+            one_order_dict = json.loads(one_order_str)
+            order_sn = one_order_dict['order_info']['order_sn']
+            okgj_api_log_error('Return Order', order_sn, 'start processing!')
+            if isinstance(order_sn, (int, long)):
+                order_sn = str(order_sn)
+            done_value = one_order_dict['order_info']['back_id']
+            remove_value = one_order_dict['order_info']['back_id']
+            sale_order_id = sale_obj.search(cr, uid, [('name', '=', order_sn)], context=context)
+            if not sale_order_id:
+                #未找到源销售订单，需在下次继续创建
+                okgj_api_log_error('Return Order', order_sn, 'Failed to fetch sale order, not found, will move to done queue!')
+                continue
+            if len(sale_order_id) != 1:
+                #找到多个销售订单
+                okgj_api_log_error('Return Order', order_sn, 'More sale order found!')
+                redis_check_done(redis_pool, done_table, done_key, done_value)
+                continue
+            vals = {}
+            vals.update({
+                'action_note' : (one_order_dict['order_action'] and one_order_dict['order_action'][0]['action_note']) or None,
+                'date_planned':(datetime.datetime.fromtimestamp(one_order_dict['order_action'][0]['log_time']) + relativedelta(hours=8)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                #time.strftime(DEFAULT_SERVER_DATETIME_FORMAT, time.localtime(one_order_dict['order_action'][0]['log_time'])) or None,
+                'action_return_type' : one_order_dict['order_action'][0]['action_note'] or None,
+                'return_status' : one_order_dict['order_action'][0]['status'] or None,
+                'sale_order_id' : sale_order_id[0],
+                'address' : one_order_dict['order_info']['order_id'],
+                'name' : one_order_dict['order_info']['back_id'],
+                'best_time' : one_order_dict['order_info']['best_time'],
+                'confirm_time' : (datetime.datetime.fromtimestamp(one_order_dict['order_info']['confirm_time']) + relativedelta(hours=8)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                #time.strftime(DEFAULT_SERVER_DATETIME_FORMAT, time.localtime(one_order_dict['order_info']['confirm_time'])) or None,
+                'consignee':one_order_dict['order_info']['consignee'],
+                'picking_policy' : 'one',
+                'mobile' : one_order_dict['order_info']['mobile'],
+                'refund_amount' : one_order_dict['order_info']['refund_amount'],
+                'refund_type' : str(one_order_dict['order_info']['refund_type']),
+                'return_type' : str(one_order_dict['order_info']['return_type']),
+                #'refund_name' : one_order_dict['order_info']['refund_name'] or None,
+                'return_info' : one_order_dict['order_info']['return_info'],
+                'return_time' : one_order_dict['order_info']['return_time'],
+                'shipping_fee' : one_order_dict['order_info']['shipping_fee'],
+                ## 'status' : one_order_dict['order_info']['status'],
+                'tel' : one_order_dict['order_info']['tel'],
+                'okgj_user_id' : one_order_dict['order_info']['user_id'],
+                'total_fee' : one_order_dict['order_info']['total_fee'],
+                'warehouse_id' : 1, #大家以后一起跟着商城跑
+                'by_okgj_shop':True
+                })
+            status = one_order_dict['order_action'][0]['return_type']
+            old_order_lines = []
+            new_order_lines = []
+            for one_product in one_order_dict['product_list']:
+                goods_sn = one_product['goods_sn']
+                if isinstance(goods_sn, (int, long)):
+                    goods_sn = str(goods_sn)
+                product_id = product_obj.search(cr, uid, [('default_code', '=', goods_sn)], context=context)
+                if isinstance(product_id, (long, int)):
+                    product_id = [product_id]
+                if len(product_id) != 1:
+                    okgj_api_log_error('Product', goods_sn, 'Failed to fetch product, not found!')
+                    continue
+                uom_id = product_obj.browse(cr, uid, product_id[0], context=context).uom_id.id
+                origin_line_id = sale_line_obj.search(cr, uid, [('order_id', '=', sale_order_id[0]), ('product_id', '=', product_id[0])], context=context)
+                price_unit = sale_line_obj.browse(cr, uid, origin_line_id[0], context=context).price_unit
+                old_order_lines.append((0, 0, {
+                    'product_id':product_id[0],
+                    'product_uom':uom_id,
+                    #'name':one_product['goods_name'],
+                    'price_unit' : price_unit or 0,
+                    'product_qty' : one_product['send_number']}))
+                if status == 2:
+                    new_order_lines.append((0, 0, {
+                        'product_id':product_id[0],
+                        'product_uom':uom_id,
+                        #'name':one_product['goods_name'],
+                        'price_unit' : price_unit or 0,
+                        'product_qty' : one_product['send_number']}))
+            vals.update({'invoice_state':'none', 'old_line_ids':old_order_lines,'new_line_ids':new_order_lines})
+            try:
+                okgj_sale_return_order_id = self.create(cr, uid, vals, context=context)
+            except:
+                #退换货单创建失败，不再创建
+                okgj_api_log_error('Return Order', order_sn, 'Failed to create sale return order!')
+                redis_check_done(redis_pool, done_table, done_key, done_value)
+                continue
+            try:
+                cr.commit()
+            except:
+                continue
+            _logger.info('Get return order %s succeed!', order_sn)
+            redis_check_done(redis_pool, done_table, done_key, done_value)
+            redis_check_done_remove(redis_pool, remove_table, remove_key, remove_value)
+            try:
+                self.action_confirm(cr, uid, okgj_sale_return_order_id, context=context)
+            except:
+                #退换货确认失败
+                okgj_api_log_error('Return Order', order_sn, 'Failed to confirm sale return order!')
+            if count <= 1:
+                count = 10
+                cr.commit()
+        cr.commit()
+        if use_new_cursor:
+            cr.close()
+        return {}
+
+            #wf_service.trg_validate(uid, "okgj.sale.return.order", okgj_sale_order_id, 'order_confirm', cr)
+
+##库存变化, do_stock_in, do_stock_out
+class okgj_stock_move_api(osv.osv):
+    _inherit = 'stock.move'
+    def action_done(self, cr, uid, ids, context=None):
+        super(okgj_stock_move_api, self).action_done(cr, uid, ids, context=context)
+        uom_obj = self.pool.get('product.uom')
+        warehouse_obj = self.pool.get('stock.warehouse')
+        warehouse_ids = warehouse_obj.search(cr, uid, [], context=context)
+        okgj_lot_stock_dict = {}
+        for one_warehouse in warehouse_obj.browse(cr, uid, warehouse_ids, context=context):
+            okgj_lot_stock_dict.update({one_warehouse.lot_stock_id.id : one_warehouse.id})
+        #数据结构 {warehouse_id:{product_default_code:product_qty}}
+        location_ids = okgj_lot_stock_dict.keys()
+        final_in_qty_data = {}
+        final_out_qty_data = {}
+        final_erp_out_qty_data = {}
+        for one_move in self.browse(cr, uid, ids, context=context):
+            if one_move.location_id.id != one_move.location_dest_id.id:
+                #商城下单销售出库
+                if one_move.location_id.id in location_ids:
+                    if (one_move.picking_id.sale_id.by_okgj_shop) or (one_move.picking_id.sale_return_id.by_okgj_shop) :
+                        product_goods_no = one_move.product_id.default_code
+                        product_base_uom = one_move.product_id.uom_id.id
+                        move_uom = one_move.product_uom.id
+                        product_real_qty = one_move.product_qty
+                        if product_base_uom != move_uom:
+                            product_real_qty = uom_obj._compute_qty(cr, uid, move_uom, one_move.product_qty, product_base_uom)
+                        warehouse_id = okgj_lot_stock_dict[one_move.location_id.id]
+                        if not final_out_qty_data.get(warehouse_id, False):
+                            final_out_qty_data[warehouse_id] = {}
+                        if not final_out_qty_data[warehouse_id].get(product_goods_no, False):
+                            final_out_qty_data[warehouse_id][product_goods_no] = product_real_qty
+                        else:
+                            final_out_qty_data[warehouse_id][product_goods_no] += product_real_qty
+                    else:
+                        product_goods_no = one_move.product_id.default_code
+                        product_base_uom = one_move.product_id.uom_id.id
+                        move_uom = one_move.product_uom.id
+                        product_real_qty = one_move.product_qty
+                        if product_base_uom != move_uom:
+                            product_real_qty = uom_obj._compute_qty(cr, uid, move_uom, one_move.product_qty, product_base_uom)
+                        warehouse_id = okgj_lot_stock_dict[one_move.location_id.id]
+                        if not final_erp_out_qty_data.get(warehouse_id, False):
+                            final_erp_out_qty_data[warehouse_id] = {}
+                        if not final_erp_out_qty_data[warehouse_id].get(product_goods_no, False):
+                            final_erp_out_qty_data[warehouse_id][product_goods_no] = product_real_qty
+                        else:
+                            final_erp_out_qty_data[warehouse_id][product_goods_no] += product_real_qty
+                #入库
+                if one_move.location_dest_id.id in location_ids:
+                    product_goods_no = one_move.product_id.default_code
+                    product_base_uom = one_move.product_id.uom_id.id
+                    move_uom = one_move.product_uom.id
+                    product_real_qty = one_move.product_qty
+                    if product_base_uom != move_uom:
+                        product_real_qty = uom_obj._compute_qty(cr, uid, move_uom, one_move.product_qty, product_base_uom)
+                    warehouse_id = okgj_lot_stock_dict[one_move.location_dest_id.id]
+                    if not final_in_qty_data.get(warehouse_id, False):
+                        final_in_qty_data[warehouse_id] = {}
+                    if not final_in_qty_data[warehouse_id].get(product_goods_no, False):
+                        final_in_qty_data[warehouse_id][product_goods_no] = product_real_qty
+                    else:
+                        final_in_qty_data[warehouse_id][product_goods_no] += product_real_qty 
+        #开始提交,后期将与接口协商物流中心处理
+        out_table = "do_stock_out"
+        erp_out_table = "do_erp_stock_out"
+        in_table = "do_stock_in"
+        p_key = "goods_no"
+        for one_out_warehouse in final_out_qty_data.keys():
+            for one_goods_no in final_out_qty_data[one_out_warehouse].keys():
+                p_value = one_goods_no + '_' + uuid.uuid4().hex
+                arg = {"out_count": int(final_out_qty_data[one_out_warehouse][one_goods_no])}
+                redis_do(redis_pool, out_table, p_key,  p_value, arg)
+        for one_erp_out_warehouse in final_erp_out_qty_data.keys():
+            for one_goods_no in final_erp_out_qty_data[one_erp_out_warehouse].keys():
+                p_value = one_goods_no + '_' + uuid.uuid4().hex
+                arg = {"out_count": int(final_erp_out_qty_data[one_erp_out_warehouse][one_goods_no])}
+                redis_do(redis_pool, erp_out_table, p_key,  p_value, arg)
+        for one_in_warehouse in final_in_qty_data.keys():
+            for one_goods_no in final_in_qty_data[one_in_warehouse].keys():
+                p_value = one_goods_no + '_' + uuid.uuid4().hex
+                arg = {"in_count":int(final_in_qty_data[one_in_warehouse][one_goods_no])}
+                redis_do(redis_pool, in_table, p_key, p_value, arg)
+        return True

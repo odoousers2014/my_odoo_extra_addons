@@ -1,0 +1,158 @@
+# -*- coding: utf-8 -*-
+from openerp.osv import fields, osv
+import openerp.addons.decimal_precision as dp
+from openerp.tools.translate import _
+import openerp.tools.config as config
+
+class okgj_stock_out_verify(osv.osv_memory):
+    _name = "okgj.stock.out.verify"
+okgj_stock_out_verify()
+
+class okgj_stock_out_verify_line(osv.osv_memory):
+    _name = "okgj.stock.out.verify.line"
+    _columns = {
+        'verify_id':fields.many2one('okgj.stock.out.verify', 'Verify'),
+        'product_id':fields.many2one('product.product', u'商品'),
+        'product_qty':fields.float(u'出库数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_verify_qty':fields.float(u'复核数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_extra_qty':fields.float(u'外挂数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_diff_qty':fields.float(u'差异数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+    }
+okgj_stock_out_verify_line()
+
+class okgj_stock_out_verify(osv.osv_memory):
+    _inherit = "okgj.stock.out.verify"
+    _columns = {
+        'name':fields.char(u'出库单号', size=64),
+        'sale_order_id':fields.many2one('sale.order', u'销售订单'),
+        'picking_id':fields.many2one('stock.picking.out', u'拣货复核单'),
+        'okgj_box':fields.text(u'箱号', size=128, help=u'物流箱号，每行一个'),
+        'goods_weight':fields.float(u'商品重量', digits_compute=dp.get_precision('Product Unit of Measure'), readonly=True),
+        'all_weight':fields.float(u'含箱重量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        ## 'extra_ids':fields.one2many('okgj.stock.picking.extra', 'picking_id', u'外挂'),
+        'scan_type': fields.selection([
+            ('1', u'复核扫描'),
+            ('2', u'外挂扫描'),
+            ], u'扫描方式', required=True),
+        'product_qty': fields.integer(u'商品数量'),
+        'product_uom': fields.many2one('product.uom', 'Product Unit of Measure'),
+        'ean':fields.char(u'商品条码', size=64),
+        'move_ids':fields.one2many('okgj.stock.out.verify.line', 'verify_id', u'明细行'),
+        'inv_amount': fields.float(u'开票金额', digits_compute=dp.get_precision('Product Price'), readonly=True),
+        'inv_content':fields.text(u'发票内容', readonly=True),
+        'inv_payee':fields.text(u'发票抬头', readonly=True),
+        'inv_state': fields.selection([
+            ('1', u'未开票'),
+            ('2', u'已开票'),
+            ('3', u'发票已退回'),
+            ], u'开票状态', readonly=True),
+        'inv_type': fields.selection([
+            ('1', u'普通发票'),
+            ('2', u'增值税发票'),
+            ], u'开票种类', readonly=True),
+        'state': fields.selection([
+            ('draft', 'Draft'),
+            ('done', 'Done'),
+            ], 'State', required=True, readonly=True),
+    }
+    
+    _defaults = {
+        'scan_type': lambda x, y, z, c: '1',
+        'state': lambda x, y, z, c: 'draft',
+    }
+
+    def onchange_name(self, cr, uid, ids, name=False, context=None):
+        """ On change of name
+        @return: Dictionary of values
+        """
+        if (not name):
+            return {}
+        if name:
+            picking_obj = self.pool.get('stock.picking')
+            mov_obj = self.pool.get('stock.move')
+            sale_obj = self.pool.get('sale.order')
+            picking_ids = picking_obj.search(cr, uid, [('name', '=', name)], context=context)
+            if not picking_ids:
+                warning = {
+                    'title': _('未找到匹配的销售订单'),
+                    'message': name,
+                }
+                return {'warning':warning}
+            if isinstance(picking_ids, (int, long)):
+                picking_ids = [picking_ids]
+            if len(picking_ids) != 1:
+                warning = {
+                    'title': _('找到多个匹配的销售订单'),
+                    'message': name,
+                }
+                return {'warning':warning}
+            picking_data = self.browse(cr, uid, picking_ids, context=context)
+            vals = {}
+            vals.update({
+                'sale_id': picking_data.sale_id.id,
+                'inv_amount' : picking_data.sale_id.inv_amount,
+                'inv_content' : picking_data.sale_id.inv_content,
+                'inv_payee' : picking_data.sale_id.inv_payee,
+                'inv_type' : picking_data.sale_id.inv_type,
+                'inv_state' : picking_data.sale_id.inv_state,
+                'goods_weight' : picking_data.sale_id.order_weight,
+                'all_weight' : goods_weight + config.get(float('okgj_box_weight', '2.6'))})
+            move_ids = []
+            for one_line in picking_data:
+                move_ids.append([(0, 0, {
+                    'product_id':one_line.product_id,
+                    'product_qty':one_line.product_qty,
+                    'product_verify_qty':0,
+                    'product_extra_qty':0,
+                    'product_diff_qty':one_line.product_qty,})])
+            vals.update({'move_ids':move_ids})
+        return {'value': vals}
+
+    def onchange_ean(self, cr, uid, ids, scan_type=False, product_qty=False, ean=False, move_ids=False, context=None):
+        """ On change of ean
+        @return: Dictionary of values
+        """
+        if not ean:
+            return {}
+        #TODO:测试move_ids数据结构
+        line_obj = self.pool.get('okgj.stock.out.verify.line')
+        lines_data = line_obj.browse(cr, uid, move_ids, context=context)
+        move_ids = []
+        has_product = False
+        for one_line in lines_data:
+            all_qty = one_line.product_qty
+            verify_qty = one_line.product_verify_qty
+            diff_qty = one_line.product_diff_qty
+            extra_qty = one_line.product_extra_qty
+            if one_line.product_id.default_code == ean: #EAN与编码相同
+                has_product = True
+                if scan_type == '1':
+                    verify_qty = verify_qty + product_qty
+                    diff_qty = all_qty - verify_qty
+                elif scan_type == '2':
+                    extra_qty = one_line.product_extra_qty + product_qty
+                else:
+                    return {'warning':{'title':_('未知扫描方式'), 'message':_('请选择扫描方式')}}
+            move_ids.append([(0, 0, {
+                'product_id':one_line.product_id,
+                'product_qty':all_qty,
+                'product_verify_qty':verify_qty,
+                'product_extra_qty':extra_qty,
+                'product_diff_qty':diff_qty,})])
+        if has_product:
+            return {'value': {'move_ids':move_ids}}
+        else:
+            return {'warning':{'title':_('条码错误'), 'message':_('未找到相应商品')}}
+
+    def action_done(self, cr, uid, ids, context=None):
+        picking_obj = self.pool.get('stock.picking')
+        for one_verify in self.browse(cr, uid, ids, context=context):
+            for one_line in one_verify.move_ids:
+                if one_line.diff != 0:
+                    raise osv.except_osv(_('错误!'), _(u"商品'%s'有差异，无法进行复核确认.") % (one_line.product_id.name))
+            #TODO: 写入箱与外挂信息，need confirm this step
+            picking_obj.write(cr, uid, one_verify.picking_id.id.id, {}, context=context)
+            picking_obj.action_done(cr, uid, one_verify.picking_id.id, context=context)
+        return True
+okgj_stock_out_verify()
+

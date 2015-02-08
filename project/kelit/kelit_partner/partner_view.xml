@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+        <!--Partner Tree View -->
+        <record model="ir.ui.view" id="partner_normal_tree_view_kelit">
+			<field name="name">partner_normal_tree_view_kelit</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_tree" />
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+		        <xpath expr="//field[@name='user_id']" position="replace">
+                    <field name="city" string="City"/>
+                    <field name="state_id" string="State"/>
+                    <field name="user_id" string="Salesman"/>
+                    <field name="categ_id" string="Tag"/>
+                <!--      <field name="section_id" string="Office"/>  -->
+		        </xpath>
+		        
+		        
+		        
+            </field>
+        </record> 
+        
+        <!--Partner Search -->           
+        <record model="ir.ui.view" id="partner_normal_search_view_kelit">
+			<field name="name">partner_normal_search_view_kelit</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_res_partner_filter" />
+			<field name="arch" type="xml">
+
+				<xpath expr="//field[@name='user_id']" position="after">
+                    <field name="section_id"/>
+                </xpath>
+                <xpath expr="//filter[@string='Salesperson']" position="replace">
+                    <filter string="Salesman" icon="terp-personal" domain="[]" context="{'group_by' : 'user_id'}" />
+                    <filter string="City" icon="terp-personal" domain="[]" context="{'group_by' : 'city'}" />
+                    <filter string="State" icon="terp-personal" domain="[]" context="{'group_by' : 'state_id'}" />
+                    <filter string="Tag" icon="terp-personal" domain="[]" context="{'group_by' : 'categ_id'}" />
+                <!--  	<filter string="Office" icon="terp-personal+" domain="[]" context="{'group_by' : 'section_id'}"/>  -->
+                </xpath>
+            </field>
+        </record>
+        
+        <!--Redefine Partner View Default Order -->
+        <record id="base.action_partner_form_view1" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="base.res_partner_kanban_view"/>
+            <field name="act_window_id" ref="base.action_partner_form"/>
+        </record>
+        <record id="base.action_partner_form_view2" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="base.view_partner_form"/>
+            <field name="act_window_id" ref="base.action_partner_form"/>
+        </record>
+        <record id="base.action_partner_tree_view1" model="ir.actions.act_window.view">
+            <field name="sequence" eval="0"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="base.view_partner_tree"/>
+            <field name="act_window_id" ref="base.action_partner_form"/>
+        </record>
+      
+ 
+        <!--Jon res/partner flitter default is_company = True -->
+        <record id="base.action_partner_form" model="ir.actions.act_window">
+            <field name="name">Customers</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="context">{"search_default_customer":1,"search_default_type_company":1}</field>
+            <field name="search_view_id" ref="base.view_res_partner_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to add a contact in your address book.
+              </p><p>
+                OpenERP helps you easily track all activities related to
+                a customer; discussions, history of business opportunities,
+                documents, etc.
+              </p>
+            </field>
+        </record>
+        
+        
+        <!--jon  Partner Form View   some info  only visible for  sale manager  -->   
+		<record model="ir.ui.view" id="view_partner_form_kelit">
+			<field name="name">res.partner.form.kelit</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form" />
+			<field name="arch" type="xml">
+                <field name="customer" position="attributes">
+                    <attribute name="groups">base.group_sale_manager</attribute>
+                </field>
+                <field name="supplier" position="attributes">
+                    <attribute name="groups">base.group_sale_manager</attribute>
+                </field>
+                
+                <field name="state_id" position="attributes">
+                    <attribute name="widget">selection</attribute>
+                </field>
+                
+                <field name="active" position="attributes">
+                    <attribute name="groups">base.group_sale_manager</attribute>
+                </field>
+                
+                <page string="Sales &amp; Purchases"  position="attributes">
+					<attribute name="groups">base.group_sale_manager,base.group_purchase_manager</attribute>
+                </page>
+                
+                <page string="History" position="attributes">
+                	<attribute name="groups">base.group_system</attribute>
+                </page>
+                
+		        <xpath expr="//field[@name='category_id']" position="attributes">
+		        	<attribute name='invisible'>1</attribute>
+		        </xpath>
+		        <xpath expr="//field[@name='category_id']" position="after">
+		        	<field name="categ_id" widget='selection' placeholder="Tags..."/>
+		        </xpath>
+                
+                
+                
+                
+            </field>
+        </record> 
+        
+        <!--jon  Partner Form View   property_product_pricelist  only visible for sale manager  -->
+        <record id="product.view_partner_property_form" model="ir.ui.view">
+            <field name="name">res.partner.product.property.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <page string="Sales &amp; Purchases" position="inside">
+                    <group>
+                        <group name="pricelists" >
+                            <field name="property_product_pricelist" groups="base.group_sale_manager" widget="selection"/>
+                        </group>
+                    </group>
+                </page>
+            </field>
+        </record>
+        <!--jon  Partner Form View   property_product_pricelist_purchase  only visible for sale manager  -->
+        <record id="purchase.view_partner_property_form" model="ir.ui.view">
+            <field name="name">res.partner.purchase.property.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority">36</field>
+            <field name="arch" type="xml">
+                <field name="property_product_pricelist" position="after">
+                    <field name="property_product_pricelist_purchase" groups="base.group_sale_manager" widget="selection"/>
+                </field>
+            </field>
+        </record>
+        <!--jon  Partner Form View   notification_email_send  only visible for sale manager  -->
+        <record id="mail.view_emails_partner_info_form" model="ir.ui.view">
+            <field name="name">res.partner.emails.info.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='active']" position="after">
+                    <field name='notification_email_send' groups="base.group_sale_manager"/>
+                </xpath>
+                <xpath expr="//sheet" position="after">
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread" options='{"thread_level": 1}'/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+        <!--jon  Partner Form View   opt_out  only visible for sale manager  -->
+        <record model="ir.ui.view" id="email_template.res_partner_opt_out_form">
+            <field name="name">res.partner.opt_out.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='active']" position="after">
+                    <field name="opt_out" groups="base.group_sale_manager"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <!--jon  Partner Form View   property_stock_customer and property_stock_customer  only visible for stock manager  -->
+        <record id="stock.view_partner_property_form" model="ir.ui.view">
+            <field name="name">res.partner.stock.property.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="product.view_partner_property_form"/>
+            <field name="arch" type="xml">
+                <group name="pricelists" position="after">
+                    <group groups="stock.group_locations">
+                        <field name="property_stock_customer" domain="[('usage','=','customer')]" groups="stock.group_stock_manager" widget="selection"/>
+                        <field name="property_stock_supplier" domain="[('usage','=','supplier')]" groups="stock.group_stock_manager" widget="selection"/>
+                    </group>
+                </group>
+            </field>
+        </record>
+        
+       <!--  res.partner page  Accounting visible for manage   jon.chow#elico-corp.com May 15, 2013-->
+       <record model="ir.ui.view" id="inherit_account_view_partner_property_form">
+            <field name="name">inherit_account_view_partner_property_form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="arch" type="xml">
+                <page string="Accounting"  position="attributes">
+					<attribute name="groups">base.group_sale_manager,base.group_purchase_manager,account.group_account_manager</attribute>
+                </page>
+
+            </field>
+        </record>
+	  
+		     
+    </data>
+</openerp>

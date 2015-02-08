@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	
+	<record id="okgj.view_okgj_sale_more_form" model="ir.ui.view">
+            <field name="name">view.okgj.sale.more.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+		    <button name="okgj_sale_order_cron"  string="导入订单" type="object"/>
+		    <button name="okgj_sale_order_cancel_cron"  string="取消订单" type="object"/>
+                </field>                   
+            </field>
+        </record>
+
+
+	<record id="okgj.view_okgj_sale_return_more_form_temp" model="ir.ui.view">
+            <field name="name">view.okgj.sale.return.more.form.temp</field>
+            <field name="model">okgj.sale.return</field>
+            <field name="inherit_id" ref="okgj.view_okgj_sale_return_form" />
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+		    <button name="okgj_sale_return_order_cron"  string="测试导入退换订单" type="object"/>
+                </field>                   
+            </field>
+        </record>
+
+   </data>
+</openerp>
+
+

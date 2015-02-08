@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<act_window
+			id="excel_product_action"
+			multi="False"
+			key2="client_action_relate"
+			name="新产品导入"
+			res_model="excel.base"
+			view_mode="form"
+			target="new"
+			context="{'default_model':'product','default_replace':'create'}"
+			view_type="form"/>
+		<menuitem 
+			id="excel_porduct_menu"
+			name="新产品导入"
+			parent="purchase.menu_product_in_config_purchase"
+			sequence="3"
+			action="excel_product_action"
+			groups="purchase.group_purchase_manager"/>
+
+	</data>
+</openerp>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>	
+		<record id="yks_excel_base_form_view" model="ir.ui.view">
+			<field name="name">yks.excel.base.form</field>
+			<field name="model">excel.base</field>
+			<field name="arch" type="xml">
+				<form string='新建导入' version="7.0">
+					<group>
+						<group>
+							<group>
+								<field name="file" required="1"/>
+							</group>
+							<group></group>
+							<group>
+								<field name="replace"/>
+								<field name="model" readonly="1"/>
+							</group>							
+						</group>
+					</group>
+					<footer>
+						<button name="apply" string="确认导入" type="object" class="oe_highlight"/> 
+						<button string="取消" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+	</data>
+</openerp>

@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+
+<record id="okgj_field_group_write_tree_view" model="ir.ui.view">
+	<field name="name">okgj.field.group.write.tree</field>
+	<field name="model">okgj.field.group.write</field>         
+	<field name="arch" type="xml">
+	    <tree string="Field Write Groups">
+			<field name="field_id"   groups="base.group_system"/>
+			<field name="group_ids"  groups="base.group_system"/>
+	    </tree>                   
+	</field>
+</record>
+<record id="okgj_field_group_write_form_view" model="ir.ui.view">
+	<field name="name">okgj.field.group.write.form</field>
+	<field name="model">okgj.field.group.write</field>         
+	<field name="arch" type="xml">
+	    <form string="Field Write Groups">
+			<field name="field_id"   groups="base.group_system"/>
+			<field name="group_ids"  groups="base.group_system"/>
+	    </form>                   
+	</field>
+</record>
+
+<record id="action_okgj_field_group_write" model="ir.actions.act_window">
+    <field name="name">action.okgj.field.group.write</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">okgj.field.group.write</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
+<menuitem id="menu_okgj_field_group_write" 
+    parent="base.next_id_9" 
+    name='Field Group Write Access'
+    sequence="100" 
+    groups="base.group_system"
+    action="action_okgj_field_group_write"/>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+</data>
+</openerp>

@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	<!--  客单价统计报表  -->
+    <record id="view_okgj_report_oemproduct_form" model="ir.ui.view">
+        <field name="name">view.okgj.report.oemproduct.form</field>
+        <field name="model">okgj.report.oemproduct</field>
+        <field name="arch" type="xml">
+            <form string="商品统计搜索条件" version="7.0">
+				<group >  
+                    <field name="okgj_iswholeday" on_change="onchange_wholeday(okgj_iswholeday)" string="当天订单" invisible="1"/>
+		</group>
+		<group >  
+                    <field name="okgj_productnumber"/>
+                    <field name="okgj_brand"/>
+					<field name="okgj_includeproduct"/>
+		</group>
+
+		<group colspan="4">  
+		    <field name="first_start_date" attrs="{'readonly': [('okgj_iswholeday','=', True)]}"/>
+		    <field name="first_end_date" attrs="{'readonly': [('okgj_iswholeday','=', True)]}"/>
+		</group>
+                <button name="do_import" string="查询" type="object" class="oe_highlight"/>
+                <field name="line_ids" widget="many2many">
+                    <tree string="商品统计明细" colors="deepskyblue:(okgjproductnumber == '合计');red:(okgjcity == '总计')">
+                        <field name="orderSN"/>
+						<field name="okgjcity"/>
+                        <field name="okgjproductnumber"/>
+                        <field name="okgjproductname"/>
+                        <field name="billcount"/>
+                        <field name="price"/>
+                        <field name="amount"/>
+                        <field name="costprice"/>
+						<field name="totalcost"/>
+                        <field name="grossprofit"/>
+                        <field name="profitrate"/>
+
+                    </tree>
+                </field>
+            </form>
+        </field>
+    </record>
+	<!--  商品统计报表  -->
+    <record id="view_okgj_report_oemproduct_tree" model="ir.ui.view">
+            <field name="name">view.okgj.report.oemproduct.tree</field>
+            <field name="model">okgj.report.oemproduct</field>
+            <field name="arch" type="xml">
+                <tree string="商品统计">
+                    <field name="first_start_date"/>	
+                    <field name="first_end_date"/> 
+                </tree>
+            </field>
+	</record>
+    <record id="view_okgj_report_oemproduct_search" model="ir.ui.view">
+            <field name="name">view.okgj.report.oemproduct.search</field>
+            <field name="model">okgj.report.oemproduct</field>
+            <field name="arch" type="xml">
+                <search string="商品统计">
+					    <!-- field name="productcaterotyname"/>
+			                    <field name="suppliernumber"/>
+					    <field name="productnumber"/>
+			                    <field name="productname"/-->
+                </search>
+            </field>
+	</record>
+
+    
+    <record model="ir.actions.act_window" id="action_okgj_report_oemproduct">
+        <field name="name">单品统计</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="res_model">okgj.report.oemproduct</field>
+    </record>
+    
+        
+    <menuitem name="销售报表管理" 
+      id="okgj.menu_okgj_report_sales"
+      parent="base.menu_reporting"  
+      sequence="8"/>
+
+    <menuitem id="okgj.menu_okgj_report_oemproduct_data" parent="okgj.menu_okgj_report_sales"  
+      name="单品统计"  sequence="60" action="okgj.action_okgj_report_oemproduct"/>
+    
+	<!--menuitem name="销售报表管理" 
+		  id="okgj.menu_okgj_report_sales"
+		  parent="base.menu_reporting"  
+		  sequence="8"/>
+        <menuitem id="okgj.menu_okgj_report_sales_comp" parent="okgj.menu_okgj_report_sales"  
+		  name="销售环比报表"  sequence="50" action="okgj.action_okgj_report_sales_comp"/-->
+    </data>
+</openerp>

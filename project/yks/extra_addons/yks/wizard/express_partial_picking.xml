@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+ 
+    
+    
+    
+    
+</data>
+</openerp>
+
+<!-- 
+<record model="ir.ui.view" id="yks_stock_partial_picking_form_view">
+    <field name="name">yks.stock.partial.picking.form</field>
+    <field name="model">stock.partial.picking</field>
+    <field name="inherit_id" ref="stock.stock_partial_picking_form"/>
+    <field name="arch" type="xml">
+        <field name="move_ids" position="after">
+            <group name="express">
+                <group>
+                    <group>
+                        <field name="delivery_carrier_id"/>
+                        <field name="scan_input" on_change="onchange_scan_input(scan_input,delivery_carrier_id,express_lines)"/>
+                    </group>
+                    <group>
+                      <h4>输出单号后回车，可连续输入多个单号</h4>
+                    </group>
+                </group>
+                <newline/>
+                <group>
+                    <field name="express_lines" nolabel="1">
+                        <tree>
+                            <field name='express_id'/>
+                            <field name="delivery_carrier_id"/>
+                            <field name="scan_input"/>
+                        </tree>
+                        <form>
+                            <field name='express_id'/>"/>
+                        </form>
+                    </field>
+                </group>
+            </group>
+        </field>
+    </field>
+</record>   
+
+ -->

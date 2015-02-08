@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Sequences for 采购退货 -->
+        <record id="seq_type_purchase_return_order" model="ir.sequence.type">
+            <field name="name">Purchase Return </field>
+            <field name="code">okgj.purchase.return</field>
+        </record>
+
+        <record id="seq_purchase_return" model="ir.sequence">
+            <field name="name">Purchase Return</field>
+            <field name="code">okgj.purchase.return</field>
+            <field name="prefix">CGTH</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_type_purchase_return_picking_order" model="ir.sequence.type">
+            <field name="name">Purchase Return Picking</field>
+            <field name="code">okgj.purchase.return.picking</field>
+        </record>
+
+        <record id="seq_purchase_return_picking" model="ir.sequence">
+            <field name="name">Purchase Return Picking</field>
+            <field name="code">okgj.purchase.return.picking</field>
+            <field name="prefix">CGTT</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+
+        <!-- Sequences for 销售退换货 -->
+        <record id="seq_type_sale_return_order" model="ir.sequence.type">
+            <field name="name">Sale Return </field>
+            <field name="code">okgj.sale.return</field>
+        </record>
+
+        <record id="seq_sale_return" model="ir.sequence">
+            <field name="name">Sale Return</field>
+            <field name="code">okgj.sale.return</field>
+            <field name="prefix">XSTTH</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequences for 其它出入库 -->
+        <record id="seq_type_okgj_internal_order" model="ir.sequence.type">
+            <field name="name">Internal Order </field>
+            <field name="code">okgj.picking.internal</field>
+        </record>
+
+        <record id="seq_okgj_internal_order" model="ir.sequence">
+            <field name="name">Internal Order</field>
+            <field name="code">okgj.picking.internal</field>
+            <field name="prefix">QTCRK</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequences for 装车 -->
+        <record id="seq_type_okgj_logistics" model="ir.sequence.type">
+            <field name="name">OKGJ CAR LOGISTICS</field>
+            <field name="code">okgj.logistics</field>
+        </record>
+
+        <record id="seq_okgj_logistics" model="ir.sequence">
+            <field name="name">OKGJ CAR LOGISTICS</field>
+            <field name="code">okgj.logistics</field>
+            <field name="prefix">JC</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequences for 汇拣单 -->
+        <record id="seq_type_okgj_multi_order" model="ir.sequence.type">
+            <field name="name">OKGJ Multi Order</field>
+            <field name="code">okgj.multi.order.print</field>
+        </record>
+
+        <record id="seq_okgj_multi_order" model="ir.sequence">
+            <field name="name">OKGJ Multi Order</field>
+            <field name="code">okgj.multi.order.print</field>
+            <field name="prefix">JH</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</openerp>

@@ -1,0 +1,63 @@
+{
+    "m": {
+        "order_action": [], 
+        "order_id": 139044, 
+        "order_info": {
+            "add_time": 1362955598, //订单生成时间 time.time
+            "address": "abc", //送货地址
+            "best_time": "", //最佳送货时间
+            "bonus": "0.00", //＊ 奖金
+            "bonus_pay": "0.0000", //＊奖金支付
+            "consignee": "万声乐", //收货人
+            "coupon_pay": "0.00", //＊ 优惠金额
+            "district": 707, //＊ 区域编码
+            "email": "", 
+            "goods_amount": "599.60", //商品总价
+            "how_oos": "等待所有商品备齐后再发", //收货要求，就这一种，目前不拆分订单
+            "inv_amount": "599.90", //发票金额
+            "inv_content": "明细", //发票内容
+            "inv_payee": "", //发票抬头
+            "mobile": "15012552215", //手机
+            "money_paid": "0.00", //余额付款
+            "order_amount": "599.90", //订单金额（含运费，减去优惠券等） 与goods_amount（商品金额）有何区别
+            "order_id": 139044, //
+            "order_sn": "2013031168390", //（与order_no一样）
+            "order_status": 1, //＊ 订单状态，有哪几种，各有何意义,我发图给你
+            "order_weight": 21744, //商品总重量
+            "pay_id": 3, //＊ 付款方式，1余额支付，2在线支付，3货到付款
+            "pay_name": "货到付款", //付款方式 ?？有哪几种
+            "pay_status": 0, //？？付款状态（0未付款，1已付款）
+            "pay_time": 0, //付款时间
+            "recharge_bonus": "0.00", //＊乐享奖金
+            "reconment": " ",  //＊ 订单备注
+            "region_id": 707, //＊ 区域编码
+            "region_name": "南山区", //区域名称
+            "send_time_content": "*本次消费乐享奖金:0.00元 *顾客选择送货时间:3月11号(星期一) 下午16:00～晚上22:00 ", 
+            "shipping_fee": "0.30", //物流费（运费+重量费）
+            "shipping_status": 3, //送货状态
+            "sign_building": "", //＊ 标志性建筑
+            "tel": "", 
+            "user_id": 20810, //会员ID
+            "zipcode": "518000" //邮编
+        }, 
+        "order_no": "2013031168390", 
+        "product_list": [
+            {
+                "goods_name": "鲁花压榨一级花生油5.436L", 
+                "goods_number": 4, 
+                "goods_price": "149.90", 
+                "goods_sn": "6916168616233", 
+                "item_weight": 5436, //单位重量还是全部重量?
+                "order_id": 139044
+            }
+        ], 
+        "user_info": {
+            "real_name": "", //真实姓名
+            "user_id": 20810, //用户ID
+            "user_name": "13166666669" //会员号
+        }
+    }, 
+    "s": 1
+}
+
+

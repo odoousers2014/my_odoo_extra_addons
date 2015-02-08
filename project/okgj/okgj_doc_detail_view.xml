@@ -1,0 +1,395 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+
+	<!-- 销售订单 -->
+
+	<record model="ir.ui.view" id="veiw_okgj_sale_order_line_inherit_search">
+		<field name="name">okgj.sale.order.line.search.inherit</field>
+		<field name="model">sale.order.line</field>
+		<field name="arch" type="xml">
+			<search string="Search Sales Order detail">
+				<field name="order_id" string="订单号" />
+				<field name="name_template" string="商品" filter_domain="['|',('name_template','ilike',self),('default_code','ilike',self)]"/>
+				<filter icon="terp-dolar_ok!" string="To Invoice" domain="[('invoiced','&lt;&gt;', 1),('state','=','done')]"  help="Sales Order Lines ready to be invoiced"/>
+                <separator/>
+                <filter string="My Sales Order Lines" icon="terp-personnal" domain="[('salesman_id','=',uid)]" help="Sales Order Lines related to a Sales Order of mine"/>
+				<group expand="0" string="Group By...">
+                	<filter string="Product" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'product_id'}"/>
+                    <filter string="Order" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'order_id'}"/>
+                    <filter string="Salesperson" icon="terp-personal" domain="[]" context="{'group_by':'salesman_id'}"/>
+                    <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
+               </group>
+			</search>
+		</field>
+	</record>
+
+    
+        <record id="sale_order_line_detail_tree2" model="ir.ui.view">
+            <field name="name">sale.order.line.detail.tree2</field>
+            <field name="model">sale.order.line</field>
+            <field name="arch" type="xml">
+                <tree string="销售订单明细">
+                    <field name="order_id" string="订单号"/>
+                    <field name="date_order2"/>
+                    <field name="okgj_city"/>
+                    <field name="product_id"/>
+                    <field name="product_uom" string="单位"/>
+                    <field name="purchase_price" />
+                    <field name="price_unit" />
+                    <field name="product_uom_qty" string="Qty" sum="Total"/>
+                    <field name="price_subtotal"  sum="Total"/>
+                    <field name="state"/>
+                </tree> 
+            </field>
+        </record>
+        
+	<record id="sale_order_line_detail" model="ir.actions.act_window">
+	    <field name="name">销售订单明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="sale_order_line_detail_tree2"/>
+	    <field name="search_view_id" ref="okgj.veiw_okgj_sale_order_line_inherit_search"/>
+	    <field name="domain">[('state','not in',['cancel'])]</field>
+	    <field name="res_model">sale.order.line</field> 
+	</record>
+
+	<menuitem name="销售明细" id="base.sale_order_line" 
+		  parent="base.menu_base_partner" 
+		  sequence="1"/>
+
+	<menuitem name="销售订单明细" id="base.menu_sale_order_line_set" 
+		  parent="base.sale_order_line" 
+		  sequence="11" action="okgj.sale_order_line_detail"/>		    
+	
+	<!-- 采购订单 -->
+        <record id="purchase_order_line_detail_tree2" model="ir.ui.view">
+            <field name="name">purchase.order.line.detail.tree2</field>
+            <field name="model">purchase.order.line</field>
+            <field name="arch" type="xml">
+                <tree string="采购订单明细">
+                    <field name="order_id"/>
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
+                    <field name="partner_id" string="Supplier"/>
+                    <field name="product_id"/>
+                    <field name="product_uom" string="单位"/>
+                    <field name="price_unit"/>
+                    <field name="product_qty" sum="数量总计"/>
+                    <field name="price_subtotal" sum="金额总计"/>
+                    <field name="okgj_note"/>
+                </tree> 
+            </field>
+        </record>
+
+	<record id="purchase_order_line_detail" model="ir.actions.act_window">
+	    <field name="name">采购订单明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="purchase_order_line_detail_tree2"/>
+	    <field name="domain">[('state','in',('confirmed','done'))]</field>
+	    <field name="res_model">purchase.order.line</field> <!-- 	 -->
+	</record>
+
+	<menuitem name="采购明细" id="base.purchase_order_line" 
+		  parent="base.menu_purchase_root" 
+		  sequence="2"/>
+
+	<menuitem name="采购订单明细" id="base.menu_purchase_order_line_set" 
+		  parent="base.purchase_order_line" 
+		  sequence="21" action="okgj.purchase_order_line_detail"/>				
+	
+	<!-- 销售退货 -->	
+	<record id="sale_return_order_old_line_detail_tree" model="ir.ui.view">
+	    <field name="name">okgj.sale.return.old.line.tree</field>
+	    <field name="model">okgj.sale.return.old.line</field>
+	    <field name="arch" type="xml">
+		<tree string="销售退货明细">
+		    <field name="return_order_id" string="申请单号" ></field>
+		    <field name="sale_order_id" />
+		    <field name="product_id" />
+		    <field name="product_uom" string="单位"/>
+		    <field name="price_unit"/>
+		    <field name="product_qty"  sum="Total"/>
+		    <field name="price_subtotal" sum="Total"/>
+		</tree>
+	    </field>
+	</record>
+	
+	<record id="sale_return_order_old_line_detail" model="ir.actions.act_window">
+	    <field name="name">销售退货明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="res_model">okgj.sale.return.old.line</field> <!--  okgj.sale.return.old.line    okgj.sale.return.new.line	-->
+	</record>
+
+	<menuitem name="销售退货明细" id="base.menu_sale_return_order_old_line_set" 
+		  parent="base.sale_order_line" 
+		  sequence="12" action="okgj.sale_return_order_old_line_detail"/>	
+	
+	<record model="ir.ui.view" id="view_okgj_sale_return_old_line_search">
+		<field name="name">okgj.sale.return.old.line.search</field>
+		<field name="model">okgj.sale.return.old.line</field>
+		<field name="arch" type="xml">
+			<search string="Search Sales Retuen Order">
+				<field name="name_template" string="商品" filter_domain="['|',('name_template','ilike',self),('default_code','ilike',self)]"/>
+			</search>
+		</field>
+	</record>
+	
+	<!-- 销售换货 -->	
+	<record id="sale_return_order_new_line_detail_tree" model="ir.ui.view">
+	    <field name="name">okgj.sale.return.new.line.tree</field>
+	    <field name="model">okgj.sale.return.new.line</field>
+	    <field name="arch" type="xml">
+		<tree string="销售换货明细">
+		    <field name="return_order_id" string="申请单号" ></field>
+		    <field name="sale_order_id" />
+		    <field name="product_id" />
+		    <field name="product_uom" string="单位"/>
+		    <field name="price_unit"/>
+		    <field name="product_qty"  sum="Total"/>
+		    <field name="price_subtotal" sum="Total"/>
+		</tree>
+	    </field>
+	</record>	    
+	
+	<record id="sale_return_order_new_line_detail" model="ir.actions.act_window">
+	    <field name="name">销售换货明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="sale_return_order_old_line_detail_tree"/>
+	    <field name="res_model">okgj.sale.return.new.line</field> 
+	</record>
+
+	<menuitem name="销售换货明细" id="base.menu_sale_return_order_new_line_set" 
+		  parent="base.sale_order_line" 
+		  sequence="13" action="okgj.sale_return_order_new_line_detail"/>			      
+	
+	<record model="ir.ui.view" id="view_okgj_sale_return_new_line_search">
+		<field name="name">okgj.sale.return.new.line.search</field>
+		<field name="model">okgj.sale.return.new.line</field>
+		<field name="arch" type="xml">
+			<search string="Search Sales New Order">
+				<field name="name_template" string="商品" filter_domain="['|',('name_template','ilike',self),('default_code','ilike',self)]"/>
+			</search>
+		</field>
+	</record>
+	
+	<!-- 采购退货 -->
+	<record id="purchase_return_order_line_detail_tree" model="ir.ui.view">
+	    <field name="name">okgj.purchase.return.line.tree</field>
+	    <field name="model">okgj.purchase.return.line</field>
+	    <field name="arch" type="xml">
+		<tree string="Purchase Return Order Lines">
+		    <field name="return_order_id" string="单号"></field>
+		    <field name="create_uid"/>
+		    <field name="create_date"/>
+		    <field name="partner_id" string="供应商"/> 
+		    <field name="product_id" />
+		    <field name="product_uom" />
+		    <field name="price_unit"/>
+		    <field name="product_qty" sum="数量总计"/>
+		    <field name="price_subtotal" sum="金额总计"/>
+		</tree>
+	    </field>
+	</record>
+
+	<record id="purchase_return_order_line_detail" model="ir.actions.act_window">
+	    <field name="name">采购退货明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="res_model">okgj.purchase.return.line</field> <!--  	purchase.return.order.line-->
+	</record>
+
+	<menuitem name="采购退货明细" id="base.menu_purchase_return_order_line_set" 
+		  parent="base.purchase_order_line" 
+		  sequence="22" action="okgj.purchase_return_order_line_detail"/>	
+
+	<!-- 采购入库明细 -->		
+        <record id="purchase_stock_in_line_detail_tree2" model="ir.ui.view">
+            <field name="name">purchase.stock.in.line.detail.tree2</field>
+            <field name="model">stock.move</field>
+            <field name="arch" type="xml">
+                <tree string="采购入库明细">
+                    <field name="picking_id" string="出入库单号"/>
+                    <field name="origin" string="单号" />
+                    <field name="date" />
+                    <field name="partner_id" string="Supplier"/>
+                    <field name="product_id"/>
+                    <field name="product_uom" string="单位"/>
+                    <field name="price_unit"/>
+                    <field name="product_qty" sum="数量总计"/>
+                    <field name="state" />
+                </tree> 
+            </field>
+        </record>   
+	
+	<record id="purchase_stock_in_line_detail" model="ir.actions.act_window">
+	    <field name="name">采购入库明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="purchase_stock_in_line_detail_tree2"/>
+	    <field name="domain">[('purchase_line_id','!=',False)]</field>
+	    <field name="res_model">stock.move</field> <!-- 	-->
+	</record>
+
+	<menuitem name="采购入库明细" id="base.menu_purchase_stock_in_line_detail_set" 
+		  parent="base.purchase_order_line" 
+		  sequence="23" action="okgj.purchase_stock_in_line_detail"/>				      
+	
+	<!-- 采购退货出库明细 -->
+
+        <record id="purchase_return_stock_in_line_detail_tree2" model="ir.ui.view">
+            <field name="name">purchase.return.stock.in.line.detail.tree2</field>
+            <field name="model">stock.move</field>
+            <field name="arch" type="xml">
+                <tree string="采购退货出库明细">
+                    <field name="picking_id" string="出入库单号"/>
+                    <field name="date" />
+                    <field name="partner_id" string="Supplier"/>
+                    <field name="product_id"/>
+                    <field name="product_uom" string="单位"/>
+                    <field name="price_unit"/>
+                    <field name="product_qty" sum="数量总计"/>
+                    <field name="state" />
+                </tree> 
+            </field>
+        </record>   
+
+	<record id="purchase_return_stock_out_line_detail" model="ir.actions.act_window">
+	    <field name="name">采购退货出库明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="purchase_return_stock_in_line_detail_tree2"/>
+	    <field name="domain">[('purchase_return_line_id','!=',False)]</field> <!-- 该过滤字段不存在，关联模型是否正确？ -->
+	    <field name="res_model">stock.move</field> <!--  [('purchase_return_line_id','=', False)] 	-->
+	</record>
+
+	<menuitem name="采购退货出库明细" id="base.menu_purchase_return_stock_out_line_detail_set" 
+		  parent="base.purchase_order_line" 
+		  sequence="24" action="okgj.purchase_return_stock_out_line_detail"/>
+	
+	<!--销售出库明细 -->
+
+        <record id="sale_stock_in_line_detail_tree2" model="ir.ui.view">
+            <field name="name">sale.stock.in.line.detail.tree2</field>
+            <field name="model">stock.move</field>
+            <field name="arch" type="xml">
+                <tree string="销售出库明细">
+                    <field name="picking_id" string="出入库单号"/>
+                    <field name="origin" string="单号" />
+                    <field name="date" />
+                    <field name="product_id"/>
+                    <field name="product_uom" string="单位"/>
+                    <field name="price_unit"/>
+                    <field name="product_qty" sum="数量总计"/>
+                    <field name="state" />
+                </tree> 
+            </field>
+        </record>   
+
+	<record id="sale_return_stock_out_line_detail" model="ir.actions.act_window">
+	    <field name="name">销售出库明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="sale_stock_in_line_detail_tree2"/>
+	    <field name="domain">[('sale_line_id','!=',False)]</field> 
+	    <field name="res_model">stock.move</field> <!-- 	-->
+	</record>
+
+	<menuitem name="销售出库明细" id="base.menu_sale_return_stock_out_line_detail_set" 
+		  parent="base.sale_order_line" 
+		  sequence="14" action="okgj.sale_return_stock_out_line_detail"/>
+	
+	<!--销售退货入库明细 -->
+        <record id="sale_return_stock_in_line_detail_tree2" model="ir.ui.view">
+            <field name="name">sale.return.stock.in.line.detail.tree2</field>
+            <field name="model">stock.move</field>
+            <field name="arch" type="xml">
+                <tree string="销售退货出入库明细">
+                    <field name="picking_id" string="出入库单号"/>
+                    <field name="date" />
+                    <field name="product_id"/>
+                    <field name="product_uom" string="单位"/>
+                    <field name="price_unit"/>
+                    <field name="product_qty" sum="数量总计"/>
+                    <field name="state" />
+                </tree> 
+            </field>
+        </record>   
+	
+	<record id="sale_return_stock_out_old_line_detail" model="ir.actions.act_window">
+	    <field name="name">销售退货入库明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="sale_return_stock_in_line_detail_tree2"/>
+	    <field name="domain">[('sale_return_old_line_id','!=',False)]</field> 
+	    <field name="res_model">stock.move</field> <!-- 	-->
+	</record>
+
+	<menuitem name="销售退货人库明细" id="base.menu_sale_return_stock_out_old_line_detail_set" 
+		  parent="base.sale_order_line" 
+		  sequence="15" action="okgj.sale_return_stock_out_old_line_detail"/>
+	
+	<!--销售换货出库明细 -->	
+	<record id="sale_return_stock_out_new_line_detail" model="ir.actions.act_window">
+	    <field name="name">销售换货出库明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="sale_return_stock_in_line_detail_tree2"/>
+	    <field name="domain">[('sale_return_new_line_id','!=',False)]</field> 
+	    <field name="res_model">stock.move</field> <!-- 	-->
+	</record>
+
+	<menuitem name="销售换货出库明细" id="base.menu_sale_return_stock_out_new_line_detail_set" 
+		  parent="base.sale_order_line" 
+		  sequence="16" action="okgj.sale_return_stock_out_new_line_detail"/>
+	
+	<!-- OrderInternal 内部调拨单-->
+	<record id="order_internal_line_detail_tree" model="ir.ui.view">
+	    <field name="name">okgj.order.picking.internal.line.tree</field>
+	    <field name="model">okgj.order.picking.internal.line</field>
+	    <field name="arch" type="xml">
+		<tree string="Order Internal Line Details">
+		    <field name="internal_order_id" string="单号"></field>
+		    <field name="product_id" />
+		    <field name="product_uom" />
+		    <field name="price_unit"/>
+		    <field name="product_qty" sum="Total"/>
+		    <field name="price_subtotal" sum="Total"/>
+		</tree>
+	    </field>
+	</record>
+
+	<record id="order_internal_line_detail" model="ir.actions.act_window">
+	    <field name="name">其它出入库明细</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree</field>
+	    <field name="res_model">okgj.order.picking.internal.line</field> 
+	</record>
+
+	<menuitem name="其它出入库单" id="base.order_internal_line" 
+		  parent="stock.menu_stock_root" 
+		  sequence="5"/>
+
+	<menuitem name="其它出入库明细" id="base.menu_order_internal_line_set" 
+		  parent="base.order_internal_line" 
+		  sequence="50" action="okgj.order_internal_line_detail"/>			      		
+
+    </data>
+</openerp>
+
+

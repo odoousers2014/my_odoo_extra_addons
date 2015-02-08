@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<act_window
+			id="action_excel_account_voucher"
+			multi="False"
+			key2="client_action_relate"
+			name="支付记录导入"
+			res_model="excel.base"
+			view_mode="form"
+			target="new"
+			context="{'default_model':'collection_voucher','default_replace':'create'}"
+			view_type="form"/>
+		<menuitem 
+			id="account_voucher_menu"
+			name="支付记录导入"
+			parent="account.menu_finance_receivables"
+			sequence="1"
+			groups="account.group_account_user"
+			action="action_excel_account_voucher"/>
+
+	</data>
+</openerp>

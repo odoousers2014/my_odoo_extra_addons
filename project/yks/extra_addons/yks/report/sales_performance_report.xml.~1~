@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+	<record model='ir.ui.view' id='wizard_sales_performance_form_view'>
+		<field name='name'>wizard.sales.performance</field>
+		<field name='model'>wizard.sales.performance</field>
+		<field name='arch' type='xml'>
+			<form string='过滤条件' version='7.0'>
+				<group>
+					<group>
+						<field name='old_date'/>
+					</group>
+					<group>
+						<field name='new_date'/>
+					</group>
+				</group>
+				<footer>
+	                <button name="apply" string="确认" type="object" class="oe_highlight" />
+	                or
+	                <button string="Cancel" class="oe_link" special="cancel"/>
+            	</footer>
+			</form>		
+		</field>
+	</record>
+	<record id="sales_performance_report" model='ir.ui.view'>
+	<field name='name'>销售业绩报告</field>
+	<field name='model'>sales.performance.report</field>
+	<field name='arch' type='xml'>
+		<tree string='销售业绩报告'>
+			<field name='sale_uid'/>
+			<field name='type'/>
+			<field name='date_done'/>
+			<field name='product_qty'/>
+			<field name='price_unit'/>
+			<field name='total'/>
+			<field name='sale_id'/>
+			<field name='product_id'/>
+			<field name='location_id'/>
+			<field name="location_dest_id"/>
+		</tree>
+	</field>
+	</record>
+
+	<record id="sales_performance_report_search" model='ir.ui.view'>
+		<field name='name'>sales.performance.report</field>
+		<field name='model'>sales.performance.report</field>
+		<field name='arch' type='xml'>
+			<search string='销售业绩搜索'>
+				<field name='sale_uid' string="业务员" filter_domain="[('sale_uid','ilike',self)]"/>
+				<field name='date_done'/>
+				<group expand='1' string='分组'>
+					<filter string='业务员' name='sale_uid' context="{'group_by':'sale_uid'}"/>
+					<filter string='年' name='year' context="{'group_by':'year'}"/>
+					<filter string='月' name='month' context="{'group_by':'month'}"/>
+					<filter string='日' name='day' context="{'group_by':'day'}"/>
+					<filter string='产品' name='product' context="{'group_by':'product_id'}"/>
+					<filter string='出库' name='type' domain="[('type', '=', 'out')]"/>
+					<filter string='入库' name='type' domain="[('type', '=', 'in')]"/>
+				</group>
+			</search>
+		</field>
+	</record>
+
+	<record model="ir.actions.act_window" id="action_sales_performance_report">
+	    <field name="name">销售业绩报告</field>
+	    <field name="type">ir.actions.act_window</field>
+	    <field name="res_model">sales.performance.report</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree,form</field>
+    </record>
+    <act_window
+    id='wizard_sales_performance_action'
+    multi= "False"
+    key2='client_action_relate'
+    name='销售业绩查询'
+    res_model='wizard.sales.performance'
+    view_mode='form'
+    target='new'
+    context="{'default_sale_uid':uid}"
+    view_type="form"/>
+        
+<menuitem id="menu_sales_performance_report" name="销售业绩报告" parent="base.next_id_64" action="wizard_sales_performance_action" groups="base.group_sale_salesman_all_leads"/>
+	
+
+</data>
+</openerp>

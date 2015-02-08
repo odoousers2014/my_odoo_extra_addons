@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+<record model="ir.ui.view" id="yks_view_delivery_carrier_tree">
+    <field name="name">yks.delivery_carrier.tree</field>
+    <field name="model">delivery.carrier</field>
+    <field name="inherit_id" ref="delivery.view_delivery_carrier_tree"/>
+    <field name="arch" type="xml">
+        <field name="partner_id" position="after">
+           <field name="name_pinyin"/>
+           <field name="code_taobao"/>
+           <field name="code_yhd"/>
+           <field name="code_suning"/>
+           <field name="code_alibaba"/>
+           <field name="code_100"/>
+           <field name="code_36wu"/>
+           <field name="sequence"/>
+        </field>
+    </field>
+</record>
+<record model="ir.ui.view" id="yks_view_delivery_carrier_form">
+    <field name="name">yks.delivery_carrier.form</field>
+    <field name="model">delivery.carrier</field>
+    <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+    <field name="arch" type="xml">
+	    <field name="product_id" position="attributes">
+	       <attribute name="domain">[('type','=','service')]</attribute>
+	    </field>
+	    <field name="product_id" position="after">
+           <field name="code_taobao"/>
+           <field name="code_yhd"/>
+           <field name="code_suning"/>
+           <field name="code_alibaba"/>
+           <field name="code_100"/>
+           <field name="code_36wu"/>
+           <field name="name_pinyin"/>
+           <field name="rule"/>
+           
+	    </field>
+    </field>
+</record>
+
+</data>
+</openerp>

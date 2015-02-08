@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    
+<record id="yks_quickly_shop_establish_from_view" model="ir.ui.view">
+    <field name="name">yks.quickly.shop.establish</field>
+    <field name="model">quickly.shop.establish</field>
+    <field name="arch" type="xml">
+        <form string="Quickly to create a new shop" version="7.0">
+            <group>
+                <field name="name"/>
+            </group>
+            <footer>
+                <button name="apply" string="Apply" type="object" class="oe_highlight" />
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<act_window 
+    id="yks_quickly_shop_establish_action"
+    multi="True"
+    key2="client_action_multi"
+    name="Quick Create Shop"
+    res_model="quickly.shop.establish"
+    src_model="sale.shop"
+    view_mode="form"
+    target="new"
+    view_type="form"/>
+     
+     
+</data>
+</openerp>

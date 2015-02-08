@@ -1,0 +1,564 @@
+#+startup:indent
+#+title:欧科ERP界面开发培训
+#+author:聂春应
+#+options:^:nil
+
+* 第一部分 菜单
+#+begin_src xml
+  <menuitem id="menuitem_id"
+            name="我是菜单"
+            sequence="15"/>
+#+end_src
+关联动作后，name默认为动作(Action)的name
+
+* 添加父级菜单
+#+begin_src xml
+  <menuitem id="menuitem_id"
+            parent="stock.menu_stock_warehouse_mgmt" 
+            name="我是菜单"
+            sequence="15"/>
+#+end_src
+关键字:parent
+
+* 添加权限
+#+begin_src xml
+  <menuitem id="menuitem_id"
+            parent="stock.menu_stock_warehouse_mgmt"
+            name="我是菜单"
+            groups="account.group_account_invoice"
+            sequence="15"/>
+#+end_src
+关键字:groups
+
+* 添加菜单关联动作
+#+begin_src xml
+  <menuitem id="menuitem_id"
+            parent="stock.menu_stock_warehouse_mgmt"
+            name="我是菜单"
+            action="action_id"
+            groups="account.group_account_invoice"
+            sequence="15"/>
+#+end_src
+关键字:action
+
+* 第二部分 动作
+#+begin_src xml
+  <record id="action_okgj_stock_picking_out_more" model="ir.actions.act_window">
+      <field name="name">复核出库</field>
+      <field name="res_model">stock.picking.out</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+  </record>
+#+end_src
+  1. name: 动作名称
+  2. res_model: 关联模型
+  3. view_type:
+	 1) form 可编辑
+	 2) tree 只可看
+  4. view_mode:
+	 1) tree,form 先打开tree，后打开form
+	 2) form,tree 先打开form，后打开tree
+	 3) tree 只有tree
+	 4) form 只有form
+	 5) 另外还有kanban, calendar, graph
+
+* 指定该菜单的限制条件
+#+begin_src xml
+  <record id="action_okgj_stock_picking_out_more" model="ir.actions.act_window">
+      <field name="name">复核出库</field>
+      <field name="res_model">stock.picking.out</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('type','=','out')]</field>
+  </record>
+#+end_src
+  1. domain，可以组合
+	 1) <field name="domain">[('location_dest_id.usage', 'in', ['production']), '|', ('picking_id','=', False), ('picking_id.type', '=', 'internal')]</field>
+	 2) <field name="domain">[('journal_id.type', 'in', ['bank', 'cash']), ('type','=','receipt'), ('partner_id','=',partner_id)]</field>
+
+* 添加环境
+#+begin_src xml
+  <record id="action_okgj_stock_picking_out_more" model="ir.actions.act_window">
+      <field name="name">复核出库</field>
+      <field name="res_model">stock.picking.out</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('type','=','out')]</field>
+      <field name="context">{}</field>
+  </record>
+#+end_src
+  1. 用于指定默认值
+	 1) <field name="context">{'default_type':'receipt', 'type':'receipt', 'partner_id': partner_id, 'default_reference':reference}</field>
+
+* 帮助
+#+begin_src xml
+        <record id="action_okgj_stock_picking_out_more" model="ir.actions.act_window">
+            <field name="name">复核出库</field>
+            <field name="res_model">stock.picking.out</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('type','=','out')]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                点击创建复核出库单
+              </p>
+              <p>
+		  复核出库帮助，将会依据仓库加入更多限制最终只显示复核出库的条目！
+              </p>
+            </field>
+        </record>
+#+end_src
+
+* 关联view
+#+begin_src xml
+  <record id="action_okgj_stock_picking_out_more" model="ir.actions.act_window">
+      <field name="name">复核出库</field>
+      <field name="res_model">stock.picking.out</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_okgj_stock_picking_out_more_search"/>
+      <field name="domain">[('type','=','out')]</field>
+      <field name="context">{}</field>
+      <field name="help" type="html">
+          <p>
+              复核出库帮助，将会依据仓库加入更多限制最终只显示复核出库的条目！
+          </p>
+      </field>
+  </record>
+#+end_src
+  1. search view关联：<field name="search_view_id" ref="view_okgj_stock_picking_out_more_search"/>
+  2. 默认打开view关联：<field name="view_id" ref="view_warehouse_orderpoint_tree"/>
+
+* 更多view关联方式:反向关联
+#+begin_src xml
+  <record id="act_view_okgj_stock_picking_out_more_tree" model="ir.actions.act_window.view">
+      <field eval="1" name="sequence"/>
+      <field name="view_mode">tree</field>
+      <field name="view_id" ref="view_okgj_stock_picking_out_more_tree"/>
+      <field name="act_window_id" ref="action_okgj_stock_picking_out_more"/>
+  </record>
+#+end_src
+
+* 第三部分 视图
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. 视图类型:form, tree, kanban, calendar, gantt, graph
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id"/>
+              <newline/>
+              <field name="product_qty"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. newline 换行
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id" domain="[('type','=','consu')]"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. domain，限制选择范围（关系字段）
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id" domain="[('type','=','consu')]" groups="product.group_purchase_pricelist"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. groups，操作权限
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id" domain="[('type','=','consu')]"  on_change="onchange_pricelist(product_id, context)"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. on_change，该字段变化将调用关联方法，引起其它字段变化
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="warehouse_id" on_change="onchange_warehouse_id(warehouse_id)" widget="selection" groups="stock.group_locations"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. widget，指定该字段在该视图上使用哪种widget
+  2. 常见one2many_list， many2one_list，many2many，many2many_tag, url，email，image，float_time，reference, status_bar……
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id" domain="[('type','=','consu')]" invisible='1'/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. invisible，该字段将不可见
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id" domain="[('type','=','consu')]" invisible='1'/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. invisible，该字段将不可见
+
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="product_id" string="商品" nolabel="1"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. nolabel="1"，不显示该字段分类
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="fiscal_position" attrs="{'readonly': [('invoiced','=', True)]}" />
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. attrs，示例中当条件满足时该字段只读
+  2. attrs的属性: readonly, invisible
+
+* form视图继承
+#+begin_src xml
+  <record id="view_product_supplier_inherit" model="ir.ui.view">
+      <field name="name">product.normal.supplier.form.inherit</field>
+      <field name="model">product.product</field>
+      <field name="inherit_id" ref="product.product_normal_form_view"/>
+      <field name="arch" type="xml">
+          <div name="options" position="inside">
+              <field name="purchase_ok"/>
+          </div>
+          <group name="procurement" position="after">
+              <field name="seller_ids" context="{'uom_id': uom_id}"/>
+          </group>
+          <xpath expr="//field[@name='supplier_taxes_id']" position="replace" >
+              <field name="supplier_taxes_id" colspan="2" widget="many2many_tags" attrs="{'readonly':[('purchase_ok','=',0)]}"/>
+          </xpath>
+  
+      </field>
+  </record>
+#+end_src
+  1. inherit，所继承的视图
+  2. position,位置
+	 1) before 分类前
+	 2) after 分类后
+	 3) replace 替换分类
+	 4) inside 分类里
+  3. xpath定位更精准
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <separator string="商品"/>
+              <field name="product_id" domain="[('type','=','consu')]"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. separator，分隔线
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <label string="商品"/>
+              <field name="product_id" domain="[('type','=','consu')]"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. label，分类
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" class="oe_highlight"/>
+              <field name="product_id" domain="[('type','=','consu')]"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. button，按钮
+	 1) states 在state字段属于该状态时显示，其它状态不显示
+	 2) name  所调用的函数或者工作流
+	 3) string 按钮上所显示的内容
+	 4) type为object时该按钮为方法，为workflow时该按钮为工作流
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <group>
+                  <field name="product_id" domain="[('type','=','consu')]"/>
+                  <field name="product_qty"/>
+              </group>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. group，成组
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <field name="order_line">
+                  <tree string="Purchase Order Lines" editable="bottom">
+                      <field name="product_id" on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
+                      <field name="name"/>
+                  </tree>
+              </field>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. 关联字段展开显示
+  2. editable：botton或者top，在底部增加或顶部增加
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂">
+              <notebook>
+                  <page string="Purchase Order">
+                      <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                  </page>
+                  <page string="Incoming Shipments &amp; Invoices">
+                      <field name="minimum_planned_date"/>
+                  </page>
+              </notebook>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. notebook，页签
+  2. page，里面的一个页签
+
+* form视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_form" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.form</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <form string="外挂" version="7.0">
+              <field name="product_id" domain="[('type','=','consu')]"/>
+          </form>
+      </field>
+  </record>
+#+end_src
+  1. version="7.0" 添加该属性后，增加了许多定制功能，html中的div，header, footer, sheet
+
+* tree视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_tree" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.tree</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <tree string="外挂">
+              <field name="product_id"/>
+          </tree>
+      </field>
+  </record>
+#+end_src
+  1. field, button, 继承等与form类似
+  2. editable中属性同上
+
+* search视图常见属性
+#+begin_src xml
+  <record id="view_okgj_stock_picking_extra_search" model="ir.ui.view">
+      <field name="name">view.okgj.stock.picking.extra.search</field>
+      <field name="model">okgj.stock.picking.extra</field>
+      <field eval="16" name="priority"/>
+      <field name="arch" type="xml">
+          <search string="外挂">
+              <field name="product_id"/>
+              <filter string="Supplier" domain="[]" context="{'group_by':'partner_id'}"/>
+              <filter name="not_invoiced" string="Not Invoiced" domain="[('invoice_ids','=', False)]" help="Purchase orders that include lines not invoiced."/>
+          </search>
+      </field>
+  </record>
+#+end_src
+  1. field常见过滤
+  2. context="{'group_by':'partner_id'}" 按该字段分组
+  3. domain="[('invoice_ids','=', False)]" 按该字段过滤
+  4. string 该过滤名称
+  5. help 该过滤所显示的帮助
+
+* 报表
+#+begin_src python
+  class report_crm_case_user(osv.osv):
+      _name = "report.crm.case.user"
+      _description = "Cases by user and section"
+      _order = 'name desc, user_id, section_id'
+      _auto = False
+      _columns = {
+          'name': fields.date('Month', readonly=True),
+          'user_id':fields.many2one('res.users', 'User',
+                                    readonly=True, relate=True),
+          'section_id':fields.many2one('crm.case.section', 'Section',
+                                       readonly=True, relate=True),
+          'amount_revenue': fields.float('Est.Revenue',
+                                         readonly=True),
+          'amount_costs': fields.float('Est.Cost', readonly=True),
+          'amount_revenue_prob': fields.float('Est. Rev*Prob.',
+                                              readonly=True),
+          'nbr': fields.integer('# of Cases', readonly=True),
+          'probability': fields.float('Avg. Probability',
+                                      readonly=True),
+          'state': fields.selection(AVAILABLE_STATES, 'State',
+                                    size=16, readonly=True),
+          'delay_close': fields.integer('Delay to close',
+                                        readonly=True),
+          }
+#+end_src  
+
+
+* 报表续一
+#+begin_src python
+
+      def init(self, cr):
+          cr.execute("""
+       CREATE OR REPLACE VIEW report_crm_case_user AS (
+       SELECT
+           min(c.id) as id,
+           SUBSTRING(c.create_date for 7)||'-01' as name,
+           c.state,
+           c.user_id,
+           c.section_id,
+           COUNT(*) AS nbr,
+           SUM(planned_revenue) AS amount_revenue,
+           SUM(planned_cost) AS amount_costs,
+           SUM(planned_revenue*probability)::decimal(16,2)
+                AS amount_revenue_prob,
+           avg(probability)::decimal(16,2) AS probability,
+           TO_CHAR(avg(date_closed-c.create_date),
+                   'DD"d" `HH24:MI:SS') AS delay_close
+       FROM
+           crm_case c
+       GROUP BY SUBSTRING(c.create_date for 7), c.state,
+                c.user_id, c.section_id
+       )""")
+  report_crm_case_user()
+#+end_src
+
+* 报表续二
+  1. 定义字段，所有字段都必须添加上readonly=True属性
+  2. 指定参数 _auto=False，以保证不创建该表
+  3. 添加方法 init(self, cr) 创建数据库视图，以匹配_columns中定义的字段
+  4. 创建所需的view与action
+
+* 报表续三
+  1. many2one字段，在many2one字段中添加该字段
+  2. one2many取的是many2one的表
+  3. many2many会新建一张表，新表中有两个字段ID
+  4. function字段与related字段，如果store=True有存储在表中，如果没有store=True，将不在表中存储

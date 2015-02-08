@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="excel_import_orderoint_form_view">
+    <field name="name">yks.excel.import.orderoint.form</field>
+    <field name="model">excel.wizard</field>
+    <field name="sequnece">0</field>
+    <field name="arch" type="xml">
+        <form string="预警规则" version="7.0">
+            <group>
+                <group>
+                <field name="file" required="1"/>
+                <field name="model" required="1" readonly="1"/>
+                </group>
+                <group>
+                </group>
+            </group>
+            <footer>
+                <button name="apply" string="确认导入" type="object" class="oe_highlight" />
+                or
+                <button string="Cancel" class="oe_link" special="cancel"/>
+            </footer>
+        </form>
+    </field>
+</record>
+<act_window
+	id="excel_import_orderoint_action"
+	multi="False"
+	key2="client_action_relate"
+	name="预警规则导入"
+	res_model="excel.wizard"
+	view_mode="form"
+	target="new"
+	context="{'default_model':'orderpoint'}"
+	view_type="form"/>
+<menuitem 
+	id="excel_import_orderoint_menu"
+	name="预警规则导入"
+	parent='purchase.menu_product_in_config_purchase' 
+	sequence="3"
+	action="excel_import_orderoint_action"
+	groups="base.group_sale_salesman_all_leads"
+	 />
+<record model="ir.ui.view" id="excel_wizard_form_view">
+    <field name="name">yks.sync.single.so.form</field>
+    <field name="model">excel.wizard</field>
+    <field name="sequnece">0</field>
+    <field name="arch" type="xml">
+        <form string="组合品导入" version="7.0">
+            <group>
+                <group>
+                <field name="file" required="1"/>
+                <field name="model" required="1" readonly="1"/>
+                </group>
+                <group>
+                </group>
+            </group>
+            <footer>
+                <button name="apply" string="确认导入" type="object" class="oe_highlight" />
+                or
+                <button string="Cancel" class="oe_link" special="cancel"/>
+            </footer>
+        </form>
+    </field>
+</record>
+<record model="ir.ui.view" id="excel_import_product_form_view">
+	<field name="name">yks.excel.import.product.form</field>
+	<field name="model">excel.wizard</field>
+	<field name="sequence">0</field>
+	<field name="arch" type="xml">
+		<form string="新产品导入" version="7.0">
+			<group>
+				<group>
+					<field name='replace' requried="1"/>
+					<field name="file" required="1"/>
+					<field name="model" required="1" readonly="1"/>
+				</group>
+			</group>
+			<footer>
+                <button name="apply" string="确认导入" type="object" class="oe_highlight" />
+                <button string="Cancel" class="oe_link" special="cancel"/>
+            </footer>
+		</form>
+	</field>
+</record>
+
+<act_window
+	id="excel_import_product_action"
+	multi="False"
+	key2="client_action_relate"
+	name="新产品导入"
+	res_model="excel.wizard"
+	view_mode="form"
+	target="new"
+	context="{'default_model':'product'}"
+	view_type="form"/>
+<menuitem 
+	id="excel_import_porduct_menu"
+	name="新产品导入"
+	parent='purchase.menu_product_in_config_purchase' 
+	sequence="3"
+	action="excel_import_product_action"
+	groups="base.group_sale_salesman_all_leads"
+	 />
+
+<act_window
+    id="yks_excel_wizard_action"
+    multi="False"
+    key2="client_action_relate"
+    name="Excel Import"
+    res_model='excel.wizard'
+    view_mode="form"
+    target='new'
+    context="{'default_model':'complex_product'}"
+    view_type="form"/>
+
+<menuitem id="yks_excel_wizard_menu" name="组合品导入"  parent="product.prod_config_main"  sequence="3"
+                  action="yks_excel_wizard_action"  groups='base.group_sale_salesman_all_leads'/>
+
+    
+    
+</data>
+</openerp>

@@ -1,0 +1,225 @@
+# -*- coding: utf-8 -*-
+from openerp import tools
+from openerp.osv import osv, fields
+import time, xlrd, base64
+from openerp.tools.translate import _
+import sys
+           
+class okgj_product_update(osv.osv_memory):
+    _name = "okgj.product.update"
+    _columns = {
+        'excel': fields.binary(u'excel文件', filters='*.xls'),                                                              
+    }
+
+    def cols_data(self,name,colnames):
+        '''获取excel表首行字段的序号 '''
+        if name in colnames:  
+            index = colnames.index(name)                      
+            return index
+        else:
+            return None
+        
+    def search_data(self,cr,uid,obj,name,sheetname,colnames,rx,context=None):
+        '''搜索字段对应的ids '''
+        obj_ids = obj.search(cr, uid, [('name', '=', name)], context=context)
+        if (not obj_ids) or (not name): 
+            raise osv.except_osv(_(u'警告!'), _(u'%s-%s-第%s行为空或者系统不存在此%s!') % (sheetname,colnames , rx+1, colnames))         
+        else:
+            return obj.browse(cr, uid, obj_ids)[0].id  
+        
+    def cell_data(self,cell,sheetname,colnames,rx):
+        '''判断单元格是否为空及转换格式类型 '''
+        if not cell:
+            raise osv.except_osv(_(u'警告!'), _(u'%s-%s-第%s行为空!') % (sheetname,colnames,rx+1)) 
+        else:
+            if isinstance(cell, float):  
+                code = str(int(cell))
+            else:
+                code = str(cell)             
+            return code                    
+     
+    def update_bill(self, cr, uid, ids, context=None):
+        for excel_data in self.browse(cr, uid, ids):   
+            if not excel_data.excel: 
+                raise osv.except_osv(_(u'警告!'), _(u'请上传表格!'))          
+            excel = xlrd.open_workbook(file_contents=base64.decodestring(excel_data.excel))
+            table_product = excel.sheet_by_index(0)
+            table_bom = excel.sheet_by_index(1)                        
+            product_obj = self.pool.get('product.product')   
+            categ_obj = self.pool.get('product.category')  
+            uom_obj = self.pool.get('product.uom')     
+            uom_categ_obj = self.pool.get('product.uom.categ') 
+            product_supplierinfo_obj = self.pool.get('product.supplierinfo')           
+            partnerinfo_obj = self.pool.get('pricelist.partnerinfo')   
+            res_partner_obj =  self.pool.get('res.partner')
+            mrp_bom_obj =  self.pool.get('mrp.bom') 
+            brand_obj =  self.pool.get('okgj.product.brand') 
+                         
+            if table_product:
+                prows = table_product.nrows #行数
+                colnames =  table_product.row_values(0) #某一行数据   
+
+                col_default_code = self.cols_data(u'编号*',colnames)
+
+                import sys
+                sys.stdout=open('/home/ouke/log.txt','a')
+                print 'asdfg'
+                print colnames
+                print isinstance(colnames[0], unicode)
+                print col_default_code                                
+                sys.stdout.close()
+                sys.stdout = sys.__stdout__
+
+
+                col_product_name = self.cols_data('品名',colnames)
+                col_categ = self.cols_data('类别',colnames)
+                col_variants = self.cols_data('规格',colnames) 
+                col_min_qty = self.cols_data('箱规',colnames)
+                col_uom = self.cols_data('单位',colnames) 
+                col_other_price = self.cols_data('市场价',colnames)
+                col_standard_price = self.cols_data('采购价',colnames) 
+                col_list_price = self.cols_data('会员价',colnames)
+                col_brand = self.cols_data('品牌',colnames) 
+                col_place = self.cols_data('产地',colnames)
+                col_ean13 = self.cols_data('条码',colnames) 
+                col_weight = self.cols_data('重量（kg）',colnames)
+                col_okgj_mark = self.cols_data('标记（产品状态）',colnames) 
+                col_okgj_long = self.cols_data('长',colnames)
+                col_okgj_wight = self.cols_data('宽',colnames) 
+                col_okgj_height = self.cols_data('高',colnames)
+                col_okgj_note = self.cols_data('备注',colnames)
+                col_life_time = self.cols_data('商品报废时间',colnames)                 
+                col_use_time = self.cols_data('商品保质期',colnames)   
+                col_alert_time = self.cols_data('禁止入库时间',colnames)                   
+                col_removal_time = self.cols_data('禁止出库时间',colnames)                 
+                col_partner_ref = self.cols_data('合同编号',colnames)   
+                col_partner_name = self.cols_data('供应商名称',colnames)  
+                col_partner_min_qty = self.cols_data('最小订购数',colnames)                                                                                                                                                                                                                                      
+                                                                                                  
+                for rx in range(1,prows): 
+                    row = table_product.row_values(rx)
+                    local_res = {} 
+                    partner_res = {}
+                    count = 200
+
+                    if (col_default_code is 0) or (col_default_code > 0):                                                            
+                        local_res['default_code'] = self.cell_data(table_product.cell(rx, col_default_code).value,'单品表', '编号', rx)
+                    else:
+                        raise osv.except_osv(_(u'警告!'), _(u'编号列必填!')) 
+                    if col_product_name >= 0:
+                        local_res['name'] = self.cell_data(table_product.cell(rx, col_product_name).value,'单品表', '品名', rx)                         
+                    if col_variants >= 0:
+                        local_res['variants'] = self.cell_data(table_product.cell(rx, col_variants).value,'单品表', '规格', rx)                         
+                    if col_min_qty >= 0:
+                        local_res['min_qty'] = self.cell_data(table_product.cell(rx, col_min_qty).value,'单品表', '箱规', rx)                         
+                    if col_other_price >= 0:
+                        local_res['other_price'] = self.cell_data(table_product.cell(rx, col_other_price).value,'单品表', '市场价', rx)
+                    if col_standard_price >= 0:
+                        local_res['standard_price'] = self.cell_data(table_product.cell(rx, col_standard_price).value,'单品表', '采购价', rx)                         
+                    if col_list_price >= 0:
+                        local_res['list_price'] = self.cell_data(table_product.cell(rx, col_list_price).value,'单品表', '会员价', rx)
+                    if col_place >= 0:
+                        local_res['okgj_place'] = self.cell_data(table_product.cell(rx, col_place).value,'单品表', '产地', rx)
+                    if col_ean13 >= 0:
+                        local_res['ean13'] = self.cell_data(table_product.cell(rx, col_ean13).value,'单品表', '条码', rx) 
+                    if col_weight >= 0:
+                        local_res['weight'] = self.cell_data(table_product.cell(rx, col_weight).value,'单品表', '重量（kg）', rx)
+                    if col_okgj_mark >= 0:
+                        local_res['okgj_mark'] = self.cell_data(table_product.cell(rx, col_okgj_mark).value,'单品表', '标记（产品状态）', rx) 
+                    if col_okgj_long >= 0:
+                        local_res['okgj_long'] = self.cell_data(table_product.cell(rx, col_okgj_long).value,'单品表', '长', rx)
+                    if col_okgj_wight >= 0:
+                        local_res['okgj_wight'] = self.cell_data(table_product.cell(rx, col_okgj_wight).value,'单品表', '宽', rx)   
+                    if col_okgj_height >= 0:
+                        local_res['okgj_height'] = self.cell_data(table_product.cell(rx, col_okgj_height).value,'单品表', '高', rx)
+                    if col_okgj_note >= 0:
+                        local_res['okgj_note'] = self.cell_data(table_product.cell(rx, col_okgj_note).value,'单品表', '备注', rx) 
+                    if col_life_time >= 0:
+                        local_res['life_time'] = self.cell_data(table_product.cell(rx, col_life_time).value,'单品表', '商品报废时间', rx)
+                    if col_use_time >= 0:
+                        local_res['use_time'] = self.cell_data(table_product.cell(rx, col_use_time).value ,'单品表', '商品保质期', rx)
+                    if col_alert_time >= 0:
+                        local_res['alert_time'] = self.cell_data(table_product.cell(rx, col_alert_time).value,'单品表', '禁止入库时间', rx)
+                    if col_removal_time >= 0:
+                        local_res['removal_time'] = self.cell_data(table_product.cell(rx, col_removal_time).value,'单品表', '禁止出库时间', rx)  
+                    if col_categ >= 0:
+                        sheet0_categ = table_product.cell(rx, col_categ).value
+                        local_res['categ_id'] = self.search_data(cr, uid, categ_obj, sheet0_categ,'单品表', '类别',rx)
+                    if col_uom >= 0:
+                        sheet0_uom = table_product.cell(rx, col_uom).value
+                        local_res['uom_id'] = self.search_data(cr, uid, uom_obj, sheet0_uom,'单品表', '单位',rx)
+                        local_res['uom_po_id'] = self.search_data(cr, uid, uom_obj, sheet0_uom,'单品表', '单位',rx)                                                
+                    if col_brand >= 0:
+                        sheet0_brand = table_product.cell(rx, col_brand).value
+                        local_res['brand_id'] = self.search_data(cr, uid, brand_obj, sheet0_brand,'单品表', '品牌',rx)
+                                     
+#                   创建或更新商品
+                    product_ids = product_obj.search(cr, uid, [('default_code', '=', local_res['default_code'])], context=context)                                                                          
+                    if not product_ids:                                                                     
+                        raise osv.except_osv(_(u'警告!'), _(u'第%s行产品不存在!') % (rx+1))
+                    else:                   
+                        product_update = product_obj.write(cr,uid,product_ids,local_res, context=context)  
+                        
+                    if col_partner_ref >= 0:
+                        partner_res['ref'] = table_product.cell(rx, col_partner_ref).value                       
+                        res_partner_id = res_partner_obj.search(cr, uid, [('ref', '=', partner_res['ref'])], context=context)
+                        if col_partner_name >= 0:
+                            partner_res['name'] = table_product.cell(rx, col_partner_name).value
+                            res_partner_update = res_partner_obj.write(cr, uid, res_partner_id,partner_res,context=context ) 
+                        else:
+                            raise osv.except_osv(_(u'警告!'), _(u'请加入供应商名称列!')) 
+                    else:
+                         if col_partner_name >= 0:
+                             raise osv.except_osv(_(u'警告!'), _(u'请加入合同编号列!'))    
+                    count -= 1
+                    if count == 0:
+                        cr.commit()
+                        count = 200                                                                          
+
+            if table_bom:        
+                bbrows = table_bom.nrows #行数
+                count = 200 
+                bom_colnames =  table_bom.row_values(0) #某一行数据 
+                col_bom_default_code = self.cols_data(u'组合装编号*',bom_colnames)                 
+                col_bom_product_name = self.cols_data(u'组合装名称',bom_colnames)
+                col_bom_categ = self.cols_data(u'类别',bom_colnames)
+                col_bom_variants = self.cols_data(u'规格',bom_colnames) 
+                col_bom_uom = self.cols_data(u'单位',bom_colnames) 
+                col_other_price = self.cols_data(u'市场价',bom_colnames)  
+                col_list_price = self.cols_data(u'会员价',bom_colnames)                              
+                for rx in range(1,bbrows):                   
+                    bom_res = {}                          
+                    if (col_bom_default_code is 0) or (col_bom_default_code > 0):                                                            
+                        bom_res['default_code'] = self.cell_data(table_bom.cell(rx, col_bom_default_code).value,'组合装编号', '编号', rx)
+                    else:
+                        raise osv.except_osv(_(u'警告!'), _(u'组合装编号列必填!'))                                                                          
+                    if col_bom_product_name >= 0 :
+                        bom_res['name'] = self.cell_data(table_bom.cell(rx, col_bom_product_name).value,'组合品表', '组合装名称', rx)                                            
+                    if col_bom_categ >= 0:
+                        sheet1_categ = table_bom.cell(rx, col_bom_categ).value
+                        bom_res['categ_id'] = self.search_data(cr, uid, categ_obj, sheet1_categ,'组合品表', '类别',rx)                                               
+                    if col_bom_uom >= 0:
+                        sheet1_uom = table_bom.cell(rx, col_bom_uom).value 
+                        bom_res['uom_id'] = self.search_data(cr, uid, uom_obj, sheet1_uom,'组合品表', '单位',rx)                                            
+                    if col_bom_variants >= 0:
+                        bom_res['variants'] = self.cell_data(table_bom.cell(rx, col_bom_variants).value,'组合品表', '规格', rx)                         
+                    if col_other_price >= 0:
+                        bom_res['other_price'] = self.cell_data(table_bom.cell(rx, col_other_price).value,'组合品表', '市场价', rx)
+                    if col_list_price >= 0:
+                        bom_res['list_price'] = self.cell_data(table_bom.cell(rx, col_list_price).value,'组合品表', '会员价', rx)                         
+
+                    bom_product_ids = product_obj.search(cr, uid, [('default_code', '=', bom_res['default_code'])], context=context) 
+                    if not bom_product_ids:
+                        raise osv.except_osv(_(u'警告!'), _(u'第%s行组合品不存在,请在系统创建!') % (rx+1))
+                    else:
+                        bom_product_update = product_obj.write(cr, uid,bom_product_ids, bom_res, context=context)                  
+
+                    count -= 1
+                    if count == 0:
+                        cr.commit()
+                        count = 200
+
+        cr.commit()
+        return {'type': 'ir.actions.act_window_close'}      
+    
+okgj_product_update()

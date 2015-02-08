@@ -1,0 +1,287 @@
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
+from openerp import tools
+from osv import fields, osv
+import openerp.addons.decimal_precision as dp
+import re
+from openerp.tools.translate import _
+
+#仓库，商品分类，品牌，条码，品名
+class okgj_report_adventinv_wizard(osv.osv_memory):
+    _name = "okgj.report.adventinv.wizard"
+    _columns = {
+        'logiscenter_id':fields.many2one('stock.warehouse', u'物流中心',required=True),
+        'warehouse_id':fields.many2one('stock.location', u'仓库',required=True, domain=[('usage','=','internal')]),
+        'category_id':fields.many2one('product.category', u'类别'),
+        #'supplier_id':fields.many2one('res.partner', u'供应商'),
+        'brand_id':fields.many2one('okgj.product.brand', u'品牌'),
+        'product_id':fields.many2one('product.product', u'商品'),
+        'adventdays':fields.integer( u'临期天数'),
+       }
+
+    def action_open_window(self, cr, uid, ids, context=None):
+        """
+            @param cr: the current row, from the database cursor,
+            @param uid: the current user’s ID for security checks,
+            @param ids: the ID or list of IDs if we want more than one
+            @return:
+        """
+        if context is None:
+            context = {}
+        report_data = self.browse(cr, uid, ids, context=context)[0]
+ 
+        logiscenter_id=0
+        warehouse_id=0
+        category_id=0
+        ##supplier_id=0
+        brand_id=0
+        product_id=0
+        advent_days=0
+        
+        if report_data.logiscenter_id:
+            logiscenter_id=report_data.logiscenter_id.id
+        if report_data.warehouse_id:
+             warehouse_id = report_data.warehouse_id.id
+        if report_data.category_id:
+             category_id = report_data.category_id.id
+     ##   if report_data.supplier_id:
+      ##       supplier_id = report_data.supplier_id.id
+        if report_data.brand_id:
+             brand_id = report_data.brand_id.id
+        if report_data.product_id:
+             product_id = report_data.product_id.id
+        if report_data.adventdays:
+            advent_days=report_data.adventdays
+            
+        strWhere=' 1=1'               
+        if logiscenter_id !=0:
+           ##strWhere=strWhere +'  AND  okgjwarehouse.id='+str(logiscenter_id)
+           context.update({'warehouse_id':logiscenter_id})
+        if  category_id !=0:
+            strWhere=strWhere + '  AND productcategory.id='+str(category_id)
+        ##if  supplier_id !=0:
+         ##   strWhere=strWhere + '  AND partner.id='+str(supplier_id)
+        if  brand_id !=0:
+            strWhere=strWhere + '  AND okgjbrand.id='+str(brand_id)
+        if product_id !=0:
+            strWhere=strWhere +'  AND orderproduct.id='+str(product_id)
+        if  advent_days != 0:
+           strWhere=strWhere + ' AND  extract(day from stockprodlot.use_date-current_date)<='+str(advent_days)+''
+    
+        ##cr.execute(""" delete from okgj_report_adventinv_data_table""")
+        cr.execute(""" 
+        CREATE or replace VIEW okgj_report_adventinv_data AS (   
+           --Insert into okgj_report_adventinv_data_table(id,productnumber,productname,variants,productcaterotyname,
+           --brandname,stockname,prodlot,adventday,invqty)
+            --最终查询
+            select   cast(row_number() over() as integer)  as id,
+            --stockprodlot.id,
+            orderproduct.id as productid,
+            orderproduct.default_code as productnumber,orderproduct.name_template as productname,
+            orderproduct.variants as variants,
+            substring(getparentcategory(productcategory.id),2,
+            char_length(getparentcategory(productcategory.id))-1) as productcaterotyname,
+            okgjbrand.name as brandname,
+            --case okgjusage.usage when 'pick' then okgjrack.name end as pickrack,
+            --case okgjusage.usage when 'store' then okgjrack.name end as storerack,
+            okgjlocation.complete_name as stockname,
+            stockprodlot.name as prodlot,
+            extract(day from stockprodlot.use_date-current_date) as adventday,
+            productinqty.invqty as invqty
+            
+            --into   okgj_report_adventinv_data_table
+            
+            from product_product orderproduct 
+            inner join product_template producttemp on orderproduct.product_tmpl_id=producttemp.id
+            left join product_category productcategory on producttemp.categ_id=productcategory.id
+            left join okgj_product_brand okgjbrand on orderproduct.brand_id=okgjbrand.id
+            --left join okgj_product_rack_usage okgjusage on okgjusage.product_id=orderproduct.id
+            --left join okgj_product_rack okgjrack on okgjusage.rack_id=okgjrack.id
+            --left join stock_Warehouse okgjwarehouse on okgjusage.warehouse_id=okgjwarehouse.id
+            left join 
+                (
+                 select temgroupinqty.id,temgroupinqty.location_id,temgroupinqty.lotid,(coalesce(temgroupinqty.inqty,0)-coalesce(temgroupoutqty.outqty,0))invqty from( 
+                select product.id,tempinqty.location_id,tempinqty.lotid,
+                sum(coalesce(tempinqty.inqty,0))inqty
+                from product_product product
+                left join
+                    (--获取入库数量
+                    select product_id,location_id,lotid,sum(inqty) as inqty from 
+                        (select 
+                        stockmove.product_id,stockmove.location_dest_id as location_id,stocklot.id as lotid,stockmove.product_uom,
+                        (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as inqty
+                        from stock_move stockmove
+                        left join 
+                            (select  product1.id,producttemp1.uom_id,puom1.factor 
+                                from 
+                                product_product product1
+                                inner join product_template producttemp1 on product1.product_tmpl_id=producttemp1.id
+                                left join product_uom puom1 on producttemp1.uom_id=puom1.id) puom 
+                                on stockmove.product_id=puom.id
+                        left join stock_production_lot stocklot on stockmove.prodlot_id=stocklot.id --and stockmove.product_id=stocklot.product_id
+                        
+                        left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                            where stockmove.location_id not in("""+str(warehouse_id)+""")
+                            and stockmove.location_dest_id  in("""+str(warehouse_id)+""")
+                            and stockmove.state in ('done')
+                            group by stockmove.product_id,stockmove.location_dest_id,stocklot.id,
+                            stockmove.product_uom,stockpuom.factor,puom.factor) temp_totalinqty 
+                    group by product_id,location_id,lotid) tempinqty 
+                    on product.id=tempinqty.product_id
+                    group by product.id,tempinqty.location_id,tempinqty.lotid) temgroupinqty
+            left join
+                (select product.id,tempoutqty.location_id,tempoutqty.lotid,
+                sum(coalesce(tempoutqty.outqty,0))outqty
+                  from product_product product
+                        left join (--出库
+                    select product_id,location_id,lotid,sum(outqty) as outqty from 
+                        (select stockmove.product_id,stockmove.location_id as location_id ,stocklot.id as lotid,stockmove.product_uom,
+                        (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as outqty
+                        from stock_move stockmove
+                        left join 
+                            (select  productout.id,producttempout.uom_id,puomout.factor 
+                            from 
+                            product_product productout
+                            inner join product_template producttempout on productout.product_tmpl_id=producttempout.id
+                            left join product_uom puomout on producttempout.uom_id=puomout.id) puom on stockmove.product_id=puom.id
+            
+                        left join stock_production_lot stocklot on stockmove.prodlot_id=stocklot.id --and stockmove.product_id=stocklot.product_id
+                        
+                        left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                        where 
+                        stockmove.location_id in("""+str(warehouse_id)+""")
+                        and stockmove.location_dest_id not in("""+str(warehouse_id)+""")
+                        and stockmove.state in ('done')
+                        group by stockmove.product_id,stockmove.location_id,stocklot.id,stockmove.product_uom,stockpuom.factor,puom.factor)temp_outqty 
+                        group by product_id,location_id,lotid) tempoutqty 
+                        on product.id=tempoutqty.product_id group by product.id,tempoutqty.location_id,tempoutqty.lotid) temgroupoutqty 
+                    on temgroupinqty.id=temgroupoutqty.id and temgroupinqty.location_id=temgroupoutqty.location_id 
+                    and temgroupinqty.lotid=temgroupoutqty.lotid) productinqty 
+                on orderproduct.id=productinqty.id
+            left join stock_location okgjlocation on productinqty.location_id=okgjlocation.id
+            left join stock_production_lot stockprodlot on stockprodlot.id=productinqty.lotid and orderproduct.id=stockprodlot.product_id
+
+            where 1=1 AND  """+strWhere+"""         
+       )
+        """
+        )
+        
+       ## cr.execute(""" select *  into okgj_report_adventinv_data_table from  okgj_report_adventinv_data""")
+
+        
+        return {
+            'name': _('临期商品统计表'),
+            'context': context,
+            'view_type': 'form',
+            "view_mode": 'tree',
+            'res_model':'okgj.report.adventinv',
+            'type': 'ir.actions.act_window',
+#            'view_id': 'view_okgj_report_sales_comp_tree',
+        }
+okgj_report_adventinv_wizard()
+
+class okgj_report_adventinv(osv.osv):
+
+    def _get_pick_rack(self, cr, uid, ids, field_names, arg, context=None):
+        """ Read the 'rack' functional fields. """
+        res = {}
+        warehouse_id = context.get('warehouse_id', False)
+        product_obj = self.pool.get('product.product')
+        for one_record in self.browse(cr, uid, ids, context=context):
+            pick_rack_data = product_obj.browse(cr, uid, one_record.productid, context=context).product_pick_rack_ids
+            has_rack = False
+            if pick_rack_data is None: pick_rack_data = []
+            for one_rack in pick_rack_data:
+                if one_rack.warehouse_id.id == warehouse_id:
+                    has_rack = True
+                    res[one_record.id] = one_rack.id
+                    break
+            if not has_rack:
+                res[one_record.id] = False
+        return res
+
+    def _get_store_rack(self, cr, uid, ids, field_names, arg, context=None):
+        """ Read the 'rack' functional fields. """
+        res ={} 
+        warehouse_id = context.get('warehouse_id', False)
+        product_obj = self.pool.get('product.product')
+        for one_record in self.browse(cr, uid, ids, context=context):
+            store_rack_data = product_obj.browse(cr, uid, one_record.productid, context=context).product_store_rack_ids
+            has_rack = False
+            if store_rack_data is None: store_rack_data = []
+            for one_rack in store_rack_data:
+                if one_rack.warehouse_id.id == warehouse_id:
+                    has_rack = True
+                    res[one_record.id] = one_rack.id
+                    break
+            if not has_rack:
+                res[one_record.id] = False
+        return res
+
+
+    _name = "okgj.report.adventinv"
+    _description = "临期商品统计表"
+    _order = 'productcaterotyname desc'
+    _auto = False
+    _columns = {
+        'productcaterotyname': fields.char(u'分类', readonly=True),
+        'productid' : fields.integer(u'商品ID'),
+        'productnumber': fields.char(u'对应商品条码',readonly=True),
+        'productname': fields.char(u'对应商品名称',readonly=True),
+        'variants': fields.char(u'规格',readonly=True),
+        'brandname': fields.char(u'品牌',readonly=True),
+        'pickrack': fields.function(_get_pick_rack, type='many2one', relation='okgj.product.rack', string=u'拣货货位'),
+        'storerack': fields.function(_get_store_rack, type='many2one', relation='okgj.product.rack', string=u'存货货位'),
+        ## 'pickrack': fields.char(u'拣货货位',readonly=True),
+        ## 'storerack': fields.char(u'存货货位',readonly=True),
+        'stockname': fields.char(u'仓库',readonly=True),
+        'prodlot': fields.char(u'生产日期',readonly=True),
+        'adventday': fields.float(u'临期天数',readonly=True),
+        'invqty': fields.float(u'库存数量', readonly=True),
+        }
+
+
+    def init(self, cr):
+        #tools.drop_view_if_exists(cr, 'report_sales_comp')
+        #总的结果查询
+        cr.execute("""
+        CREATE or replace VIEW okgj_report_adventinv AS (      
+        select 
+            id as id,
+            productid as productid,
+            productnumber as productnumber,
+            productname as productname,
+            variants as variants,
+            productcaterotyname as productcaterotyname,    
+            brandname as brandname,
+           -- pickrack as pickrack,
+           -- storerack as storerack,
+            stockname as stockname,
+            prodlot as prodlot,
+            adventday as adventday,
+            invqty as invqty
+            
+        
+           from okgj_report_adventinv_data
+        )
+        """
+    )
+okgj_report_adventinv()

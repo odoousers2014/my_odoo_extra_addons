@@ -1,0 +1,668 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	<!--隐藏权限-->
+        <record model="res.groups" id="group_okgj_no_one">
+            <field name="name">OKGJ隐藏</field>
+        </record>
+
+
+        <menuitem name="Messaging"
+          id="mail.mail_feeds_main"
+          sequence="1"/>
+
+	<!-- Top menu item -->
+	<menuitem name="采购管理" 
+		  id="base.menu_purchase_root" 
+		  sequence="2"/>
+
+
+	<!-- 二级菜单 -->
+	<menuitem name="基础数据" 
+		  id="okgj.menu_okgj_basedatainfo_root" 
+		  parent="base.menu_purchase_root"
+		  sequence="1"/>
+
+	<!-- 三级菜单 -->
+	<menuitem 
+	    action="base.action_partner_category_form" 
+	    id="base.menu_partner_category_form" 
+	    name="供应商分类" 
+	    sequence="1" 
+	    parent="okgj.menu_okgj_basedatainfo_root"/>
+
+        <record id="base.menu_partner_category_form" model="ir.ui.menu">
+	    <field eval="[(5, 0, 0)]" name="groups_id"/>
+        </record>
+
+	
+	<menuitem name="供应商" 
+		  id="base.menu_procurement_management_supplier_name"
+		  parent="okgj.menu_okgj_basedatainfo_root"  
+		  sequence="5"/>
+
+        <menuitem name="商品分类"
+		  action="product.product_category_action_form"
+		  id="product.menu_product_category_action_form2"
+		  parent="okgj.menu_okgj_basedatainfo_root"
+		  sequence="8"/>
+
+        <record id="product.menu_product_category_action_form" model="ir.ui.menu">
+	    <field eval="[(5, 0, 0)]" name="groups_id"/>
+        </record>
+
+	<menuitem name="品牌"
+		  action="okgj.action_okgj_product_brand" 
+		  id="okgj.menu_product_brand"
+		  parent="okgj.menu_okgj_basedatainfo_root"  
+		  sequence="15"/>
+
+	<menuitem name="商品" 
+		  id="product.menu_products"
+		  action="product.product_normal_action_sell" 
+		  parent="okgj.menu_okgj_basedatainfo_root"  
+		  sequence="20"/>
+
+	<!--menuitem name="分类商品" 
+		  action="product.product_category_action"
+		  id="product.menu_products_category2"
+		  parent="okgj.menu_okgj_basedatainfo_root" sequence="21"/-->
+
+        <record id="product.menu_products_category" model="ir.ui.menu">
+	    <field eval="[(5, 0, 0)]" name="groups_id"/>
+        </record>
+
+	<menuitem name="计量单位"
+		  id="product.menu_product_uom_form_action"
+		  action="product.product_uom_form_action" 
+		  parent="okgj.menu_okgj_basedatainfo_root"  
+		  sequence="25"/>
+
+        <record id="product.menu_product_uom_form_action" model="ir.ui.menu">
+	    <field eval="[(5,0,0)]" name="groups_id"/>
+        </record>
+
+	<menuitem name="导入商品"
+		  id="okgj.menu_okgj_product_import2"
+		  action="action_okgj_product_import"
+		  sequence="13"
+		  parent="okgj.menu_okgj_basedatainfo_root"/>
+
+	<!--menuitem name="商品更新"
+		  id="okgj.menu_okgj_product_update2"
+		  action="action_okgj_product_update"
+		  sequence="14"
+		  parent="okgj.menu_okgj_basedatainfo_root"/-->
+
+
+	<!-- 调价单 TODO -->
+	<!-- 二级菜单 -->
+	<menuitem name="采购业务" 
+		  id="okgj.menu_okgj_purchase_root" 
+		  parent="base.menu_purchase_root"
+		  sequence="2"/>
+
+	<!-- 三级菜单 -->
+
+
+	<menuitem name="采购订单草稿" 
+		  id="purchase.menu_purchase_rfq"
+		  parent="okgj.menu_okgj_purchase_root"  
+		  sequence="3"/>
+
+	<menuitem name="采购订单" 
+		  id="purchase.menu_purchase_form_action"
+		  parent="okgj.menu_okgj_purchase_root"  
+		  sequence="5"/>
+
+        <!--record id="okgj_action_view_compute_schedulers_wizard" model="ir.actions.act_window">
+            <field name="name">运行</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">procurement.order.compute.all</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id">procurement.view_compute_schedulers_wizard</field>
+            <field name="target">new</field>
+        </record>
+
+	<menuitem id="okgj_menu_view_compute_schedulers_wizard"
+		  action="okgj_action_view_compute_schedulers_wizard" 
+		  parent="okgj.menu_okgj_purchase_root"  
+		  sequence="15"/-->
+
+	<menuitem name="采购收货单" 
+		  id="purchase.menu_okgj_action_picking_tree4"
+		  action="action_okgj_purchase_picking" 
+		  parent="okgj.menu_okgj_purchase_root"  
+		  sequence="10"/>
+	
+	<!--menuitem name="采购入库单" 
+		  id="okgj.menu_action_okgj_stock_picking_in_more"
+		  action="okgj.action_okgj_stock_picking_in_more" 
+		  parent="okgj.menu_okgj_purchase_root"  
+		  sequence="15"/-->
+
+
+        <menuitem name="保质期查询"
+            id="okgj.menu_okgj_product_expiry"
+	    parent="stock.next_id_61"
+            action="okgj.view_okgj_product_expiry_action"
+            sequence="10"/>
+
+
+	<!--隐藏-->
+        <record id="purchase.menu_purchase_config_purchase" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="purchase.menu_procurement_management" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+	<!--Inventory control隐藏-->
+        <record id="purchase.menu_procurement_management_inventory" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+	<!--Invoice control隐藏-->
+        <record id="purchase.menu_procurement_management_invoice" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="purchase.menu_procurement_management_product" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	<!--隐藏结束  -->
+
+	<!-- 二级菜单 -->
+	<menuitem name="采购退货" 
+		  id="okgj.menu_okgj_purchasereturn_root" 
+		  parent="base.menu_purchase_root"
+		  sequence="3"/>
+	<!-- 三级菜单 -->
+
+	<menuitem name="采购退货申请单" 
+		  action="okgj.action_okgj_purchase_return"
+		  id="okgj.menu_action_okgj_purchase_return"
+		  parent="okgj.menu_okgj_purchasereturn_root"  
+		  sequence="1"/>
+
+	<menuitem name="采购退货出库单" 
+		  action="action_okgj_picking_purchase_return"
+		  id="menu_action_okgj_picking_purchase_return"
+		  parent="okgj.menu_okgj_purchasereturn_root"  
+		  sequence="5"/>
+
+	<!-- 二级菜单 -->
+	<menuitem name="价格管理" 
+		  id="okgj.menu_okgj_priceadjust_root" 
+		  parent="base.menu_purchase_root"
+		  sequence="50"/>
+
+        <menuitem name="销售调价单" 
+		  action="okgj.action_okgj_adjust_sale_price" 
+		  id="okgj.menu_okgj_action_adjust_sale_price" 
+		  parent="okgj.menu_okgj_priceadjust_root"
+		  sequence="8"/>
+
+	<menuitem name="采购调价单" 
+		  id="okgj.menu_okgj_adjust_purchase_price"
+		  action="okgj.action_okgj_adjust_purchase_price"
+		  parent="okgj.menu_okgj_priceadjust_root"  
+		  sequence="20"/>
+
+
+	<!-- 一级菜单 -->	 	
+	<menuitem name="销售管理" 
+		  id="base.menu_base_partner" 
+		  sequence="10"/>
+	
+	<!-- 二级菜单 -->
+	<menuitem name="销售业务" 
+		  id="okgj.menu_okgj_sales_root" 
+		  parent="base.menu_base_partner"
+		  sequence="1"/>
+
+	<!-- 三级菜单 -->
+	<menuitem name="销售订单" 
+		  id="okgj.menu_sale_order"
+		  parent="okgj.menu_okgj_sales_root"  
+		  action="action_okgj_sale_orders"
+		  sequence="1"/>
+		  
+		  
+
+    <record id="action_okgj_so_manual" model="ir.actions.act_window">
+        <field name="name">手录销售订单</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+        <field name="domain">[('okgj_order_type','in',['oktg','offline'])]</field>
+        <field name="context" eval="{'default_okgj_order_type':'oktg'}"/>
+    </record>
+	<menuitem name="手录销售订单" 
+		  id="okgj.menu_sale_order_meituan"
+		  parent="okgj.menu_okgj_sales_root"  
+		  action="action_okgj_so_manual"
+		  sequence="2"/>
+		  
+		  
+		  
+	<menuitem name="销售出库单" 
+		  id="menu_okgj_action_picking_tree"
+		  parent="okgj.menu_okgj_sales_root"  
+		  action="action_okgj_picking_tree" 
+		  sequence="5"/>
+
+
+	<menuitem name="订单装车历史" 
+		  id="okgj.menu_okgj_logistics_line"
+		  parent="okgj.menu_okgj_sales_root"  
+		  action="okgj.action_okgj_logistics_line" 
+		  sequence="10"/>
+
+	<menuitem name="拣货与复核" 
+		  id="menu_okgj_salecheck_root" 
+		  parent="base.menu_base_partner"
+		  sequence="2"/>
+
+
+	<menuitem name="出库单打印" 
+		  id="menu_action_okgj_picking_tree_out_print"
+		  parent="menu_okgj_salecheck_root"  
+		  action="action_okgj_picking_tree_print"
+		  sequence="1"/>
+
+
+
+	<menuitem name="出库单重打印" 
+		  id="menu_action_okgj_picking_tree_out_reprint"
+		  parent="menu_okgj_salecheck_root"  
+		  action="action_okgj_picking_tree_reprint"
+		  sequence="5"/>
+
+	<menuitem name="拣货单查询" 
+		  id="menu_action_okgj_multi_order_reprint"
+		  parent="menu_okgj_salecheck_root"  
+		  action="action_okgj_multi_order_print"
+		  sequence="8"/>
+	
+	<!--menuitem name="查询汇拣单"
+		  action="action_okgj_multi_order_print" 
+		  id="menu_action_okgj_multi_order_print123" 
+		  parent="okgj.menu_okgj_sales_root"/-->
+
+	
+	<menuitem name="拣货登记" 
+	     id="menu_okgj_picking_out_reg"
+	     parent="menu_okgj_salecheck_root"  
+	     action="action_okgj_picking_out_reg"
+	     sequence="15"/>
+
+	<menuitem name="拣货复核" 
+		  id="okgj.menu_okgj_stock_out_verify"
+		  parent="okgj.menu_okgj_salecheck_root"  
+		  action="action_okgj_stock_out_verify" 
+		  sequence="20"/>
+
+	<menuitem name="复核更改" 
+		  id="okgj.menu_okgj_verify_order_modify"
+		  parent="okgj.menu_okgj_salecheck_root"  
+		  action="action_okgj_verify_order_modify" 
+		  sequence="21"/>
+		  
+	<menuitem name="打包登记" 
+		  id="okgj.menu_okgj_packeg_reg"
+		  parent="okgj.menu_okgj_salecheck_root"  
+		  action="okgj.action_okgj_picking_tree"
+		  groups="base.group_system"
+		  sequence="22"/>
+		  
+	<menuitem name="物流配送" 
+		  id="okgj.menu_okgj_logistics_root"
+		  parent="base.menu_base_partner" 
+		  sequence="3"/>
+	  
+	<!-- 三级菜单 -->
+	<menuitem name="送货管家" 
+		  id="okgj.menu_okgj_logistics_car"
+		  parent="okgj.menu_okgj_logistics_root"  
+		  action="okgj.action_okgj_logistics_car"
+		  sequence="1"/>
+
+	<menuitem name="干线装车登记" 
+		  id="okgj.menu_okgj_logistics_more_route"
+		  parent="okgj.menu_okgj_logistics_root"  
+		  action="okgj.action_okgj_logistics_route" 
+		  sequence="3"/>
+
+	<menuitem name="干线送达登记" 
+		  id="menu_okgj_logistics_back_route"
+		  parent="menu_okgj_logistics_root"  
+		  action="action_okgj_logistics_back_route" 
+		  sequence="4"/>
+	
+	<menuitem name="本地装车登记" 
+		  id="okgj.menu_okgj_logistics_more"
+		  parent="okgj.menu_okgj_logistics_root"  
+		  action="okgj.action_okgj_logistics" 
+		  sequence="5"/>
+	
+	<menuitem name="本地返程登记" 
+		  id="menu_okgj_logistics_back"
+		  parent="menu_okgj_logistics_root"  
+		  action="action_okgj_logistics_back" 
+		  sequence="10"/>
+	
+	<menuitem name="第三方物流登记" 
+		  id="menu_okgj_logistics_three_side"
+		  parent="menu_okgj_logistics_root"  
+		  action="action_okgj_logistics_three_side" 
+		  sequence="11"/>
+		  
+	<menuitem name="第三方物流送达登记" 
+		  id="menu_okgj_logistics_back_three_side"
+		  parent="menu_okgj_logistics_root"  
+		  action="action_okgj_logistics_back_three_side" 
+		  sequence="12"/>
+	
+	<menuitem name="回单回款" 
+	     id="menu_okgj_logistics_back_money"
+	     parent="menu_okgj_logistics_root"  
+	     action="action_okgj_logistics_back_money" 
+	     sequence="15"
+	     groups="okgj.group_okgj_logistics_assist"/>
+	     
+	<menuitem name="回单回款明细" 
+	     id="menu_okgj_logistics_line_back_money"
+	     parent="menu_okgj_logistics_root"  
+	     action="action_okgj_logistics_line_back_money" 
+	     sequence="16"
+	     groups="okgj.group_okgj_logistics_assist"/>
+	     
+	     
+	
+	<menuitem name="销售退换货" 
+		  id="menu_okgj_salereturn_root" 
+		  parent="base.menu_base_partner"
+		  sequence="3"/>
+
+	<menuitem name="销售退换货申请单" 
+	     id="okgj.menu_okgj_sale_return"
+	     parent="menu_okgj_salereturn_root"  
+	     action="action_okgj_sale_return"
+	     sequence="1"/> 
+
+	<menuitem name="销售退货出库单" 
+		  id="menu_action_okgj_saleout_return"
+		  parent="menu_okgj_salereturn_root"  
+		  action="action_okgj_picking_saleout_return" 
+		  sequence="2"/>
+
+	<menuitem name="销售退货入库单" 
+	     id="menu_action_okgj_salein_return"
+	     parent="menu_okgj_salereturn_root"  
+	     action="action_okgj_picking_salein_return" 
+	     sequence="3"/>
+	
+	<!--隐藏-->
+        <record id="base.menu_product" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="base.menu_sales" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="base.menu_invoiced" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="product.menu_product_uom_categ_form_action" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="base.menu_base_config" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	
+        <record id="base.menu_config_address_book" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	<!--隐藏结束  -->
+	
+  	<!-- 一级菜单 -->
+	<menuitem name="仓储物流"
+		  id="stock.menu_stock_root"
+		  sequence="15"/>
+	
+	<!-- 二级菜单 -->
+	<menuitem name="基础数据" 
+		  id="okgj.menu_okgj_stockbasedata_root"
+		  parent="stock.menu_stock_root" 
+		  sequence="1"/>
+	<!-- 三级菜单 -->
+
+	<menuitem name="物流中心" 
+		  id="stock.menu_action_warehouse_form"
+		  parent="okgj.menu_okgj_stockbasedata_root"  
+		  action="stock.action_warehouse_form" 
+		  sequence="5"/>
+
+	<menuitem name="物流中心" 
+		  id="stock.menu_action_location_form"
+		  parent="menu_okgj_stockbasedata_root"  
+		  action="stock.action_location_form" 
+		  sequence="10"/>
+
+	<menuitem name="货位" 
+		  id="okgj.menu_action_okgj_product_rack"
+		  parent="okgj.menu_okgj_stockbasedata_root"  
+		  action="okgj.action_okgj_product_rack" 
+		  sequence="15"/>
+
+	<menuitem name="导入商品货位"
+		  id="product.menu_okgj_rack_import2"
+		  action="action_okgj_rack_import" 
+		  parent="okgj.menu_okgj_stockbasedata_root"
+		  sequence="16"/>
+	
+	
+	<menuitem name="商品货位" 
+		  action="action_okgj_product_rack_usage" 
+		  id="menu_action_okgj_product_rack_usage" 
+		  parent="okgj.menu_okgj_stockbasedata_root"
+		  sequence="17"/>
+
+	<menuitem name="批量生成货位"
+		  id="okgj_rack_arrange"
+		  action="action_view_okgj_rack_arrange" 
+		  parent="menu_okgj_stockbasedata_root"/>
+
+	<!--menuitem name="货位更新" 
+		  action="action_okgj_product_rack_change" 
+		  id="menu_action_okgj_product_rack_change" 
+		  parent="okgj.menu_okgj_stockbasedata_root"
+		  sequence="20"/-->
+	
+	<menuitem name="库存管理" 
+		  id="okgj.menu_okgj_stockmanage_root"
+		  parent="stock.menu_stock_root" 
+		  sequence="2"/>
+
+	<!-- 三级菜单 -->
+	<menuitem name="物流中心间调拨申请单" 
+	     id="menu_action_okgj_picking_internal_warehouse"
+	     parent="okgj.menu_okgj_stockmanage_root"  
+	     action="action_okgj_order_picking_internal_warehouse" 
+	     sequence="3"/> 
+
+	<menuitem name="其它入库申请单" 
+	     id="menu_action_okgj_picking_internal_in"
+	     parent="okgj.menu_okgj_stockmanage_root"  
+	     action="action_okgj_order_picking_internal_in" 
+	     sequence="5"/> 
+
+	<menuitem name="其它出库申请单" 
+		  id="menu_action_okgj_picking_internal_out"
+		  parent="menu_okgj_stockmanage_root"  
+		  action="action_okgj_order_picking_internal_out" 
+		  sequence="10"/>
+	
+	<!--menuitem name="内部调拨" 
+	     id="menu_action_okgj_stock_picking_internal_internal_in"
+	     parent="okgj.menu_okgj_stockmanage_root"  
+	     action="action_okgj_stock_picking_internal_internal_in" 
+	     sequence="10"/-->
+	
+	<menuitem name="其它入库" 
+	     id="menu_action_okgj_stock_picking_internal_other_in"
+	     parent="okgj.menu_okgj_stockmanage_root"  
+	     action="action_okgj_stock_picking_internal_other_in" 
+	     sequence="15"/> 
+
+
+	<menuitem name="其它出库" 
+	     id="menu_action_okgj_stock_picking_internal_other_out"
+	     parent="okgj.menu_okgj_stockmanage_root"  
+	     action="action_okgj_stock_picking_internal_other_out" 
+	     sequence="20"/> 
+
+
+	<!--menuitem name="出入库业务类型" 
+		  id="stock.menu_action_stock_journal_form"
+		  parent="menu_okgj_stockmanage_root"  
+		  action="stock.action_stock_journal_form" 
+		  sequence="25"/-->
+
+	<menuitem name="内部调拨单" 
+		  id="menu_action_okgj_picking_internal_between"
+		  parent="okgj.menu_okgj_stockmanage_root"  
+		  action="action_okgj_order_picking_internal_between"
+		  sequence="28"/>
+
+	<menuitem name="库存盘点单" 
+		  id="stock.menu_action_inventory_form_okgj"
+		  parent="menu_okgj_stockmanage_root"  
+		  action="action_okgj_inventory_form" 
+		  sequence="30"/>
+
+	<menuitem name="导入库存"
+		  id="product.menu_okgj_stock_import2"
+		  action="action_okgj_stock_import" 
+		  parent="menu_okgj_stockmanage_root"
+		  sequence="31"/>
+
+
+	
+	<!-- <menuitem name="成本调整单" 
+	     id=""
+	     parent="menu_okgj_stockmanage_root"  
+	     action="" 
+	     sequence="6"/>
+	-->
+
+
+	<!--隐藏-->
+        <record id="stock.menu_stock_warehouse_mgmt" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="stock.menu_stock_products_moves" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="stock.menu_traceability" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="stock.menu_stock_inventory_control" model="ir.ui.menu">
+            <field eval="[(6,0,[ref('okgj.group_okgj_logisitcs_manager')])]" name="groups_id"/>
+        </record>
+        <record id="procurement.menu_stock_sched" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	
+        <record id="stock.menu_product_in_config_stock" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="stock.menu_stock_configuration" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="stock.menu_stock_products_menu" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+        <record id="stock.menu_product_by_category_stock_form" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	<!--隐藏结束  -->
+
+	<!-- 一级菜单 -->	
+	<menuitem name="报表管理" 
+		  id="base.menu_reporting" 
+		  sequence="20"/>
+
+	<!-- 一级菜单 -->	
+	<menuitem name="系统设置" 
+		  id="base.menu_administration"
+		  sequence="25"/>
+
+        <record id="account.menu_finance" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	
+        <record id="base.menu_mrp_root" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+	
+        <record id="hr.menu_hr_root" model="ir.ui.menu">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+
+	<!--以下部分为隐藏报表-->
+        <record id="sale.report_sale_order" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+
+        <record id="stock.report_product_history" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+
+        <record id="stock.report_picking_list" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+
+        <record id="stock.report_picking_list_in" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="stock.report_picking_list_out" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="purchase.report_purchase_quotation" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="purchase.report_purchase_order" model="ir.actions.report.xml">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+
+	<!--隐藏原有退货-->
+        <record id="stock.act_stock_return_picking" model="ir.actions.act_window">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="stock.act_stock_return_picking_in" model="ir.actions.act_window">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+        <record id="stock.act_stock_return_picking_out" model="ir.actions.act_window">
+	    <field eval="[(6,0,[ref('okgj.group_okgj_no_one')])]" name="groups_id"/>
+        </record>
+
+    </data>
+</openerp>
+

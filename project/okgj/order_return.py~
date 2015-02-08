@@ -1,0 +1,596 @@
+# -*- coding: utf-8 -*-
+from openerp.osv import fields, osv
+import openerp.addons.decimal_precision as dp
+from openerp import netsvc
+from openerp.tools.translate import _
+
+#采购退货单
+class okgj_purchase_return(osv.osv):
+    _name = "okgj.purchase.return"
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
+okgj_purchase_return()
+
+class okgj_purchase_return_line(osv.osv):
+
+    def _amount_line(self, cr, uid, ids, field_names, arg, context=None):
+        """ 
+        @param prop: Name of field.
+        @param unknow_none:
+        @return: Dictionary of values.
+        """
+        if context is None:
+            context = {}
+        result = {}.fromkeys(ids, 0.0)
+        for one_line in self.browse(cr, uid, ids, context=context):
+            result[one_line.id] = one_line.price_unit * one_line.product_qty
+        return result
+
+    _name = "okgj.purchase.return.line"
+    _columns = {
+        'product_id':fields.many2one('product.product', u'商品', required=True),
+        'product_qty':fields.float(u'数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'price_unit': fields.float(u'单价', digits_compute= dp.get_precision('Product Price')),
+        'price_subtotal': fields.function(_amount_line, string=u'金额', digits_compute= dp.get_precision('Account')), 
+        'product_uom': fields.many2one('product.uom', u'计量单位', required=True),
+        'return_order_id': fields.many2one('okgj.purchase.return', 'Order Reference', select=True, required=True, ondelete='cascade'),
+    }
+
+    def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id,
+                            product_qty, product_uom, partner_id,
+                            price_unit=False, context=None):
+        """
+        onchange handler of product_id.
+        """
+        if context is None:
+            context = {}
+        res = {'value': {'price_unit': price_unit or 0.0, 'product_uom' : product_uom or False}}
+        if not product_id:
+            return res
+        product_product_obj = self.pool.get('product.product')
+        product_pricelist_obj = self.pool.get('product.pricelist')
+        product = product_product_obj.browse(cr, uid, product_id, context=context)
+        # - set a domain on product_uom
+        res['domain'] = {'product_uom': [('category_id','=',product.uom_id.category_id.id)]}
+        if not product_uom:
+            product_uom_id = product.uom_po_id.id
+            res['value'].update({'product_uom': product_uom_id})
+        # - determine price_unit
+        if pricelist_id:
+            price = product_pricelist_obj.price_get(cr, uid, [pricelist_id],
+                    product.id, product_qty or 1.0, partner_id or False)[pricelist_id]
+        else:
+            price = product.standard_price
+        res['value'].update({'price_unit': price})
+        return res
+
+    ## def onchange_product_qty_price(self, cr, uid, ids, product_qty=False, price_unit=False, context=None):
+    ##     """ On change of product id, finds UoM
+    ##     @param prod_id: Changed Product id
+    ##     @return: Dictionary of values
+    ##     """
+    ##     if not product_qty or not price_unit:
+    ##         return {}
+    ##     result = {
+    ##         'price_subtotal': product_qty * price_unit,
+    ##     }
+    ##     return {'value': result}
+
+okgj_purchase_return_line()
+
+class okgj_purchase_return(osv.osv):
+    _inherit = "okgj.purchase.return"
+    _order = "name desc"
+    _columns = {
+        'create_uid':fields.many2one('res.users', u'创建人', readonly='True'),
+        'create_date':fields.datetime(u'创建时间', readonly='True'),
+        'write_date': fields.datetime('Date Modified', readonly=True),
+        'write_uid':  fields.many2one('res.users', 'Last Modification User', readonly=True),
+        'name': fields.char(u'退货单号', size=64, required=True, select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'date_planned': fields.date(u'退货日期', required=True, select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'line_ids':fields.one2many('okgj.purchase.return.line', 'return_order_id', u'商品明细', states={'draft':[('readonly', False)]}, readonly=True),
+        'partner_id':fields.many2one('res.partner', u'供应商',  states={'draft':[('readonly', False)]}, readonly=True, required=True, domain=[('supplier', '=', True)]),
+        'invoice_state': fields.selection([('2binvoiced', u'开票'), ('none', u'不开票')], u'发票', required=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'state': fields.selection([('draft', u'草稿'), ('confirmed', u'确认'), ('done', u'完成'), ('cancel', u'取消')], u'状态', required=True, readonly=True),
+        'warehouse_id':fields.many2one('stock.warehouse', u'物流中心', required=True,states={'draft':[('readonly', False)]}, readonly=True),
+        'pricelist_id':fields.many2one('product.pricelist', u'价格表', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+        'note':fields.text(u'备注'),
+    }
+    _defaults = {
+        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'okgj.purchase.return'),
+        'date_planned': fields.date.context_today,
+        'state': lambda *args: 'draft',
+        'invoice_state': lambda *a: 'none',
+        'pricelist_id': lambda self, cr, uid, context: context.get('partner_id', False) and self.pool.get('res.partner').browse(cr, uid, context['partner_id']).property_product_pricelist_purchase.id,
+    }
+
+    def onchange_partner_id(self, cr, uid, ids, partner_id):
+        partner = self.pool.get('res.partner')
+        if not partner_id:
+            return {}
+        supplier = partner.browse(cr, uid, partner_id)
+        return {'value': {'pricelist_id': supplier.property_product_pricelist_purchase.id,}}
+
+    def action_import_product(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        data = self.browse(cr, uid, ids, context)[0]
+        context.update({
+            'active_model': self._name,
+            'active_ids': ids,
+            'active_id': len(ids) and ids[0] or False,
+            'active_supplier_id':data.partner_id.id,
+            'active_warehouse_id':data.warehouse_id.id,
+            'active_pricelist_id':data.pricelist_id.id,
+        })
+        return {
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'okgj.purchase.return.fill.order',
+            'type': 'ir.actions.act_window',
+            'target': 'new',
+            'context': context,
+        }
+
+    ## def onchange_supplier_id(self, cr, uid, ids, partner_id=False, warehouse_id=False, context=None):
+    ##     """ On change of supplier id, finds products
+    ##     @param supplier_id: Changed supplier id
+    ##     @return: Dictionary of values
+    ##     """
+    ##     if (not partner_id) or (not warehouse_id):
+    ##         return {}
+    ##     if context is None:
+    ##         context = {}
+    ##     product_obj = self.pool.get('product.product')
+    ##     supplierinfo_obj = self.pool.get('product.supplierinfo')
+    ##     supplierinfo_ids = supplierinfo_obj.search(cr, uid, [('name', '=', partner_id)], context=context)
+    ##     product_tmpl_ids = [i['product_id'][0] for i in supplierinfo_obj.read(cr, uid, supplierinfo_ids, ['product_id'], context=context)]
+    ##     product_ids = []
+    ##     for one_tmpl_id in product_tmpl_ids:
+    ##         product_ids += product_obj.search(cr, uid, [('product_tmpl_id', '=', one_tmpl_id)], context=context)
+    ##     local_ctx = context.copy()
+    ##     local_ctx.update({'warehouse_id':warehouse_id})
+    ##     lines = []
+    ##     for one_product in product_obj.browse(cr, uid, product_ids, context=local_ctx):
+    ##         lines.append({
+    ##             'product_id':one_product.id,
+    ##             'product_qty':one_product.qty_available,
+    ##             'product_uom':one_product.uom_id.id,
+    ##         })
+    ##     result = {
+    ##         'line_ids': lines,
+    ##     }
+    ##     return {'value': result}
+
+    #TODO:启用工作流支持?
+    def action_confirm(self, cr, uid, ids, context=None):
+        """ 确认并创建picking
+         @param self: The object pointer.
+         @param cr: A database cursor
+         @param uid: ID of the user currently logged in
+         @param ids: List of ids selected
+         @param context: A standard dictionary
+         @return: A dictionary which of fields with values.
+        """
+        if context is None:
+            context = {} 
+        record_id = context and context.get('active_id', False) or False
+        location_obj = self.pool.get('stock.location')
+        supplier_location_id = location_obj.search(cr, uid, [('usage', '=', 'supplier')], context=context)
+        if not supplier_location_id:
+            raise osv.except_osv(_('配置错误!'), _('系统未找到供应商库位，无法继续.'))   
+        form = self.browse(cr, uid, ids[0], context=context)
+        move_lines = []
+        for line in form.line_ids:
+            move_lines.append((0, 0, {
+                'name':form.partner_id.name,
+                'date':form.date_planned,
+                'date_expected':form.date_planned,
+                'product_id':line.product_id.id,
+                'product_qty':line.product_qty,
+                'price_unit':line.price_unit,
+                'product_uom':line.product_uom.id,
+                'purchase_return_line_id':line.id,
+                #'prodlot_id':line.prodlot_id.id,
+                'location_id':form.warehouse_id.lot_stock_id.id,
+                'location_dest_id':supplier_location_id[0]}))
+        
+        picking_obj = self.pool.get('stock.picking.out')
+        seq_obj = self.pool.get('ir.sequence')
+        picking_id = picking_obj.create(cr, uid, {
+            'name': seq_obj.get(cr, uid, 'okgj.purchase.return.picking'),
+            'partner_id':form.partner_id.id,
+            'move_lines': move_lines, 
+            'state':'draft', 
+            'type': 'out',
+            'date':form.date_planned,
+            'invoice_state': form.invoice_state,
+            'move_type':'one',
+            'okgj_type':'okgj_purchase_out',
+            'purchase_return_id':ids[0],
+        }, context=context)
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
+        #picking_obj.force_assign(cr, uid, [picking_id], context)
+        self.write(cr, uid, ids, {'state':'confirmed'}, context=context)
+        return True
+
+    #为什么需要取消
+    def action_cancel(self, cr, uid, ids, context=None):
+        pass
+
+okgj_purchase_return()
+
+#销售退货单，退货由商城发起
+class okgj_sale_return(osv.osv):
+    _name = "okgj.sale.return"
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
+okgj_sale_return()
+
+#原有订单
+class okgj_sale_return_old_line(osv.osv):
+    def _line_total(self, cr, uid, ids, field_names, arg, context=None):
+        """ 获取金额
+        @param prop: Name of field.
+        @param unknow_none:
+        @return: Dictionary of values.
+        """
+        if context is None:
+            context = {}
+        result = {}.fromkeys(ids, 0.0)
+        for one_line in self.browse(cr, uid, ids, context=context):
+            result[one_line.id] = one_line.price_unit * one_line.product_qty
+        return result
+
+    _name = "okgj.sale.return.old.line"
+    _columns = {
+        'product_id':fields.many2one('product.product', u'商品', required=True),
+        'variant':fields.related('product_id', 'variants', type="char", string=u"规格", readonly=True),
+        'product_qty':fields.float(u'数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_uom': fields.many2one('product.uom', u'计量单位', required=True),
+        'return_order_id': fields.many2one('okgj.sale.return', 'Order Reference', select=True, required=True, ondelete='cascade'),
+        'price_unit':fields.float(u'单价', digits_compute=dp.get_precision('Product Price')),
+        'price_subtotal': fields.function(_line_total, string=u'金额', type='float', digits_compute= dp.get_precision('Account'), readonly=True, store=True), 
+        #'price_subtotal':fields.float(u'金额', digits_compute=dp.get_precision('Account')),
+    }
+    
+    def onchange_product_id(self, cr, uid, ids, prod_id=False, context=None):
+        """ On change of product id, finds UoM
+        @param prod_id: Changed Product id
+        @return: Dictionary of values
+        """
+        if not prod_id:
+            return {}
+        product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=context)[0]
+        result = {
+            'product_uom': product.uom_id.id,
+        }
+        return {'value': result}
+
+okgj_sale_return_old_line()
+
+#新商品
+class okgj_sale_return_new_line(osv.osv):
+
+    def _line_total(self, cr, uid, ids, field_names, arg, context=None):
+        """ 获取金额
+        @param prop: Name of field.
+        @param unknow_none:
+        @return: Dictionary of values.
+        """
+        if context is None:
+            context = {}
+        result = {}.fromkeys(ids, 0.0)
+        for one_line in self.browse(cr, uid, ids, context=context):
+            result[one_line.id] = one_line.price_unit * one_line.product_qty
+        return result
+
+
+    _name = "okgj.sale.return.new.line"
+    _columns = {
+        'product_id':fields.many2one('product.product', u'商品', required=True),
+        'variant':fields.related('product_id', 'variants', type="char", string=u"规格", readonly=True),
+        'product_qty':fields.float(u'数量', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'product_uom': fields.many2one('product.uom', u'计量单位', required=True),
+        'price_unit':fields.float(u'单价', digits_compute=dp.get_precision('Product Price')),
+        'price_subtotal': fields.function(_line_total, string=u'金额', type='float', digits_compute= dp.get_precision('Account'), readonly=True, store=True), 
+        'return_order_id': fields.many2one('okgj.sale.return', 'Order Reference', select=True, required=True, ondelete='cascade'),
+    }
+    
+    def onchange_product_id(self, cr, uid, ids, prod_id=False, context=None):
+        """ On change of product id, finds UoM
+        @param prod_id: Changed Product id
+        @return: Dictionary of values
+        """
+        if not prod_id:
+            return {}
+        product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=context)[0]
+        result = {
+            'product_uom': product.uom_id.id,
+            'price_unit':product.lst_price,
+        }
+        return {'value': result}
+okgj_sale_return_new_line()
+
+
+#是否有必要处理钱的问题？财务模块先简要处理
+class okgj_sale_return(osv.osv):
+    _inherit = "okgj.sale.return"
+    _order = 'name desc'
+
+    ## def _money_get(self, cr, uid, ids, field_names, arg, context=None):
+    ##     """ 
+    ##     @param prop: Name of field.
+    ##     @param unknow_none:
+    ##     @return: Dictionary of values.
+    ##     """
+    ##     if context is None:
+    ##         context = {}
+    ##     result = {}.fromkeys(ids, 0.0)
+    ##     for one in self.browse(cr, uid, ids, context=context):
+    ##         money_amount = 0
+    ##         for one_new in one.new_line_ids:
+    ##             money_amount += one_new.price_subtotal
+    ##         for one_old in one.old_line_ids:
+    ##             money_amount -= one_old.price_subtotal
+    ##         money_amount += one.shipping_fee
+    ##         if money_amount < 0 :
+    ##             money_amount = 0
+    ##         result[one.id] = money_amount
+    ##     return result
+
+    ## def _money_diff(self, cr, uid, ids, field_names, arg, context=None):
+    ##     """ 
+    ##     @param prop: Name of field.
+    ##     @param unknow_none:
+    ##     @return: Dictionary of values.
+    ##     """
+    ##     if context is None:
+    ##         context = {}
+    ##     result = {}.fromkeys(ids, 0.0)
+    ##     for one in self.browse(cr, uid, ids, context=context):
+    ##         money_amount = 0
+    ##         for one_new in one.new_line_ids:
+    ##             money_amount += one_new.price_subtotal
+    ##         for one_old in one.old_line_ids:
+    ##             money_amount -= one_old.price_subtotal
+    ##         result[one.id] = money_amount
+    ##     return result
+    
+    #TODO:价格与金额的逻辑暂未处理
+    _columns = {
+        'create_uid':fields.many2one('res.users', u'创建人', readonly='True'),
+        'create_date':fields.datetime(u'创建时间', readonly='True'),
+        'name': fields.char(u'退货单号', size=64, required=True, select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'date_planned': fields.datetime(u'退货日期', required=True, select=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'sale_order_id':fields.many2one('sale.order', u'源订单', states={'draft':[('readonly', False)]}, readonly=True, required=True),
+        'return_info':fields.text(u'退换原因', states={'draft':[('readonly', False)]}, readonly=True),
+        'region_name':fields.text(u'收货区域'),
+        'address':fields.text(u'收货地址', states={'draft':[('readonly', False)]}, readonly=True),
+        'origin_sale_pay_id': fields.related('sale_order_id', 'pay_id', type="char", string=u'源付款方式', readonly=True, store=True),
+        'best_time':fields.char(u'送货时间', size=32, states={'draft':[('readonly', False)]}, readonly=True),
+        'consignee':fields.char(u'收货人', size=16, states={'draft':[('readonly', False)]}, readonly=True),
+        'shipping_fee': fields.float(u'物流费', digits_compute=dp.get_precision('Product Price'), states={'draft':[('readonly', False)]}, readonly=True),
+        'action_note':fields.text(u'客服备注', states={'draft':[('readonly', False)]}, readonly=True),
+        'okgj_tel':fields.char(u'联系电话', size=16, states={'draft':[('readonly', False)]}, readonly=True),
+        'refund_amount': fields.float(u'退款金额', digits_compute=dp.get_precision('Product Price')),
+        'old_line_ids':fields.one2many('okgj.sale.return.old.line', 'return_order_id', u'退货明细', states={'draft':[('readonly', False)]}, readonly=True),
+        'new_line_ids':fields.one2many('okgj.sale.return.new.line', 'return_order_id', u'换货明细', states={'draft':[('readonly', False)]}, readonly=True),
+        'invoice_state': fields.selection([
+            ('2binvoiced', 'To be refunded/invoiced'),
+            ('none', 'No invoicing')
+            ], 'Invoicing',required=True, states={'draft':[('readonly', False)]}, readonly=True),
+        'state': fields.selection([
+            ('draft', u'草稿'),
+            ('confirmed', u'确认'),
+            ('validate', u'审核'),
+            ('done', u'完成'),
+            ('cancel', u'取消'),
+            ], u'状态', required=True, readonly=True),
+        'warehouse_id':fields.many2one('stock.warehouse', u'物流中心', required=True, states={'draft':[('readonly', False)]}, readonly=True),
+        ## 'money_get':fields.function(_money_get, string=u'货到收款金额', type='float', digits_compute= dp.get_precision('Account')),
+        ## 'money_diff':fields.function(_money_diff, string=u'差异金额', type='float', digits_compute= dp.get_precision('Account')),
+        'money_get':fields.float(u'货到收款金额', digits_compute= dp.get_precision('Account')),
+        'has_print':fields.boolean(u'已打印', readonly=True),
+        'has_pay':fields.boolean(u'已退款', readonly=True),
+        'picking_in_ids':fields.one2many('stock.picking.in', 'sale_return_id', u'入库单号', domain=[('okgj_type', '=', 'okgj_sale_in')]),
+        'picking_out_ids':fields.one2many('stock.picking.out', 'sale_return_id', u'出库单号', domain=[('okgj_type', '=', 'okgj_sale_out')]),
+    }
+
+    def _default_warehouse_id(self, cr, uid, context=None):
+        user_data = self.pool.get('res.users').browse(cr,uid, uid, context=context)
+        warehouse_id = False
+        for one_warehouse in user_data.warehouse_ids:
+            warehouse_id = one_warehouse.id
+        return warehouse_id
+    
+    _defaults = {
+        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'okgj.sale.return'),
+        'date_planned': fields.date.context_today,
+        'invoice_state': 'none',
+        'state':'draft',
+        'warehouse_id': _default_warehouse_id,
+    }
+
+    def onchange_order_id(self, cr, uid, ids, order_id=False, context=None):
+        """ On change of order id,  finds return lines
+        @param order_id: Changed order id
+        @return: Dictionary of values
+        """
+        if not order_id:
+            return {}
+        has_create = self.search(cr, uid, [('sale_order_id', '=', order_id)], context=context)
+        order_data = self.pool.get('sale.order').browse(cr, uid, [order_id], context=context)[0]
+        region_name = order_data.region_name
+        address = order_data.okgj_address
+        consignee = order_data.consignee
+        okgj_tel = order_data.okgj_tel
+        order_lines = order_data.order_line
+        origin_sale_pay_id = order_data.pay_id
+        return_lines = []
+        for one_order_line in order_lines:
+            #one2many格式 [(0, 0, {'field_name':field_value_record1, ...}), (0, 0, {'field_name':field_value_record2, ...})]
+            return_lines.append((0, 0, {
+                'product_id':one_order_line.product_id.id,
+                'product_qty':one_order_line.product_uom_qty,
+                'product_uom':one_order_line.product_uom.id,
+                'price_unit':one_order_line.price_unit,
+                'price_subtotal':one_order_line.price_subtotal,
+                }))
+        if has_create:
+            return {'value': {'old_line_ids':return_lines, 'region_name':region_name, 'address':address, 'consignee':consignee, 'okgj_tel':okgj_tel, 'origin_sale_pay_id':origin_sale_pay_id},
+                    'warning': {'title': _('请确认'), 'message': _('该销售订单已创建退换货单,请确认是否再次创建')}}
+        else:
+            return {'value': {'old_line_ids':return_lines, 'address':address, 'consignee':consignee, 'okgj_tel':okgj_tel, 'origin_sale_pay_id':origin_sale_pay_id}}
+
+
+    def unlink(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        """Allows to delete sales return order lines in draft states"""
+        for rec in self.browse(cr, uid, ids, context=context):
+            if rec.state not in ['draft']:
+                raise osv.except_osv(_('错误!'), _('不能删除非草稿状态的退换货单 %s.') %(rec.name))
+        return super(okgj_sale_return, self).unlink(cr, uid, ids, context=context)
+
+    def action_confirm(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'confirmed'}, context=context)
+
+    def action_money(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'has_pay':True}, context=context)
+
+    #TODO:启用工作流支持?
+    def action_validate(self, cr, uid, ids, context=None):
+        """ 
+         Creates return picking.
+         @param self: The object pointer.
+         @param cr: A database cursor
+         @param uid: ID of the user currently logged in
+         @param ids: List of ids selected
+         @param context: A standard dictionary
+         @return: A dictionary which of fields with values.
+        """
+        if context is None:
+            context = {}
+        pick_out_obj = self.pool.get('stock.picking.out')
+        pick_in_obj = self.pool.get('stock.picking.in')
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        location_obj = self.pool.get('stock.location')
+        customer_location_id = location_obj.search(cr, uid, [('usage', '=', 'customer')], context=context)
+        if not customer_location_id:
+            raise osv.except_osv(_('配置错误!'), _('系统未找到客户库位，无法继续.'))   
+        for one_record in self.browse(cr, uid, ids, context=context):
+            old_line = []
+            for one_old_line in one_record.old_line_ids:
+                old_line.append((0, 0, {
+                    'name':one_old_line.product_id.name,
+                    'date':one_record.date_planned,
+                    'date_expected':one_record.date_planned,
+                    'product_id':one_old_line.product_id.id,
+                    'price_unit':one_old_line.product_id.standard_price or 0.0,
+                    'product_qty':one_old_line.product_qty,
+                    'product_uom':one_old_line.product_uom.id,
+                    'sale_return_old_line_id':one_old_line.id,
+                    'location_id':customer_location_id[0],
+                    'location_dest_id':one_record.warehouse_id.lot_input_id.id,}))
+            old_line_picking = False
+            if old_line:
+                old_line_picking = pick_in_obj.create(cr, uid, {
+                    'move_lines': old_line, 
+                    'state':'draft', 
+                    'type': 'in',
+                    'date':one_record.date_planned,
+                    #是否财务处理？可能有BUG
+                    'invoice_state': one_record.invoice_state,
+                    'okgj_type':'okgj_sale_in',
+                    'sale_return_id':ids[0],
+                    })
+            new_line = []
+            for one_new_line in one_record.new_line_ids:
+                new_line.append((0, 0, {
+                    'name':one_new_line.product_id.name,
+                    'date':one_record.date_planned,
+                    'date_expected':one_record.date_planned,
+                    'product_id':one_new_line.product_id.id,
+                    'price_unit': one_new_line.product_id.standard_price or 0.0,
+                    'product_qty':one_new_line.product_qty,
+                    'product_uom':one_new_line.product_uom.id,
+                    'sale_return_new_line_id':one_new_line.id,
+                    'location_id':one_record.warehouse_id.lot_stock_id.id,
+                    ##库链有问题，暂直接处理至客户货位
+                    'location_dest_id':customer_location_id[0], #one_record.warehouse_id.lot_output_id.id,
+                    }))
+            new_line_picking = False
+            if new_line:
+                new_line_picking = pick_out_obj.create(cr, uid, {
+                    'move_lines': new_line, 
+                    'state':'draft', 
+                    'type': 'out',
+                    'date':one_record.date_planned,
+                    #是否财务处理？可能有BUG
+                    'invoice_state': one_record.invoice_state,
+                    'okgj_type':'okgj_sale_out',
+                    'sale_return_id':ids[0],
+                })
+            wf_service = netsvc.LocalService("workflow")
+            if old_line_picking:
+                wf_service.trg_validate(uid, 'stock.picking', old_line_picking, 'button_confirm', cr)
+            if new_line_picking:
+                wf_service.trg_validate(uid, 'stock.picking', new_line_picking, 'button_confirm', cr)
+        self.write(cr, uid, ids, {'state':'validate'}, context=context)
+        return True
+
+    def action_cancel(self, cr, uid, ids, context=None):
+        picking_obj = self.pool.get('stock.picking')
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        cancel_ids = []
+        for one in self.browse(cr, uid, ids, context=context):
+            picking_ids = picking_obj.search(cr, uid, [('sale_return_id', '=', one.id)], context=context)
+            for one_pick in picking_obj.browse(cr, uid, picking_ids, context=context):
+                if one_pick.state != 'cancel':
+                    raise osv.except_osv(_('错误!'), _('请先取消该退换货单的出入库单%s.')%(one_pick.name))
+            cancel_ids.append(one.id)
+        self.write(cr, uid, cancel_ids, {'state':'cancel'}, context=context)
+
+
+    def action_draft(self, cr, uid, ids, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        draft_ids = []
+        for one in self.browse(cr, uid, ids, context=context):
+            if one.state != 'cancel':
+                raise osv.except_osv(_('错误!'), _('只有取消的订单可以设为草稿%s.')%(one.name))
+            draft_ids.append(one.id)
+        self.write(cr, uid, draft_ids, {'state':'draft'}, context=context)
+
+    def print_return(self, cr, uid, ids, context=None):
+        '''
+        最终退换货单
+        This function prints the OKGJ Final sales order 
+        '''
+        assert len(ids) == 1, 'This option should only be used for a single id at a time'
+        self.write(cr, uid, ids, {'has_print':True}, context=context)
+        datas = {
+            'model': 'okgj.sale.return',
+            'ids': ids,
+            'form': self.read(cr, uid, ids[0], context=context),
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'okgj.sale.return.report', 'datas': datas, 'nodestroy': True}
+
+
+## *销售退换货单：
+## 1）确认后不能取消；
+## 2）*打印没有差异金额及货到收款金额；
+## 3）*要打印原销售订单号；
+
+## 1、退换货单选择订单时检查是否存在已经录过申请单；
+## 2、退换货单需要财务审核，审核后状态标识及颜色标识；
+## 3、退换货单打印时加上原订单号、出库单号、入库单号，打印后显示已经打印；
+## 4、退货申请单上显示原订单上的付款方式；
+
+        
+okgj_sale_return()
+
+
+

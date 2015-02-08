@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+
+<data noupdate="1">
+
+
+
+
+</data>
+
+
+<data>
+<record model="ir.ui.view" id="yks_mrp_bom_form_view">
+    <field name="name">mrp_bom.form</field>
+    <field name="model">mrp.bom</field>
+    <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+    <field name="arch" type="xml">
+        <field name="type" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </field>
+        <field name="code" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </field>
+        <label for="routing_id" position="attributes">
+            <attribute name="string"> </attribute>
+        </label>
+        <field name="routing_id" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </field>
+        <field name="product_qty" position="attributes">
+             <attribute name="readonly">1</attribute>
+        </field>
+        <field name="product_id" position="attributes">
+            <attribute name="domain">[('supply_method','=','produce')]</attribute>
+        </field>
+        <page string="Properties" groups="product.group_mrp_properties" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </page>
+        
+        <xpath expr="//field[@name='bom_lines']/tree/field[@name='date_start']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='bom_lines']/tree/field[@name='date_stop']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+    </field>
+</record>
+
+<!-- Complex SKU -->
+<record model="ir.actions.act_window" id="yks_action_complex_product">
+    <field name="name">组合产品</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">product.product</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('supply_method','=','produce')]</field>
+    <field name="context">{'default_supply_method':'produce', 'default_purchase_ok':0}</field>
+</record>
+<menuitem sequence="2" id="yks_menu_complex_product" name="组合品"  parent='product.prod_config_main' action="yks_action_complex_product"/>
+<menuitem sequence="2" id="yks_menu_complex_product_for_purchase" name="组合品"  parent='purchase.menu_product_in_config_purchase' action="yks_action_complex_product"/>
+
+
+<record model="ir.actions.act_window" id="yks_action_mrp_bom">
+    <field name="name">组合产品BOM</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">mrp.bom</field>
+    <field name="view_type">form</field>
+    <field name="domain">[('bom_id','=',False)]</field>
+    <field name="view_mode">tree,form</field>
+</record>
+<menuitem sequence="2" id="yks_menu_mrp_bom" name="组合品BOM"  parent='product.prod_config_main' action="yks_action_mrp_bom"/>
+<menuitem sequence="2" id="yks_menu_mrp_bom_for_purchase" name="组合品BOM"  parent='purchase.menu_product_in_config_purchase' action="yks_action_mrp_bom"/>
+
+
+
+
+
+
+
+
+
+</data>
+</openerp>

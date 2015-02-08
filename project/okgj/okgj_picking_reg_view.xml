@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	
+
+         <!--  车辆信息登记  -->
+        <record id="view_okgj_picking_out-reg_form" model="ir.ui.view">
+            <field name="name">view.okgj.picking.out.reg.form</field>
+            <field name="model">okgj.picking.out.reg</field>
+            <field name="arch" type="xml">
+                <form string="拣货登记" version="7.0">
+                <header>
+		    <button name="action_done" string="确认登记" type="object" class="oe_highlight"/>
+		</header>
+                <sheet>
+                    <h1>
+			<label string="拣货登记"/>
+		    </h1>
+		    <group>
+			<group> 
+				<field name="person" on_change="onchange_person(person)"/>
+				<field name="collect" on_change="onchange_collect(collect, line_ids)"/>
+				<field name="picking"  on_change="onchange_picking(picking, line_ids)"/>
+			    </group>
+			    <group>
+				<field name="operator_id" readonly="1"/>
+				<field name="pick_car"/>
+			    </group>
+		    </group>
+                    <h2>
+			<label for="line_ids" string="拣货单"/>
+		    </h2>
+		    <field name="line_ids" editable="top">
+			<tree string="拣货登记">
+			    <field name="picking_id"/>
+			    <field name="okgj_send_time"/>
+			</tree>
+			<form string="拣货登记">
+			    <field name="picking_id"/>
+			    <field name="okgj_send_time"/>
+			</form>
+		    </field>
+		</sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_picking_out_reg_tree" model="ir.ui.view">
+            <field name="name">view.okgj.picking.out.reg.tree</field>
+            <field name="model">okgj.picking.out.reg</field>
+            <field name="arch" type="xml">
+                <tree string="拣货登记">
+		    <field name="create_uid"/>
+		    <field name="create_date"/>
+                    <field name="operator_id"/>
+                    <field name="line_ids"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_picking_out_reg_search" model="ir.ui.view">
+            <field name="name">view.okgj.picking.out.reg.search</field>
+            <field name="model">okgj.picking.out.reg</field>
+            <field name="arch" type="xml">
+                <search string="拣货登记">
+                    <field name="operator_id"/>
+                    <!--field name="line_ids"/-->
+                    <group expand="0" string="Group By...">
+			<filter string="拣货员" icon="terp-personal" domain="[]" context="{'group_by':'operator_id'}"/>
+		    </group>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_picking_out_reg" model="ir.actions.act_window">
+            <field name="name">拣货登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.picking.out.reg</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记拣货信息
+	      </p>
+            </field>
+        </record>
+
+   </data>
+</openerp>

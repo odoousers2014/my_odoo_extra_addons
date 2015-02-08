@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Yannick Stock Moves     Jon: if install this record, location_id will cant be visible.
+		<record id="view_move_picking_tree_KL" model="ir.ui.view">
+			<field name="name">stock.move.picking.tree_KL</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_move_picking_tree" />
+			<field name="arch" type="xml">
+                <xpath expr="//field[@name='location_dest_id']" position="replace">
+                	<field name="location_id"  string="From"/>
+				    <field name="location_dest_id" string="To" />
+                </xpath>
+            </field>
+        </record>
+        -->
+        
+        <!--jon  Stock Moves Form -->
+		<record id="view_move_picking_form_KL" model="ir.ui.view">
+			<field name="name">stock.move.picking.form_KL</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_move_picking_form" />
+			<field name="arch" type="xml">
+                <xpath expr="//field[@name='location_id']" position="attributes">
+					<attribute name="widget">selection</attribute>
+					<attribute name="domain">[('usage','in',['supplier','customer','internal',])]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='location_dest_id']" position="attributes">
+					<attribute name="widget">selection</attribute>
+					<attribute name="domain">[('usage','in',['supplier','customer','internal',])]</attribute>
+                </xpath>                
+            </field>
+        </record>
+        
+        <!--jon    Stock Moves Form   for  stock.picking.out  stock.picking.in -->
+		<record id="inherit_view_move_form_KL" model="ir.ui.view">
+			<field name="name">inherit_view_move_form</field>
+			<field name="model">stock.move</field>
+			<field name="inherit_id" ref="stock.view_move_form" />
+			<field name="arch" type="xml">
+                <xpath expr="//field[@name='location_id']" position="attributes">
+					<attribute name="widget">selection</attribute>
+					<attribute name="domain">['|',('name','ilike','stock'),('usage','in',['supplier','customer',])]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='location_dest_id']" position="attributes">
+					<attribute name="widget">selection</attribute>
+					<attribute name="domain">['|',('name','ilike','stock'),('usage','in',['supplier','customer',])]</attribute>
+                </xpath>                
+            </field>
+        </record>
+        
+        <!-- menu Deliveries to Invoice  invisible for group Salman  -->
+        <!--to group Enable Invoicing Delivery orders delete the user  -->
+        
+        
+        <!-- button view delivery order  group only  sale_manager -->
+        <record model="ir.ui.view" id="inherit_view_order_form_inherit">
+            <field name="name">inherit_view_order_form.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+            <field name="arch" type="xml">
+
+                <button name="action_view_delivery" position="attributes">
+                    <attribute name="groups">base.group_sale_manager</attribute>
+                </button>
+
+            </field>
+        </record>
+        
+        
+        
+       <!-- button  cancel_order_and_picking -->
+       <record model="ir.ui.view" id="inherit_view_order_form">
+            <field name="name">view_order_form.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//form/header/button[@name='action_cancel']" position="after">
+            		<button name="cancel_order_and_picking"  string="Cancel Delivery" type="object" attrs="{'invisible': ['|','|','|',('picking_ids','=',False),('picking_ids','=',[]), ('state', 'not in', ('progress','manual')),('shipped','=',True)]}" groups="base.group_sale_salesman"/>
+				</xpath>
+            </field>
+        </record>
+        
+        <!-- jon adjust the delivery odrer and income ship sequence jon.chow#elico-corp.com May 28, 2013-->
+        <menuitem action="stock.action_picking_tree" id="stock.menu_action_picking_tree" parent="stock.menu_stock_warehouse_mgmt" sequence="1"/>
+        <menuitem action="stock.action_picking_tree4" id="stock.menu_action_picking_tree4" parent="stock.menu_stock_warehouse_mgmt" sequence="3"/>
+        
+        <!-- picking.out  tree view  jon.chow#elico-corp.com Jul 22, 2013-->
+        <record model="ir.ui.view" id="inherit_view_picking_out_tree">
+            <field name="name">stock.picking.out.tree</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_out_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <field name="salesman_id"/>
+                </xpath>
+
+            </field>
+        </record>
+        
+        <!-- group by parnter  stock.picking.out search -->
+        <record model="ir.ui.view" id="inherit_view_picking_out_search">
+            <field name="name">stock.picking.out.search</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_out_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search/group[@string='Group By...']" position="inside">
+                    <filter string="Partner" icon="terp-folder-orange" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter string="SalesMan" icon="terp-folder-orange" domain="[]" context="{'group_by':'salesman_id'}"/>
+                </xpath>
+            </field>
+        </record>
+        
+        
+        <!-- stock.picking.in tree  jon.chow#elico-corp.com Nov 13, 2013-->
+        <record model="ir.ui.view" id="kelit_stock_inherit_stock_picking_in_tree">
+            <field name="name">kelit_stock.stock.picking.in.tree</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <field name="shop_id"/>
+                </xpath>
+            </field>
+        </record>
+        <!-- stock.picking.in form  jon.chow#elico-corp.com Nov 13, 2013-->
+        <record model="ir.ui.view" id="kelit_stock_inherit_stock_picking_in_form">
+            <field name="name">kelit_stock.stock.picking.in.from</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="shop_id"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <!-- group by parnter  stock.picking.in search -->
+        <record model="ir.ui.view" id="inherit_view_picking_in_search">
+            <field name="name">stock.picking.in.search</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search/group[@string='Group By...']" position="inside">
+                    <filter string="Partner" icon="terp-folder-orange" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter string="Shop" icon="terp-folder-orange" domain="[]" context="{'group_by':'shop_id'}"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <!-- group by parnter  stock.move tree -->
+        <record model="ir.ui.view" id="inherit_view_move_tree">
+            <field name="name">inherit_view_move_tree</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='picking_id']" position="after">
+                    <field name='partner_id'/>
+                </xpath>
+            </field>
+        </record>
+        
+        <!--Product Scrap Menu          
+        <record id="move_scrap" model="ir.actions.act_window">
+            <field name="name">Scrap Move</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.move.scrap</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <menuitem id="scrap_menu" name="Scrap Product" parent="stock.menu_stock_product" action="move_scrap"/>
+         --> 
+        
+        <!-- group by parnter  stock.move search -->
+        <record model="ir.ui.view" id="inherit_view_move_search">
+            <field name="name">stock.move.search</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search/group[@string='Group By...']" position="inside">
+                    <filter string="Partner" icon="terp-folder-orange" domain="[]" context="{'group_by':'partner_id'}"/>
+                </xpath>
+            </field>
+        </record>
+        
+        
+        <!-- stock.move tree for stock.picking.out.form -->
+        <record model="ir.ui.view" id="inherit_view_move_picking_tree">
+            <field name="name">inherit_view_move_tree</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_picking_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[@name='location_id']" position="replace">
+                </xpath>
+                <xpath expr="//tree/field[@name='location_dest_id']" position="before">
+                	<field name="location_id" string="From Location"/>
+                </xpath>
+                <xpath expr="//tree/button[@string='Put in current pack']" position="attributes">
+                	<attribute name='invisible'>1</attribute>
+                </xpath>
+                
+                
+            </field>
+        </record>
+        
+        <!--  stock.fill.inventory wizard jon.chow#elico-corp.com Aug 26, 2013-->
+        
+        <record model="ir.ui.view" id="mmx_view_stock_fill_inventory">
+            <field name="name">stock.fill.inventory.form</field>
+            <field name="model">stock.fill.inventory</field>
+            <field name="inherit_id" ref="stock.view_stock_fill_inventory"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/group/field[@name='location_id']" position="replace">
+ 					<field name="location_id" groups="stock.group_locations" widget='selection' domain=" [('name','ilike','stock'),('usage','=','internal')]"/>
+                </xpath>
+            </field>
+        </record>
+  
+    </data>
+</openerp>

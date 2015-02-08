@@ -1,0 +1,1258 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+	
+	<menuitem name="物流" 
+		  id="menu_okgj_logistics_root" 
+		  sequence="11"/>
+
+	<menuitem name="设置" 
+		  id="menu_okgj_logistics_configure"
+		  parent="menu_okgj_logistics_root"
+		  sequence="80"/>
+
+         <!--  车辆信息登记  -->
+        <record id="view_okgj_logistics_car_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.car.form</field>
+            <field name="model">okgj.logistics.car</field>
+            <field name="arch" type="xml">
+                <form string="车辆登记" version="7.0">
+		    <sheet>
+			<h1>
+			    <label string="车辆登记"/>
+			</h1>
+			<group>
+			    <group>
+				<field name="name"/>
+				<field name="car_code"/>
+				<field name="warehouse_id"/>
+				<field name="start_time"/>	
+			    </group>
+			    <group>
+				<field name="active"/>
+				<field name="driver"/>
+				<field name="driver_phone"/>
+			    </group>
+			</group>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_car_tree" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.car.tree</field>
+            <field name="model">okgj.logistics.car</field>
+            <field name="arch" type="xml">
+                <tree string="车辆登记">
+                    <field name="name"/>
+                    <field name="car_code"/>
+                    <field name="driver"/>
+                    <field name="driver_phone"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_car_search" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.car.search</field>
+            <field name="model">okgj.logistics.car</field>
+            <field name="arch" type="xml">
+                <search string="车辆登记">
+                    <field name="name"/>
+                    <field name="car_code"/>
+                    <field name="driver"/>
+                    <field name="driver_phone"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics_car" model="ir.actions.act_window">
+            <field name="name">送货管家</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics.car</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记车辆信息
+	      </p>
+            </field>
+        </record>
+
+    <!--menuitem id="menu_okgj_logistics_car" 
+        parent="menu_okgj_logistics_configure" 
+        sequence="11" 
+        action="action_okgj_logistics_car"/-->
+        
+     <!-- 第三方物流装车登记 -->
+    <record id="view_okgj_logistics_form_three_side" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.form.three.side</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="装车登记" version="7.0">
+		    <header>
+			<button name="action_start_three" string="出发" states="draft" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,end"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="装车单"/>
+			     </h1>
+			 </div>
+			<group>
+			    <group>
+				<field name="name"/>
+				<field name="type" invisible="1"/>
+				<field name="car_id" domain="[('warehouse_id','=',warehouse_id)]"/>
+			    <field name="is_sale_return"/>
+			   	<field name="three_side_picking"/>
+			   	<field name="picking"
+					on_change="onchange_picking(type, is_sale_return, picking, line_ids, three_side_picking)"/>
+			    </group>
+			    <group>
+					<field name="warehouse_id"/>
+					<field name="okgj_box_qty"/>
+			    	<!--field name="okgj_box"/-->
+			    </group>
+			</group>
+			<h2>
+			    <label for="line_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_ids">
+				<tree string="装车登记"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="three_side_picking"/>
+				    <field name="picking_id"/>
+				    <field name="sale_return_id"/>
+				    <field name="okgj_pay_car"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_okgj_address"/>
+				    <field name="sale_pay_id"/>
+				    <field name="sale_date_order2"/>
+				    <field name="sale_best_time"/>
+				    <field name="box"/>
+				    <field name="state"/>
+				    <!--field name="container"/-->
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_tree_three_side" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.tree.three.side</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="装车登记"  colors="blue:state == 'start';grey:state == 'end'">
+		    		<field name="name"/>
+		    		<field name="create_date"/>
+		    		<field name="create_uid"/>
+		    		<field name="back_date"/>
+		    		<field name="back_uid"/>
+		    		<field name="money_date"/>
+		    		<field name="money_uid"/>
+		    		<field name="car_name"/>
+                    <field name="car_id"/>
+		    		<field name="okgj_box_qty"/>
+		    		<field name="okgj_box_return_qty"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_search_three_side" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.search.three.side</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <search string="装车登记">
+		    <field name="name"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+                </search>
+            </field>
+       </record>
+        
+        <record id="action_okgj_logistics_three_side" model="ir.actions.act_window">
+            <field name="name">第三方物流登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_search_three_side"/>
+	    <field name="domain">[('type','=','three_side')]</field>
+	    <field name="context">{'default_type': 'three_side'}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记第三方物流信息
+	      </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_logistics_tree_three_side" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_tree_three_side"/>
+            <field name="act_window_id" ref="action_okgj_logistics_three_side"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_form_three_side" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_form_three_side"/>
+            <field name="act_window_id" ref="action_okgj_logistics_three_side"/>
+        </record>
+             
+        <!--本地物流-->
+    <record id="view_okgj_logistics_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.form</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="装车登记" version="7.0">
+		    <header>
+			<button name="action_start" string="出发" states="draft" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,end"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="装车单"/>
+			     </h1>
+			 </div>
+			<group>
+			    <group>
+				<field name="name"/>
+				<field name="type" invisible="1"/>
+				<field name="car_id" domain="[('warehouse_id','=',warehouse_id)]"/>
+				<field name="okgj_box_qty"/>
+			    </group>
+			    <group>
+				<field name="start_miles"/>
+				<field name="end_miles"/>
+				<field name="warehouse_id"/>
+			    </group>
+			</group>
+			<group>
+			    <field name="is_sale_return"/>
+			    <field name="picking"
+				   on_change="onchange_picking(type, is_sale_return, picking, line_ids)"/>
+			    <!--field name="okgj_box"/-->
+			</group>
+
+			<h2>
+			    <label for="line_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_ids">
+				<tree string="装车登记"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="picking_id"/>
+				    <field name="sale_return_id"/>
+				    <field name="okgj_pay_car"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_okgj_address"/>
+				    <field name="sale_pay_id"/>
+				    <field name="sale_date_order2"/>
+				    <field name="sale_best_time"/>
+				    <field name="box"/>
+				    <field name="state"/>
+				    <!--field name="container"/-->
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_tree" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.tree</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="装车登记"  colors="blue:state == 'start';grey:state == 'end'">
+		    <field name="name"/>
+		    <field name="create_date"/>
+		    <field name="create_uid"/>
+		    <field name="back_date"/>
+		    <field name="back_uid"/>
+		    <field name="money_date"/>
+		    <field name="money_uid"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+		    <field name="okgj_box_qty"/>
+		    <field name="okgj_box_return_qty"/>
+		    <field name="start_miles"/>
+		    <field name="end_miles"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_search" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.search</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <search string="装车登记">
+		    <field name="name"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics" model="ir.actions.act_window">
+            <field name="name">本地装车登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_search"/>
+	    <field name="domain">[('type','=','local')]</field>
+	    <field name="context">{'default_type': 'local'}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记车辆信息
+	      </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_logistics_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_tree"/>
+            <field name="act_window_id" ref="action_okgj_logistics"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_form"/>
+            <field name="act_window_id" ref="action_okgj_logistics"/>
+        </record>
+
+	<!--干线物流-->
+	<record id="view_okgj_logistics_form_route" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.form.route</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="干线装车登记" version="7.0">
+		    <header>
+			<button name="action_start" string="出发" states="draft" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,done"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="装车单"/>
+			     </h1>
+			 </div>
+			<group>
+			    <group>
+				<field name="name"/>
+				<field name="type" invisible="1"/>
+				<field name="car_id" domain="[('warehouse_id','=',warehouse_id)]"/>
+				<field name="okgj_box_qty"/>
+			    </group>
+			    <group>
+				<field name="dest_shop" attrs="{'required': [('type','=','route')], 'invisible': [('type','=','local')]}"/>
+				<field name="warehouse_id" invisible="1"/>
+				<field name="start_miles"/>
+				<field name="end_miles"/>
+			    </group>
+			</group>
+			<group>
+			    <field name="is_sale_return"/>
+			    <field name="picking"
+				   on_change="onchange_picking(type, is_sale_return, picking, line_ids)"/>
+			    <!--field name="okgj_box"/-->
+			</group>
+
+			<h2>
+			    <label for="line_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_ids">
+				<tree string="装车登记"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="picking_id"/>
+				    <field name="sale_return_id"/>
+				    <field name="sale_order_id"/>
+				    <field name="okgj_pay_car"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_okgj_address"/>
+				    <field name="sale_pay_id"/>
+				    <field name="sale_date_order2"/>
+				    <field name="sale_best_time"/>
+				    <field name="box"/>
+				    <field name="state"/>
+				    <!--field name="container"/-->
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_tree_route" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.tree.route</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="装车登记"  colors="blue:state == 'start';grey:state == 'end'">
+		    <field name="name"/>
+		    <field name="create_date"/>
+		    <field name="create_uid"/>
+		    <field name="back_date"/>
+		    <field name="back_uid"/>
+		    <field name="dest_shop"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+		    <field name="okgj_box_qty"/>
+		    <field name="okgj_box_return_qty"/>
+		    <field name="start_miles"/>
+		    <field name="end_miles"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics_route" model="ir.actions.act_window">
+            <field name="name">干线装车登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_search"/>
+	    <field name="domain">[('type','=','route')]</field>
+	    <field name="context">{'default_type': 'route'}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记车辆信息
+	      </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_logistics_tree_route" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_tree_route"/>
+            <field name="act_window_id" ref="action_okgj_logistics_route"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_form_route" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_form_route"/>
+            <field name="act_window_id" ref="action_okgj_logistics_route"/>
+        </record>
+
+
+	<!--未送达事由-->
+	<record id="view_okgj_logistics_line_cause_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.line.cause.form</field>
+            <field name="model">okgj.logistics.line.cause</field>
+            <field name="arch" type="xml">
+		<form string="事由" version="7.0">
+		    <sheet>
+			<h2>
+			    <div class="oe_title">
+				<separator string="请填写未送达事由"/>
+			    </div>
+			</h2>
+		    <group>
+			<field name="cause"/>
+		    </group>
+		    <footer>
+		    <button name="action_cancel" string="确认" type="object" class="oe_highlight"/>
+		    或
+		    <button string="取消" class="oe_link" special="cancel" />
+		    </footer>
+		    </sheet>                    
+		</form>
+            </field>
+        </record>
+
+        <record id="action_okgj_logistics_line_cause" model="ir.actions.act_window">
+            <field name="name">未送达事由</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics.line.cause</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+	    	<field name="target">new</field>
+            <field name="view_id" ref="view_okgj_logistics_line_cause_form"/>
+        </record>
+	
+	<!--拒收事由-->
+	<record id="view_okgj_logistics_line_cause_refuse_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.line.cause.refuse.form</field>
+            <field name="model">okgj.logistics.line.cause</field>
+            <field name="arch" type="xml">
+		<form string="事由" version="7.0">
+		    <sheet>
+			<h2>
+			    <div class="oe_title">
+				<separator string="请填写拒收事由"/>
+			    </div>
+			</h2>
+		    <group>
+			<field name="cause"/>
+		    </group>
+		    <footer>
+		    <button name="action_cancel" string="确认" type="object" class="oe_highlight" context="{'if_refuse':True}"/>
+		    或
+		    <button string="取消" class="oe_link" special="cancel" />
+		    </footer>
+		    </sheet>                    
+		</form>
+            </field>
+        </record>
+        
+        <record id="action_okgj_logistics_line_cause_refuse" model="ir.actions.act_window">
+            <field name="name">拒绝事由</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics.line.cause</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+	    	<field name="target">new</field>
+            <field name="view_id" ref="view_okgj_logistics_line_cause_refuse_form"/>
+        </record>
+	
+	<!--本地返程登记-->
+	<record id="view_okgj_logistics_back_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.form</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="返程登记" version="7.0">
+		    <header>
+			<button name="action_end" string="返程" states="start" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,end"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="装车单"/>
+			     </h1>
+			 </div>
+			<group>
+			    <group>
+				 <field name="name"/>
+				<field name="car_id"/>
+				<field name="okgj_box_qty"/>
+				<field name="okgj_box_return_qty"/>
+			    </group>
+			    <group>
+				<field name="start_miles"/>
+				<field name="end_miles"/>
+			    </group>
+			</group>
+
+			<h2>
+			    <label for="line_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_ids">
+				<tree string="装车明细"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="picking_id" invisible="1"/>
+				    <field name="sale_return_id" invisible="1"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_okgj_address"/>
+				    <field name="sale_pay_id"/>
+				    <field name="sale_date_order2"/>
+				    <field name="box"/>
+				    <field name="container"/>
+				    <button name="%(action_okgj_logistics_line_cause_refuse)d" icon="gtk-no" string="拒收" type="action" states="todo"/>
+				    <field name="refuse_cause"/>
+				    <button name="action_done" string="送达" icon="gtk-apply"  states="todo" type="object"/>
+				    <button name="action_todo" string="设为待送" icon="gtk-redo"  states="done" type="object"/>
+				    <button name="%(action_okgj_logistics_line_cause)d" icon="gtk-stop" string="未送达" type="action" states="todo"/>
+				    <field name="state"/>
+				    <field name="cause"/>
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_tree" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.tree</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="返程登记"  colors="blue:state == 'start';grey:state == 'end'">
+		    <field name="name"/>
+		    <field name="create_date"/>
+		    <field name="create_uid"/>
+		    <field name="back_date"/>
+		    <field name="back_uid"/>
+		    <field name="money_date"/>
+		    <field name="money_uid"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+		    <field name="okgj_box_qty"/>
+		    <field name="okgj_box_return_qty"/>
+		    <field name="start_miles"/>
+		    <field name="end_miles"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_search" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.search</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <search string="返程登记">
+		    <field name="name"/>
+                    <field name="car_id"/>
+                    <field name="okgj_box_qty"/>
+		    <filter string="按管家" name="groupby_car_id" domain="[]"  context="{'group_by':'car_id'}"/>
+                    <filter icon="terp-accessories-archiver-minus" string="已出发" domain="[('state', '=', 'start')]"/>
+		    <filter icon="terp-accessories-archiver-minus" string="已返程" domain="[('state', '=', 'end')]"/>
+		    <filter icon="terp-accessories-archiver-minus" string="完成" domain="[('state', '=', 'done')]"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics_back" model="ir.actions.act_window">
+            <field name="name">返程登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="domain">[('type','=','local')]</field>
+	    <field name="context">{'default_type': 'local'}</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_back_search"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记车辆信息
+	      </p>
+            </field>
+        </record>
+
+
+        <record id="act_view_okgj_logistics_back_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_back_tree"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_back_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_back_form"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back"/>
+        </record>
+
+	<!--干线返程登记-->
+	<record id="view_okgj_logistics_back_form_route" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.form.route</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="送达登记" version="7.0">
+		    <header>
+			<button name="action_route_done" string="接收" states="start" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,end"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="装车单"/>
+			     </h1>
+			 </div>
+			<group>
+			    <group>
+				<field name="name"/>
+				<field name="car_id"/>
+				<field name="okgj_box_qty"/>
+				<field name="okgj_box_return_qty"/>
+			    </group>
+			    <group>
+				<field name="dest_shop"/>
+				<field name="start_miles"/>
+				<field name="end_miles"/>
+			    </group>
+			</group>
+
+			<h2>
+			    <label for="line_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_ids">
+				<tree string="装车明细"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="picking_id" invisible="1"/>
+				    <field name="sale_return_id" invisible="1"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_okgj_address"/>
+				    <field name="sale_pay_id"/>
+				    <field name="sale_date_order2"/>
+				    <field name="box"/>
+				    <field name="container"/>
+				    <button name="%(action_okgj_logistics_line_cause_refuse)d" icon="gtk-no" string="拒收" type="action" states="todo"/>
+				    <field name="refuse_cause"/>
+				    <button name="action_done" string="接收" icon="gtk-apply"  states="todo" type="object"/>
+				    <button name="action_todo" string="设为待收" icon="gtk-redo"  states="done" type="object"/>
+				    <button name="%(action_okgj_logistics_line_cause)d" icon="gtk-stop" string="未接收" type="action" states="todo"/>
+				    <field name="state"/>
+				    <field name="cause"/>
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_tree_route" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.tree_route</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="送达登记"  colors="blue:state == 'start';grey:state == 'end'">
+		    <field name="name"/>
+		    <field name="create_date"/>
+		    <field name="create_uid"/>
+		    <field name="back_date"/>
+		    <field name="back_uid"/>
+		    <field name="dest_shop"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+		    <field name="okgj_box_qty"/>
+		    <field name="okgj_box_return_qty"/>
+		    <field name="start_miles"/>
+		    <field name="end_miles"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+
+        <record id="action_okgj_logistics_back_route" model="ir.actions.act_window">
+            <field name="name">干线送达登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="domain">[('type','=','route')]</field>
+	    <field name="context">{'default_type': 'route'}</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_back_search"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记车辆信息
+	      </p>
+            </field>
+        </record>
+
+
+        <record id="act_view_okgj_logistics_back_tree_route" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_back_tree_route"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back_route"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_back_form_route" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_back_form_route"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back_route"/>
+        </record>
+		
+		<!--第三方物流送达登记-->
+	<record id="view_okgj_logistics_back_form_three_side" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.form.three_side</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="送达登记" version="7.0">
+		    <header>
+			<button name="action_end" string="送达" states="start" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,end"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="装车单"/>
+			     </h1>
+			 </div>
+			<group>
+			    <group>
+				 	<field name="name"/>
+					<field name="car_id"/>
+					<field name="okgj_box_qty"/>
+					<field name="okgj_box_return_qty"/>
+			    </group>
+			</group>
+
+			<h2>
+			    <label for="line_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_ids">
+				<tree string="装车明细"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="picking_id" invisible="1"/>
+				    <field name="sale_return_id" invisible="1"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="three_side_picking"/>
+				    <field name="sale_okgj_address"/>
+				    <field name="sale_pay_id"/>
+				    <field name="sale_date_order2"/>
+				    <field name="box"/>
+				    <field name="container"/>
+				    <button name="%(action_okgj_logistics_line_cause_refuse)d" icon="gtk-no" string="拒收" type="action" states="todo"/>
+				    <field name="refuse_cause"/>
+				    <button name="action_done" string="送达" icon="gtk-apply"  states="todo" type="object"/>
+				    <button name="action_todo" string="设为待送" icon="gtk-redo"  states="done" type="object"/>
+				    <button name="%(action_okgj_logistics_line_cause)d" icon="gtk-stop" string="未送达" type="action" states="todo"/>
+				    <field name="state"/>
+				    <field name="cause"/>
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_tree_three_side" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.tree.three.side</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="送达登记"  colors="blue:state == 'start';grey:state == 'end'">
+		    <field name="name"/>
+		    <field name="create_date"/>
+		    <field name="create_uid"/>
+		    <field name="back_date"/>
+		    <field name="back_uid"/>
+		    <field name="money_date"/>
+		    <field name="money_uid"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+		    <field name="okgj_box_qty"/>
+		    <field name="okgj_box_return_qty"/>
+		    <!--field name="start_miles"/>
+		    <field name="end_miles"/-->
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_search_three_side" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.search.three.side</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <search string="送达登记">
+		    <field name="name"/>
+                    <field name="car_id"/>
+                    <field name="okgj_box_qty"/>
+		    <filter string="按管家" name="groupby_car_id" domain="[]"  context="{'group_by':'car_id'}"/>
+                    <filter icon="terp-accessories-archiver-minus" string="已出发" domain="[('state', '=', 'start')]"/>
+		    <filter icon="terp-accessories-archiver-minus" string="已送达" domain="[('state', '=', 'end')]"/>
+		    <filter icon="terp-accessories-archiver-minus" string="完成" domain="[('state', '=', 'done')]"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics_back_three_side" model="ir.actions.act_window">
+            <field name="name">第三方物流送达登记</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="domain">[('type','=','three_side')]</field>
+	    <field name="context">{'default_type': 'three_side'}</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_back_search_three_side"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记第三方物流送达信息
+	      </p>
+            </field>
+        </record>
+
+
+        <record id="act_view_okgj_logistics_back_tree_three_side" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_back_tree_three_side"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back_three_side"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_back_form_three_side" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_back_form_three_side"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back_three_side"/>
+        </record>
+        
+	<!--实收金额-->
+	<record id="view_okgj_logistics_line_money_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.line.money.form</field>
+            <field name="model">okgj.logistics.line.money</field>
+            <field name="arch" type="xml">
+		<form string="实收金额" version="7.0">
+		    <sheet>
+			<h2>
+			    <div class="oe_title">
+				<separator string="请输入实收金额"/>
+			    </div>
+			</h2>
+			<group>
+			    <field name="order_id"/>
+			</group>
+			<group>
+			    <field name="money_act"/>
+			</group>
+			<group>
+			    <field name="pos_act"/>
+			</group>
+			<group>
+			    <field name="notes"/>
+			</group>
+			
+		    <footer>
+		    <button name="action_money" string="确认" type="object" class="oe_highlight"/>
+		    或
+		    <button string="取消" class="oe_link" special="cancel" />
+		    </footer>
+		    </sheet>                    
+		</form>
+            </field>
+        </record>
+
+        <record id="action_okgj_logistics_line_money" model="ir.actions.act_window">
+            <field name="name">实收金额</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics.line.money</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+	    <field name="target">new</field>
+            <field name="view_id" ref="view_okgj_logistics_line_money_form"/>
+        </record>
+	
+	<!--回单回款-->
+	<record id="view_okgj_logistics_back_money_form" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.money.form</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <form string="回单回款" version="7.0">
+		    <header>
+			<button name="action_done" string="完成" states="end" type="object" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="start,end, done"/>
+		    </header>
+		    <sheet>
+			 <div class="oe_title">
+			     <h1>
+				 <label string="回款单"/>
+			     </h1>
+			 </div>
+			<group> 
+			    <group>
+				 <field name="name"/>
+				<field name="car_id"/>
+			    </group>
+			</group>
+
+			<h2>
+			    <label for="line_done_ids" string="送货明细"/>
+			</h2>
+			    <field name="line_done_ids">
+				<tree string="装车明细"  colors="blue:state == 'start';grey:state == 'end'">
+				    <field name="line_no"/>
+				    <field name="picking_id" invisible="1"/>
+				    <field name="sale_return_id" invisible="1"/>
+				    <field name="okgj_pay_car"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_pay_id"/>
+				    <field name="money_owned" sum="合计"/>
+				    <field name="money_act" sum="合计"/>
+				    <field name="pos_act" sum="合计"/>
+				    <field name="rebate_amount" sum="合计"/>
+				    <button name="%(action_okgj_logistics_line_money)d" icon="gtk-ok" string="实收金额" type="action" attrs="{'invisible':[('money_state','=','done')]}"/>
+				    <field name="money_diff" sum="合计"/>
+				    <field name="money_state"/>
+				    <field name="rebate"/>
+				    <field name="state"/>
+				    <field name="notes"/>
+				</tree>
+			    </field>
+		    </sheet>
+                </form>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_money_tree" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.money.tree</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <tree string="回单回款"  colors="blue:state == 'start';grey:state == 'end'">
+		    <field name="name"/>
+	        <!--  	    <field name="partner_id"/>  -->
+		    <field name="okgj_order_type"/>
+		    <field name="create_date"/>
+		    <field name="create_uid"/>
+		    <field name="back_date"/>
+		    <field name="back_uid"/>
+		    <field name="money_date"/>
+		    <field name="money_uid"/>
+		    <field name="car_name"/>
+                    <field name="car_id"/>
+                    <field name="okgj_box_qty"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_back_money_search" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.back.money.search</field>
+            <field name="model">okgj.logistics</field>
+            <field name="arch" type="xml">
+                <search string="返程登记">
+		    <field name="name"/>
+                    <field name="car_id"/>
+                    <field name="okgj_box_qty"/>
+		    <filter string="按管家" name="groupby_car_id" domain="[]"  context="{'group_by':'car_id'}"/>
+                    <filter icon="terp-accessories-archiver-minus" string="已出发" domain="[('state', '=', 'start')]"/>
+		    <filter icon="terp-accessories-archiver-minus" string="已返程" domain="[('state', '=', 'end')]"/>
+		    <filter icon="terp-accessories-archiver-minus" string="完成" domain="[('state', '=', 'done')]"/>
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics_back_money" model="ir.actions.act_window">
+            <field name="name">回单回款</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    <field name="domain">[('state','in',['end','done']),('type','in',['local','three_side'])]</field>
+	    <field name="search_view_id" ref="view_okgj_logistics_back_money_search"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+		  点击开始登记车辆信息
+	      </p>
+            </field>
+        </record>
+
+        <record id="act_view_okgj_logistics_back_money_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_okgj_logistics_back_money_tree"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back_money"/>
+        </record>
+
+        <record id="act_view_okgj_logistics_back_money_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_okgj_logistics_back_money_form"/>
+            <field name="act_window_id" ref="action_okgj_logistics_back_money"/>
+        </record>
+        
+        <!-- 回单回款明细 -->
+        <record id="view_okgj_logistics_line_back_money_tree" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.line.back.money.tree</field>
+            <field name="model">okgj.logistics.line</field>
+            <field name="arch" type="xml">
+                <tree string="回单回款明细"  colors="blue:state == 'start';grey:state == 'end'">
+                	<field name="logistics_id"/>
+                	<field name="partner_id"/>
+				    <field name="line_no"/>
+				    <field name="picking_id" invisible="1"/>
+				    <field name="sale_return_id" invisible="1"/>
+				    <field name="okgj_pay_car"/>
+				    <field name="sale_consignee"/>
+				    <field name="sale_order_id"/>
+				    <field name="sale_pay_id"/>
+				    <field name="money_owned" sum="合计"/>
+				    <field name="money_act" sum="合计"/>
+				    <field name="pos_act" sum="合计"/>
+				    <field name="rebate_amount" sum="合计"/>
+				    <button name="%(action_okgj_logistics_line_money)d" icon="gtk-ok" string="实收金额" type="action"/>
+				    <field name="money_diff" sum="合计"/>
+				    <field name="money_state"/>
+				    <field name="rebate"/>
+				    <field name="state"/>
+				    <field name="notes"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_okgj_logistics_line_back_money" model="ir.actions.act_window">
+            <field name="name">回单回款明细</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics.line</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+	    	<field name="domain">[]</field>
+	    	<field name="context">{'search_default_done_money_todo':1,}</field>
+	    	<field name="view_id" ref="view_okgj_logistics_line_back_money_tree"/>
+	    	<field name="search_view_id" ref="view_okgj_logistics_line_search"/>
+        </record>
+
+
+	<!--menuitem 
+	    name="使用信息"
+	    id="menu_okgj_logistics" 
+	    parent="menu_okgj_logistics_root" 
+	    sequence="11" 
+	    /-->
+
+	<!--menuitem id="menu_okgj_logistics_more" 
+		  parent="menu_okgj_logistics" 
+		  sequence="11" 
+		  action="action_okgj_logistics"/-->
+
+
+	<!--装车登记明细-->
+        <record id="view_okgj_logistics_line_tree" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.line.tree</field>
+            <field name="model">okgj.logistics.line</field>
+            <field name="arch" type="xml">
+                <tree string="装车登记明细"  colors="red:state == 'cancel';blue:state == 'todo'">
+		    <field name="sale_order_id"/>
+		    <field name="picking_id"/>
+		    <!--field name="logistics_id"/-->
+		    <field name="three_side_picking"/>
+		    <field name="sale_return_id"/>
+		    <field name="sale_okgj_city"/>
+		    <field name="sale_region_name"/>
+		    <field name="sale_consignee"/>
+		    <field name="sale_okgj_tel"/>
+		    <field name="sale_okgj_address"/>		    
+		    <field name="sale_pay_id"/>
+		    <field name="sale_date_order2"/>		    
+		    <field name="sale_create_date"/>
+		    <field name="sale_best_time"/>		    
+		    <field name="sale_inv_payee"/>
+		    <field name="sale_inv_content"/>
+		    <field name="sale_inv_amount"/>
+		    <!--field name="collect_create_uid"/>
+		    <field name="collect_create_date"/-->
+		    <!--field name="collect_ids"/-->
+		    <field name="reg_operate_id"/>
+		    <field name="reg_date"/>
+		    <field name="reg_verify_id"/>
+		    <field name="reg_verify_date"/>
+		    <field name="logistics_id"/>		
+		    <field name="create_uid"/>
+		    <field name="create_date"/>
+		    <field name="logistics_car_name"/>
+		    <field name="logistics_car_id"/>
+		    <field name="logistics_car_tel"/>
+		    <field name="state"/>
+		    <field name="cause"/>
+                </tree>
+            </field>
+       </record>
+
+        <record id="view_okgj_logistics_line_search" model="ir.ui.view">
+            <field name="name">view.okgj.logistics.line.search</field>
+            <field name="model">okgj.logistics.line</field>
+            <field name="arch" type="xml">
+                <search string="装车登记明细">
+		   		    <field name="sale_order_id"/>
+                    <field name="picking_id"/>
+		            <field name="sale_consignee"/>
+		            <field name="sale_okgj_tel"/>
+                    <field name="logistics_id"/>		    
+		            <field name="logistics_car_id"/>
+		            <field name="logistics_car_name"/>
+			    	<filter string="已送达" name="state_done" domain="[('state','=','done')]" />
+			    	<filter string="待回款" name="money_state_todo" domain="[('money_state','=','todo')]" />
+			    	<filter string="已送达待回款" name="done_money_todo" domain="[('state','=','done'),('money_state','=','todo')]" />
+			
+                </search>
+            </field>
+       </record>
+
+        <record id="action_okgj_logistics_line" model="ir.actions.act_window">
+            <field name="name">订单装车历史</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.logistics.line</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="view_okgj_logistics_line_search"/>
+	</record>
+	
+	<!--城市视图 -->
+	<record model="ir.ui.view" id='view_okgj_logistics_city_form'>
+		<field name="name">城市</field>
+		<field name="model">okgj.logistics.city.line</field>
+		<field name="arch" type="xml">
+			<form string="城市" version="7.0">
+				<group>
+					<field name="province_id"/>
+					<field name="name"/>
+					<field name="code"/>
+				</group>
+			</form>
+		</field>
+	</record>
+	
+	<!-- 区域视图 -->
+	<record model="ir.ui.view" id="view_okgj_logistics_region_tree">
+		<field name="name">view.okgj.logistics.region.tree</field>
+		<field name="model">okgj.logistics.region</field>
+		<field name="arch" type="xml">
+			<tree string="城市区域列表">
+				<field name="name"/>
+				<field name="code"/>
+				<field name="city_line_id"/>
+				<field name="province_id"/>
+				<field name="country_id" invisible="1"/>
+				<field name="create_date"/>
+				<field name="create_uid"/>
+			</tree>
+		</field>
+	</record>
+	<record model="ir.ui.view" id="view_okgj_logistics_region_form">
+		<field name="name">view.okgj.logistics.region.form</field>
+		<field name="model">okgj.logistics.region</field>
+		<field name="arch" type="xml">
+			<form string="城市区域表单" version="7.0">
+				<sheet>
+					<h1>
+						<label string="区域管理"/>
+					</h1>
+					<group>
+						<group>
+							<field name="city_line_id"/>
+							<field name="name"/>
+							<field name="code"/>		
+						</group>
+						<group>
+							<field name="province_id" invisible="1"/>
+							<field name="create_date"/>
+							<field name="create_uid"/>
+						</group>
+					</group>
+					<h2>
+						<label string="区域街道明细"/>
+					</h2>
+					<field name="region_line_ids">
+						<tree string='街道明细'>
+							<field name="name"/>
+							<field name="code"/>
+							<field name="region_id" invisible="1"/>
+						</tree>
+						<form string="街道明细">
+							<group>
+								<field name="name"/>
+								<field name="code"/>
+								<separator string="名称匹配方式:有关键字时,按关键字匹配;无关键字时,匹配整个名称!" colspan="4"/>
+								<separator string="关键字设置方式:使用小括号:(关键字);如:(西乡街)道办" colspan="4"/>
+								<field name="region_id" invisible="1"/>
+							</group>
+						</form>
+					</field>
+				</sheet>
+			</form>
+		</field>
+	</record>
+	
+	<record model="ir.actions.act_window" id="action_okgj_logistics_region">
+		<field name="name">区域编码管理</field>
+		<field name="res_model">okgj.logistics.region</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+   </data>
+</openerp>

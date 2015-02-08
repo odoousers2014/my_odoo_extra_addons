@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="inherit_product_product_tree_view">
+    <field name="name">product.product.tree.w</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="product.product_product_tree_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//tree" position="inside">
+            <button name='get_stock_available' string='Stock Available for multi Location' type='object' icon='terp-stock_zoom'/>
+        </xpath>
+
+    </field>
+</record>
+
+    
+</data>
+</openerp>

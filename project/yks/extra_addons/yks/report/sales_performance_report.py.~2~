@@ -1,0 +1,130 @@
+# -*- coding: utf-8 -*-
+
+
+from openerp import tools
+from openerp.osv import fields, osv
+import datetime
+
+
+class wizard_sales_performance(osv.osv_memory):
+    _name = 'wizard.sales.performance'
+    _columns = {
+        'name': fields.char('Name', size=10),
+        'sale_uid': fields.many2one('res.users', string=u'业务员', ),
+        'product_id': fields.many2one('product.product', string='产品'),
+        'old_date': fields.datetime(u'开始时间'),
+        'new_date': fields.datetime(u'截止时间'),
+        'picking_type': fields.selection([('in', u'入库'), ('out', u'出库')]),
+    }
+    _defaults = {
+        'new_date': fields.datetime.now(),
+        'old_date': lambda self, cr, uid, c: self._month_first_day(cr, uid, c),
+    }
+
+    def _month_first_day(self, cr, uid, context=None):
+        """"""
+        time = datetime.datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime(
+            tools.DEFAULT_SERVER_DATE_FORMAT)
+        return time
+
+    def apply(self, cr, uid, ids, context=None):
+        ''''''
+        performance_obj = self.pool.get('sales.performance.report')
+        product_id = None
+        old_date = None
+        new_date = None
+        args = []
+        obj = self.browse(cr, uid, ids[0], context)
+        if obj.product_id:
+            product_id = obj.product_id.id
+            args.append(('product_id', '=', product_id))
+        if obj.old_date:
+            old_date = obj.old_date
+            args.append(('date_done', '>', old_date))
+        if obj.new_date:
+            new_date = obj.new_date
+            args.append(('date_done', '<', new_date))
+        if obj.picking_type:
+            picking_type = obj.picking_type
+            args.append(('type', '=', picking_type))
+        res_ids = performance_obj.search(cr, uid, args, context=context)
+        return {
+            'name': (u'销售业绩报告'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'sales.performance.report',
+            'domain': [('id', 'in', res_ids)],
+            'type': 'ir.actions.act_window',
+        }
+
+
+wizard_sales_performance()
+
+
+class sales_performance_report(osv.osv):
+    _name = "sales.performance.report"
+    _order = "sale_uid desc"
+    _auto = False
+
+    def _get_total(self, cr, uid, ids, name, arg, context=None):
+        ''''''
+        res = {}
+        for r in self.browse(cr, uid, ids, context=context):
+                res[r.id] = r.product_qty * r.price_unit
+        return res
+
+    _columns = {
+        'sale_uid': fields.many2one('res.users', string=u'业务员', ),
+        'product_id': fields.many2one('product.product', string='产品'),
+        'product_qty': fields.float(string=u'数量'),
+        'price_unit': fields.float(string='单价'),
+        'total': fields.function(_get_total, arg=None, type='float', string=u'小计'),
+        'location_id': fields.many2one('stock.location', string=u'源库位'),
+        'location_dest_id': fields.many2one('stock.location', string=u'目的库位'),
+        'type': fields.selection([('in', u'入库'), ('out', u'出库')], string=u'出入库'),
+        'sale_id': fields.many2one('sale.order', string=u'销售单号'),
+        'date_done': fields.datetime(string=u'完成时间'),
+        'year': fields.char(u'年', size=4, readonly=True),
+        'month': fields.selection([('01', 'January'), ('02', 'February'), ('03', 'March'), ('04', 'April'),
+            ('05', 'May'), ('06', 'June'), ('07', 'July'), ('08', 'August'), ('09', 'September'),
+            ('10', 'October'), ('11', 'November'), ('12', 'December')], u'月', readonly=True),
+        'day': fields.char(u'天', size=128, readonly=True),
+    }
+
+    def init(self, cr):
+        """"""
+        tools.drop_view_if_exists(cr, 'sales_performance_report')
+        cr.execute("""
+            create or replace view sales_performance_report as (
+                select
+                    m.id as id,
+                    stock.type as type,
+                    stock.date_done as date_done,
+                    sale.id as sale_id,
+                    sale.user_id as sale_uid,
+                    case stock.type
+                        when 'in' then -m.product_qty
+                        when 'out' then m.product_qty
+                    end as product_qty,
+                    product.id as product_id,
+                    m.location_id as location_id,
+                    sl.price_unit as price_unit,
+                    m.location_dest_id as location_dest_id,
+                    to_char(stock.date_done, 'YYYY') as year,
+                    to_char(stock.date_done, 'MM') as month,
+                    to_char(stock.date_done, 'YYYY-MM-DD') as day
+                from
+                    stock_picking stock
+                    left join  sale_order sale on (sale.id = stock.sale_id)
+                    left join stock_move m on (m.picking_id = stock.id)
+                    left join product_product product on (product.id = m.product_id)
+                    left join sale_order_line sl on (sl.id =m.sale_line_id)
+                where
+                    stock.state ='done'
+            )
+        """)
+
+sales_performance_report()
+
+
+#########

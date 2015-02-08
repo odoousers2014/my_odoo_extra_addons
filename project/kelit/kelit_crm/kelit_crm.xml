@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+		
+		<!--jon: adjust the sequence of the Phone Call Menu-->
+		<menuitem name="Phone Calls" id="crm.menu_crm_case_phone"
+			groups="base.group_sale_salesman"
+			parent="base.menu_base_partner" sequence="3"/>
+		<menuitem id="base.menu_product" name="Products" parent="base.menu_base_partner" sequence="1"/>	
+		<menuitem id="base.menu_invoiced" name="Invoicing" parent="base.menu_base_partner" sequence="2"/>
+    
+		<!--jon only can select China state, and change the string'state' to 'region'  -->    
+        <record id="inherit_crm_lead_form" model="ir.ui.view">
+            <field name="name">CRM Lead</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_form_view_leads"/>
+            <field name="arch" type="xml">
+                <field name="state_id" position="attributes">
+					 <attribute name="domain">[('country_id.name','in',['China','Hong Kong']),]</attribute>
+					 <attribute name="placeholder">Region</attribute>
+					 <attribute name="widget">selection</attribute>
+ 					 <attribute name="required">1</attribute>
+                </field>
+				<field name="partner_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				
+				<!-- jon add field channeld_id -->
+				<field name="categ_ids" position="after">
+					<field name="channel_id"  widget="selection"/>
+				</field>
+				
+				<!-- jon change tow field widget to selection -->
+				<field name="user_id" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="section_id" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="title" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="country_id" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="categ_ids" position="attributes">
+					<attribute name="string">Type of Lead</attribute>
+				</field>
+				
+				<!--jon add partner_category_id  -->
+				<field name="partner_name" position="after">
+					<field name="partner_categ_id" widget="widget" placeholder="Customer Category"/>
+				</field>
+				
+				
+            </field>
+        </record>
+		
+		<!--jon: lead tree view , invisible  email, phone , insert saleperson, saleteam, state, city   -->	
+        <record id="inherit_crm_lead_tree" model="ir.ui.view">
+            <field name="name">CRM Lead</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+            <field name="arch" type="xml">
+                <field name="email_from" position="attributes">
+					<attribute name="invisible">True</attribute>
+                </field>
+                <field name="phone" position="attributes">
+					<attribute name="invisible">True</attribute>
+                </field>
+                <field name="stage_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+                </field>
+
+				<field name="contact_name" position="before">				
+					<field name="partner_name"/>
+				</field>
+				
+				<field name="contact_name" position="after">
+				<!--<field name="user_id"/> -->
+				<!--<field name="section_id"/> -->
+					<field name="city"/>
+					<field name="state_id"/>
+				<!--<field name="channel_id"/> -->	
+					<field name="priority"/>
+				</field>
+            </field>
+        </record>
+		
+		<!--jon:  repace the wizard button -->	
+        <record id="inherit_view_crm_lead2opportunity_partner" model="ir.ui.view">
+            <field name="name">CRM Lead</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_form_view_leads"/>
+            <field name="arch" type="xml">
+                <button name="%(crm.action_crm_lead2opportunity_partner)d" position="replace">
+					<button name="crm_lead2opportunity" string="Convert to Opportunity" type="object" class="oe_highlight"/>
+				</button>
+            </field>
+        </record>
+		
+		<!--JON  fix the opportunites   -->
+        <record model="ir.ui.view" id="inherit_crm_case_form_view_oppor">
+            <field name="name">Opportunities</field>
+            <field name="model">crm.lead</field>
+			<field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+			<field name="arch" type="xml">
+                <field name="state_id" position="attributes">
+					 <attribute name="domain">[('country_id.name','in',['China','Hong Kong']),]</attribute>
+					 <attribute name="placeholder">Region</attribute>
+					 <attribute name="widget">selection</attribute>
+                </field>
+				
+				<field name="user_id" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="section_id" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="title" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="country_id" position="attributes">
+					<attribute name="widget">selection</attribute>
+				</field>
+				<field name="categ_ids" position="attributes">
+					<attribute name="string">Type of Lead</attribute>
+				</field>
+				
+				<field name="partner_id" position="after">
+					<field name="partner_categ_id" widget="selection" placeholder="Customer Category"/>
+				</field>
+				
+				<field name="categ_ids" position="after">
+					<field name="channel_id"  widget="selection"/>
+				</field>
+				
+				
+			</field>
+		</record>
+		
+		
+		<!-- jon  fix the lead filter   -->
+        <record id="inherit_view_crm_case_leads_filter" model="ir.ui.view">
+            <field name="name">CRM - Leads Search</field>
+            <field name="model">crm.lead</field>
+			<field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="arch" type="xml">
+				<xpath expr="//filter[@string='Team']" position="replace">
+					<filter string="Sales Team" name="sale_team" icon="terp-personal+" domain="[]" context="{'group_by':'section_id'}"/>
+				</xpath>
+				
+				<xpath expr="//search/group[@string='Group By...']" position="inside">
+					<filter string="City" name="group_by_city" icon="terp-personal+" domain="[]" context="{'group_by':'city'}"/>
+					<filter string="State" name="group_by_state_id" icon="terp-personal+" domain="[]" context="{'group_by':'state_id'}"/>
+				</xpath>
+				
+			</field>
+		</record>
+		
+    <record model="ir.actions.act_window" id="crm.crm_case_category_act_leads_all">
+        <field name="name">Leads</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">['|', ('type','=','lead'), ('type','=',False)]</field>
+        <field name="view_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="context">{'default_type':'lead', 'stage_type':'lead', 'search_default_sale_team':1}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click to create an unqualified lead.
+          </p><p>
+            Use leads if you need a qualification step before creating an
+            opportunity or a customer. It can be a business card you received,
+            a contact form filled in your website, or a file of unqualified
+            prospects you import, etc.
+          </p><p>
+            Once qualified, the lead can be converted into a business
+            opportunity and/or a new customer in your address book.
+          </p>
+        </field>
+    </record>
+	
+	
+		<!--jon:  repace the wizard button Convert to Quotation
+        <record model="ir.ui.view" id="sale_crm.crm_case_form_view_oppor">
+            <field name="name">CRM - Opportunities - Quote Inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//button[@name='case_mark_lost']" position="after">
+                        <button states="done" string="Create Quotation" name="%(sale_crm.action_crm_make_sale)d" type="action"/>
+                    		<button states="draft,open,pending" string="Convert to Quotation" name="%(sale_crm.action_crm_make_sale)d" type="action" class="oe_highlight"/>	
+						<button states="draft,open,pending" string="Convert to Quotation" name="opportunity2order" type="object" class="oe_highlight"/>
+                    </xpath>
+                </data>
+            </field>
+        </record> -->	
+	</data>
+</openerp>

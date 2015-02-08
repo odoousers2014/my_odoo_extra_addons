@@ -1,0 +1,97 @@
+id	partner_id/id	name	product_id/id	code_yhd	code_suning	code_alibaba	code_taobao	rule
+__export__.yks_delivery_carrier_001	__export__.res_partner_yks_001	EMS	yks.yks_product_product_postage		E01	7	EMS	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|^(10|11)[0-9]{11}$|^(50|51)[0-9]{11}$
+__export__.yks_delivery_carrier_002	__export__.res_partner_yks_002	圆通速递	yks.yks_product_product_postage	1755	Y01	2	YTO	^[A-Za-z0-9]{2}[0-9]{10}$|^[A-Za-z0-9]{2}[0-9]{8}$|^(8800)[0-9]{14}$
+__export__.yks_delivery_carrier_003	__export__.res_partner_yks_003	宅急送	yks.yks_product_product_postage		Z04	106	ZJS	^[a-zA-Z0-9]{10}$|^(42)[0-9]{8}$
+__export__.yks_delivery_carrier_004	__export__.res_partner_yks_004	顺丰速运	yks.yks_product_product_postage		S02	6	SF	^[0-9]{12}$
+__export__.yks_delivery_carrier_005	__export__.res_partner_yks_005	优速快递	yks.yks_product_product_postage		Y10	107859	UC	^VIP[0-9]{9}|V[0-9]{11}|[0-9]{12}$|^LBX[0-9]{15}-[2-9AZ]{1}-[1-9A-Z]{1}$|^(9001)[0-9]{8}$
+__export__.yks_delivery_carrier_006	__export__.res_partner_yks_006	燕文国际	yks.yks_product_product_postage				YANWENINTE	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}
+__export__.yks_delivery_carrier_007	__export__.res_partner_yks_007	燕文上海	yks.yks_product_product_postage				YANWENSH	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}
+__export__.yks_delivery_carrier_008	__export__.res_partner_yks_008	燕文深圳	yks.yks_product_product_postage				YANWENSZ	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}
+__export__.yks_delivery_carrier_009	__export__.res_partner_yks_009	燕文北京	yks.yks_product_product_postage				YANWENBJ	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}
+__export__.yks_delivery_carrier_010	__export__.res_partner_yks_010	燕文义乌	yks.yks_product_product_postage				YANWENYW	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}
+__export__.yks_delivery_carrier_011	__export__.res_partner_yks_011	燕文广州	yks.yks_product_product_postage				YANWENGZ	^[A-Z]{2}[0-9]{9}[A-Z]{2}$|[0-9]{13}
+__export__.yks_delivery_carrier_012	__export__.res_partner_yks_012	ZTOGZ	yks.yks_product_product_postage				ZTOGZ	1.11111111111111E+019
+__export__.yks_delivery_carrier_013	__export__.res_partner_yks_013	RUSTON	yks.yks_product_product_postage				RUSTON	1.11111111111111E+019
+__export__.yks_delivery_carrier_014	__export__.res_partner_yks_014	ZTOSH	yks.yks_product_product_postage				ZTOSH	1.11111111111111E+019
+__export__.yks_delivery_carrier_015	__export__.res_partner_yks_015	凡宇速递	yks.yks_product_product_postage				GZFY	^[0-9]{12}$
+__export__.yks_delivery_carrier_016	__export__.res_partner_yks_016	联昊通	yks.yks_product_product_postage		L02	107860	LTS	^[0-9]{9,12}$
+__export__.yks_delivery_carrier_017	__export__.res_partner_yks_017	全峰快递	yks.yks_product_product_postage		Q03	1663	QFKD	^[0-9]{12}$|^[0-9]{15}$
+__export__.yks_delivery_carrier_018	__export__.res_partner_yks_018	全一快递	yks.yks_product_product_postage		Q01		UAPEX	^\d{12}|\d{11}$
+__export__.yks_delivery_carrier_019	__export__.res_partner_yks_019	城市100	yks.yks_product_product_postage		C01		BJCS	^(CS[0-9]{13})$|^([0-9]{13})$|^([0-9]{9})$
+__export__.yks_delivery_carrier_020	__export__.res_partner_yks_020	广东EMS	yks.yks_product_product_postage		G01		GDEMS	^[a-zA-Z]{2}[0-9]{9}[a-zA-Z]{2}$
+__export__.yks_delivery_carrier_021	__export__.res_partner_yks_021	速尔	yks.yks_product_product_postage		S03	107805	SURE	^[0-9]{11}[0-9]{1}$
+__export__.yks_delivery_carrier_022	__export__.res_partner_yks_022	EMS经济快递	yks.yks_product_product_postage			354	EYB	^(50|51)[0-9]{11}$
+__export__.yks_delivery_carrier_023	__export__.res_partner_yks_023	中通快递	yks.yks_product_product_postage	1751	Z01	3	ZTO	^((751|358|618|680|778|768|688|689|618|828|988|118|888|571|518|010|628|205|880|717|718|728|738|761|762|763|701|757)[0-9]{9})$|^((2008|2010|8050|7518)[0-9]{8})$|^((36)[0-9]{10})$
+__export__.yks_delivery_carrier_024	__export__.res_partner_yks_024	飞远(爱彼西)配送	yks.yks_product_product_postage				HZABC	^[0-9]{10,11}$|^T[0-9]{10}$|^FYPS[0-9]{12}$|^LBX[0-9]{15}-[2-9AZ]{1}-[1-9A-Z]{1}$
+__export__.yks_delivery_carrier_025	__export__.res_partner_yks_025	韵达快递	yks.yks_product_product_postage		Y02	4	YUNDA	^(10|11|12|13|14|15|16|17|19|18|50|55|58|80|88|66|31)[0-9]{11}$
+__export__.yks_delivery_carrier_026	__export__.res_partner_yks_026	天天快递	yks.yks_product_product_postage		T02	5	TTKDEX	^[0-9]{12}$
+__export__.yks_delivery_carrier_027	__export__.res_partner_yks_027	佳吉快递	yks.yks_product_product_postage		J01	43	CNEX	^[0-9,C]{9,10}$
+__export__.yks_delivery_carrier_028	__export__.res_partner_yks_028	百世物流	yks.yks_product_product_postage				BEST	^[0-9]{11,12}$
+__export__.yks_delivery_carrier_029	__export__.res_partner_yks_029	联邦快递	yks.yks_product_product_postage		L03	107	FEDEX	^[0-9]{12}$
+__export__.yks_delivery_carrier_030	__export__.res_partner_yks_030	华强物流	yks.yks_product_product_postage				SHQ	^[A-Za-z0-9]*[0|2|4|6|8]$
+__export__.yks_delivery_carrier_031	__export__.res_partner_yks_031	百世汇通	yks.yks_product_product_postage		H01		HTKY	^(A|B|C|D|E|H|0)(D|X|[0-9])(A|[0-9])[0-9]{10}$|^(21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|37|38|39|61)[0-9]{10}$|^(369|639|649|630|360)[0-9]{9}$|^(50|51)[0-9]{12}$|^(7)[0-9]{13}$
+__export__.yks_delivery_carrier_032	__export__.res_partner_yks_032	中铁快运	yks.yks_product_product_postage		Z02	44	CRE	^K[0-9]{13}$|^K[0-9]{11}$
+__export__.yks_delivery_carrier_033	__export__.res_partner_yks_033	信丰物流	yks.yks_product_product_postage		X04		XFWL	^1[38]{1}[7-9]{1}[0-9]{9}$
+__export__.yks_delivery_carrier_034	__export__.res_partner_yks_034	申通快递	yks.yks_product_product_postage		S01	1	STO	^(11|22|33|268|888|588|688|368|468|568|668|768|868|968)[0-9]{9}$|^(11|22|33|268|888|588|688|368|468|568|668|768|868|968)[0-9]{10}$|^(STO)[0-9]{10}$|^(33)[0-9]{11}$
+__export__.yks_delivery_carrier_035	__export__.res_partner_yks_035	龙邦速递	yks.yks_product_product_postage		L01	107861	LB	^[0-9]{12}$|^LBX[0-9]{15}-[2-9AZ]{1}-[1-9A-Z]{1}$|^[0-9]{15}$|^[0-9]{15}-[1-9A-Z]{1}-[1-9A-Z]{1}$
+__export__.yks_delivery_carrier_036	__export__.res_partner_yks_036	天地华宇	yks.yks_product_product_postage		H02	81	HOAU	^[A-Za-z0-9]{8,9}$
+__export__.yks_delivery_carrier_037	__export__.res_partner_yks_037	快捷快递	yks.yks_product_product_postage		K01	3441	FAST	^[0-9]{11,13}$|^(P330[0-9]{8})$|^(D[0-9]{11})$|^(319)[0-9]{11}$
+__export__.yks_delivery_carrier_038	__export__.res_partner_yks_038	邮政国内小包	yks.yks_product_product_postage				POSTB	^[GA]{2}[0-9]{9}([2-5][0-9]|[1][1-9]|[6][0-5])$|^[99]{2}[0-9]{11}$
+__export__.yks_delivery_carrier_039	__export__.res_partner_yks_039	黑猫宅急便	yks.yks_product_product_postage				YCT	^[0-9]{12}$
+__export__.yks_delivery_carrier_040	__export__.res_partner_yks_040	新邦物流	yks.yks_product_product_postage		X03	42	XB	[0-9]{8}
+__export__.yks_delivery_carrier_041	__export__.res_partner_yks_041	能达速递	yks.yks_product_product_postage				NEDA	^((88|)[0-9]{10})$|^((1|2|3|5|)[0-9]{9})$|^(90000[0-9]{7})$
+__export__.yks_delivery_carrier_042	__export__.res_partner_yks_042	增益速递	yks.yks_product_product_postage				QRT	^[0-9]{12}$
+__export__.yks_delivery_carrier_043	__export__.res_partner_yks_043	国通快递	yks.yks_product_product_postage		G05	107726	GTO	^(2|3|8|5|6|7)[0-9]{9}$
+__export__.yks_delivery_carrier_044	__export__.res_partner_yks_044	德邦物流	yks.yks_product_product_postage		D04	41	DBL	^[0-9]{8,10}$
+__export__.yks_delivery_carrier_045	__export__.res_partner_yks_045	E速宝	yks.yks_product_product_postage				ESB	[0-9a-zA-Z-]{5,20}
+__export__.yks_delivery_carrier_046	__export__.res_partner_yks_046	居无忧	yks.yks_product_product_postage				JWY	
+__export__.yks_delivery_carrier_047	__export__.res_partner_yks_047	贝业新兄弟	yks.yks_product_product_postage				BOYOL	
+__export__.yks_delivery_carrier_048	__export__.res_partner_yks_048	合众阳晟	yks.yks_product_product_postage				YS	
+__export__.yks_delivery_carrier_yhd_001	__export__.res_partner_delivery_yhd_001	贝海国际速递	yks.yks_product_product_postage	23489	B04			
+__export__.yks_delivery_carrier_yhd_002	__export__.res_partner_delivery_yhd_002	TNT快递(标准)	yks.yks_product_product_postage	17328	T01			
+__export__.yks_delivery_carrier_yhd_003	__export__.res_partner_delivery_yhd_003	DPD	yks.yks_product_product_postage	24882				
+__export__.yks_delivery_carrier_yhd_004	__export__.res_partner_delivery_yhd_004	晋越	yks.yks_product_product_postage	25492				
+__export__.yks_delivery_carrier_yhd_005	__export__.res_partner_delivery_yhd_005	中邮速递	yks.yks_product_product_postage	25966	Z03			
+__export__.yks_delivery_carrier_yhd_006	__export__.res_partner_delivery_yhd_006	德国邮政	yks.yks_product_product_postage	26360				
+__export__.yks_delivery_carrier_yhd_007	__export__.res_partner_delivery_yhd_007	上海邮政	yks.yks_product_product_postage	24746				
+__export__.yks_delivery_carrier_yhd_008	__export__.res_partner_delivery_yhd_008	Bpost	yks.yks_product_product_postage	24752				
+__export__.yks_delivery_carrier_yhd_009	__export__.res_partner_delivery_yhd_009	荷兰皇家邮政	yks.yks_product_product_postage	26338				
+__export__.yks_delivery_carrier_yhd_010	__export__.res_partner_delivery_yhd_010	dhl快递	yks.yks_product_product_postage	26384	D01	110		
+__export__.yks_delivery_carrier_yhd_011	__export__.res_partner_delivery_yhd_011	AOL 	yks.yks_product_product_postage	25111				
+__export__.yks_delivery_carrier_suning_001	__export__.res_partner_delivery_suning_001	AAE-中国	yks.yks_product_product_postage		A01			
+__export__.yks_delivery_carrier_suning_002	__export__.res_partner_delivery_suning_002	BHT	yks.yks_product_product_postage		B01			
+__export__.yks_delivery_carrier_suning_003	__export__.res_partner_delivery_suning_003	百福东方	yks.yks_product_product_postage		B02			
+__export__.yks_delivery_carrier_suning_004	__export__.res_partner_delivery_suning_004	中国邮政国内包裹/挂号信	yks.yks_product_product_postage		B03			
+__export__.yks_delivery_carrier_suning_005	__export__.res_partner_delivery_suning_005	D速快递	yks.yks_product_product_postage		D02			
+__export__.yks_delivery_carrier_suning_006	__export__.res_partner_delivery_suning_006	大田物流	yks.yks_product_product_postage		D03	45		
+__export__.yks_delivery_carrier_suning_007	__export__.res_partner_delivery_suning_007	FedEx(国外)	yks.yks_product_product_postage		F02			
+__export__.yks_delivery_carrier_suning_008	__export__.res_partner_delivery_suning_008	共速达	yks.yks_product_product_postage		G04	262		
+__export__.yks_delivery_carrier_suning_009	__export__.res_partner_delivery_suning_009	佳怡物流	yks.yks_product_product_postage		J02	163		
+__export__.yks_delivery_carrier_suning_010	__export__.res_partner_delivery_suning_010	京广速递	yks.yks_product_product_postage		J03			
+__export__.yks_delivery_carrier_suning_011	__export__.res_partner_delivery_suning_011	全晨快递	yks.yks_product_product_postage		Q02			
+__export__.yks_delivery_carrier_suning_012	__export__.res_partner_delivery_suning_012	全日通快递	yks.yks_product_product_postage		Q04	107863		
+__export__.yks_delivery_carrier_suning_013	__export__.res_partner_delivery_suning_013	三态速递	yks.yks_product_product_postage		S04			
+__export__.yks_delivery_carrier_suning_014	__export__.res_partner_delivery_suning_014	UC优速物流	yks.yks_product_product_postage		U03			
+__export__.yks_delivery_carrier_suning_015	__export__.res_partner_delivery_suning_015	远成物流	yks.yks_product_product_postage		Y06	222		
+__export__.yks_delivery_carrier_suning_016	__export__.res_partner_delivery_suning_016	元智捷运	yks.yks_product_product_postage		Y07			
+__export__.yks_delivery_carrier_suning_017	__export__.res_partner_delivery_suning_017	运通速运	yks.yks_product_product_postage		Y08			
+__export__.yks_delivery_carrier_suning_018	__export__.res_partner_delivery_suning_018	越丰快递	yks.yks_product_product_postage		Y09			
+__export__.yks_delivery_carrier_suning_019	__export__.res_partner_delivery_suning_019	中铁物流	yks.yks_product_product_postage		Z05	164		
+__export__.yks_delivery_carrier_suning_020	__export__.res_partner_delivery_suning_020	飞康达物流	yks.yks_product_product_postage		F01	107862		
+__export__.yks_delivery_carrier_suning_021	__export__.res_partner_delivery_suning_021	急先达	yks.yks_product_product_postage		J04			
+__export__.yks_delivery_carrier_suning_022	__export__.res_partner_delivery_suning_022	如风达快递	yks.yks_product_product_postage		R01			
+__export__.yks_delivery_carrier_suning_023	__export__.res_partner_delivery_suning_023	UPS	yks.yks_product_product_postage		U02	109		
+__export__.yks_delivery_carrier_suning_024	__export__.res_partner_delivery_suning_024	亚风快递	yks.yks_product_product_postage		Y03			
+__export__.yks_delivery_carrier_suning_025	__export__.res_partner_delivery_suning_025	其他	yks.yks_product_product_postage		Q00	8		
+__export__.yks_delivery_carrier_suning_026	__export__.res_partner_delivery_suning_026	当当	yks.yks_product_product_postage		DD1			
+__export__.yks_delivery_carrier_suning_027	__export__.res_partner_delivery_suning_027	中粮	yks.yks_product_product_postage		ZL1			
+__export__.yks_delivery_carrier_suning_028	__export__.res_partner_delivery_suning_028	威时沛运	yks.yks_product_product_postage		W01			
+__export__.yks_delivery_carrier_alibaba_001	__export__.res_partner_delivery_alibaba_001	汇通快运	yks.yks_product_product_postage			352		
+__export__.yks_delivery_carrier_alibaba_002	__export__.res_partner_delivery_alibaba_002	CCES快递	yks.yks_product_product_postage			108		
+__export__.yks_delivery_carrier_alibaba_003	__export__.res_partner_delivery_alibaba_003	苏粤货运	yks.yks_product_product_postage			122		
+__export__.yks_delivery_carrier_alibaba_004	__export__.res_partner_delivery_alibaba_004	贵平物流	yks.yks_product_product_postage			142		
+__export__.yks_delivery_carrier_alibaba_005	__export__.res_partner_delivery_alibaba_005	盛辉物流	yks.yks_product_product_postage			182		
+__export__.yks_delivery_carrier_alibaba_006	__export__.res_partner_delivery_alibaba_006	城市之星	yks.yks_product_product_postage			202		
+__export__.yks_delivery_carrier_alibaba_007	__export__.res_partner_delivery_alibaba_007	新时代通成	yks.yks_product_product_postage			242		
+__export__.yks_delivery_carrier_alibaba_008	__export__.res_partner_delivery_alibaba_008	港中能达	yks.yks_product_product_postage			1662		
+__export__.yks_delivery_carrier_alibaba_009	__export__.res_partner_delivery_alibaba_009	卡行天下	yks.yks_product_product_postage			107789		

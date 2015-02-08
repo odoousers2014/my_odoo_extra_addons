@@ -1,0 +1,282 @@
+# -*- coding: utf-8 -*-
+from openerp.osv import fields, osv
+import openerp.addons.decimal_precision as dp
+from openerp.tools.translate import _
+from openerp import netsvc
+
+class okgj_stock_inventory(osv.osv):
+    _inherit = "stock.inventory"
+    _columns = {
+        'note':fields.text(u'备注'),
+    }
+okgj_stock_inventory()
+    
+class okgj_stock_picking(osv.osv):
+    _inherit = "stock.picking"
+    _order = "name desc"
+    _columns = {
+        'okgj_type':fields.selection([
+            ('okgj_internal_in', u'其它入库单'),
+            ('okgj_internal_out', u'其它出库单'),
+            ('okgj_internal_internal', u'其它调拨单'),
+            ('okgj_others', u'其它单据')
+            ], string=u'单据类型'),
+        'internal_order_id':fields.many2one('okgj.order.picking.internal', '源出入库申请单'),
+        'sale_return_id':fields.many2one('okgj.sale.return', '源销售退货单'),
+        'purchase_return_id':fields.many2one('okgj.purchase.return', u'源退货单'),
+        'print_state':fields.selection([('not', 'NOT'), ('yes', 'YES')], 'Print State', required=True),
+        'collect_state':fields.selection([('not', 'NOT'), ('yes', 'YES')], 'Collect Print State', required=True),
+    }
+
+okgj_stock_picking()
+
+class okgj_stock_picking_in(osv.osv):
+    _inherit = "stock.picking.in"
+    _order = "name desc"
+    _columns = {
+        'sale_return_id':fields.many2one('okgj.sale.return', '源销售退货单'),
+        'okgj_type':fields.selection([
+            ('okgj_sale_in', u'销售退货入库单'),
+            ('okgj_internal_in', u'其它入库单'),
+            ], string=u'单据类型'),
+    }
+
+    ##一次收货后自动定时关闭采购订单，未出货的出库单
+    def okgj_close_partial_picking_cron(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        wf_service = netsvc.LocalService("workflow")
+        to_close_ids = self.search(cr, uid, [('state', 'in', ['draft', 'auto', 'confirmed', 'assigned']), ('type', '=', 'in'), ('purchase_id', '!=', False)], context=context)
+        for one in self.browse(cr, uid, to_close_ids, context=context):
+            if one.backorder_id:
+                wf_service.trg_validate(uid, "stock.picking.in", one.id, 'button_cancel', cr)
+        #未出货的出库单
+        to_close_return_ids = self.search(cr, uid, [('state', 'in', ['draft', 'auto', 'confirmed', 'assigned']), ('type', '=', 'out'), ('purchase_return_id', '!=', False)], context=context)
+        for one in self.browse(cr, uid, to_close_return_ids, context=context):
+            if one.backorder_id:
+                wf_service.trg_validate(uid, "stock.picking.in", one.id, 'button_cancel', cr)
+okgj_stock_picking_in()
+
+class okgj_stock_picking_out(osv.osv):
+    _inherit = "stock.picking.out"
+    _order = "name desc"
+    _columns = {
+        'okgj_type':fields.selection([
+            ('okgj_purchase_out', u'采购退货出库单'),
+            ('okgj_sale_out', u'销售退货出库单'),
+            ], string=u'单据类型'),
+        'collect_state':fields.selection([('not', 'NOT'), ('yes', 'YES')], 'Collect Print State', required=True),
+        'print_state':fields.selection([('not', 'NOT'), ('yes', 'YES')], 'Print State', required=True),
+        'purchase_return_id':fields.many2one('okgj.purchase.return', u'源退货单'),
+        'sale_return_id':fields.many2one('okgj.sale.return', '源销售单'),
+        'pay_id':fields.related('sale_id', 'pay_id', type='char', string='支付方式', readonly=True),
+        'send_time':fields.related('sale_id', 'send_time', type='char', string='要求送货时间', readonly=True),
+        'inv_payee':fields.related('sale_id', 'inv_payee', type='text', string='发票抬头', readonly=True),
+        'inv_content':fields.related('sale_id', 'inv_content', type='text', string='发票内容', readonly=True),
+        'inv_amount':fields.related('sale_id', 'inv_amount', type='float', string='发票金额', readonly=True),
+        'okgj_city':fields.related('sale_id', 'okgj_city', type='char', string='收货城市', readonly=True),
+        'region_name':fields.related('sale_id', 'region_name', type='char', string='收货区域', readonly=True),
+        'consignee':fields.related('sale_id', 'consignee', type='char', string='收货人', readonly=True,)
+        
+    }
+    _defaults = {
+        'collect_state': lambda *args: 'not',
+        'print_state': lambda *args: 'not',
+    }
+okgj_stock_picking_out()
+
+#理货上架，添加货位字段
+class okgj_stock_move(osv.osv):
+    _inherit = "stock.move"
+
+    def _get_pick_rack(self, cr, uid, ids, field_names, arg, context=None):
+        """ Read the 'rack' functional fields. """
+        res = {}
+        for one_move in self.browse(cr, uid, ids, context=context):
+            picking = one_move.picking_id or False
+            if not picking:
+                res[one_move.id] = False
+                continue
+            warehouse_id = False
+            #采购单
+            purchase = picking.purchase_id  or False
+            if purchase:
+                warehouse_id = purchase.warehouse_id.id
+            #销售单
+            sale = picking.sale_id  or False
+            if sale:
+                warehouse_id = sale.shop_id.warehouse_id.id
+            #采购退货单
+            purchase_return = picking.purchase_return_id  or False
+            if purchase_return:
+                warehouse_id = purchase_return.warehouse_id.id
+            #销售退货单
+            sale_return = picking.sale_return_id  or False
+            if sale_return:
+                warehouse_id = sale_return.warehouse_id.id
+            #内部调拨与其它出入库
+            internal_return = picking.internal_order_id  or False
+            if internal_return:
+                warehouse_id = internal_return.warehouse_id.id
+            if not warehouse_id:
+                res[one_move.id] = False
+                continue
+            pick_rack_data = one_move.product_id.product_pick_rack_ids
+            has_rack = False
+            for one_rack in pick_rack_data:
+                if one_rack.warehouse_id.id == warehouse_id:
+                    has_rack = True
+                    res[one_move.id] = one_rack.id
+                    break
+            if not has_rack:
+                res[one_move.id] = False
+        return res
+
+    ## def _set_pick_rack(self, cr, uid, id, pick_rack_id, value, arg, context=None):
+    ##     pass
+    ##     """ Write the 'rack' functional fields. """
+    ##     assert pick_rack_id == 'pick_rack_id'
+    ##     warehouse_obj = self.pool.get('stock.warehouse')
+    ##     users_obj = self.pool.get('res.users')
+    ##     product_obj = self.pool.get('product.product')
+
+    ##     picking = one_move.picking_id or False
+    ##     if not picking:
+    ##         warehouse_id = False
+    ##     #采购单
+    ##     purchase = picking.purchase_id  or False
+    ##     if purchase:
+    ##         warehouse_id = purchase.warehouse_id.id
+    ##     #销售单
+    ##     sale = picking.sale_id  or False
+    ##     if sale:
+    ##         warehouse_id = sale.warehouse_id.id
+    ##     #采购退货单
+    ##     purchase_return = picking.purchase_return_id  or False
+    ##     if purchase_return:
+    ##         warehouse_id = purchase_return.warehouse_id.id
+    ##     #销售退货入库单
+    ##     sale_return_in = picking.sale_return_in_id  or False
+    ##     if sale_return_in:
+    ##         warehouse_id = sale_return_in.warehouse_id.id
+    ##     #销售退货出库单
+    ##     sale_return_out = picking.sale_return_out_id  or False
+    ##     if sale_return_out:
+    ##         warehouse_id = sale_return_out.warehouse_id.id
+    ##     if not warehouse_id:
+    ##         res[one_move.id] == False
+    ##         continue
+    ##     rack_obj = self.pool.get('okgj.product.rack')
+    ##     rack_data = rack_obj.browse(cr, uid, value, context=context)
+    ##     if rack_data.warehouse_id.id = warehouse_id:
+
+    ##         product_data = product_obj.read(cr, uid, product_id, ['product_pick_rack_ids'], context=context)
+    ##     product_pick_rack_ids = product_data['product_pick_rack_ids']
+    ##     if not product_pick_rack_ids:
+    ##         product_obj.write(cr, uid, product_id, {'product_pick_rack_ids':[(4, pick_rack_id)]}, context=context)
+    ##     else:
+    ##         change_state = True
+    ##         for one_rack in rack_obj.browse(cr, uid, product_pick_rack_ids, context):
+    ##             if one_rack.warehouse_id.id == warehouse_id[0]:
+    ##                 product_obj.write(cr, uid, product_id, {'product_pick_rack_ids':[(3, one_rack.id)]}, context=context)
+    ##                 product_obj.write(cr, uid, product_id, {'product_pick_rack_ids':[(4, pick_rack_id)]}, context=context)
+    ##                 change_state = False
+    ##                 break
+    ##         if change_state:
+    ##             product_obj.write(cr, uid, product_id, {'product_pick_rack_ids':[(4, pick_rack_id)]}, context=context)
+    ##     return True
+
+    def _get_store_rack(self, cr, uid, ids, field_names, arg, context=None):
+        """ Read the 'rack' functional fields. """
+        res ={}
+        for one_move in self.browse(cr, uid, ids, context=context):
+            picking = one_move.picking_id or False
+            if not picking:
+                res[one_move.id] = False
+                continue
+            warehouse_id = False
+            #采购单
+            purchase = picking.purchase_id  or False
+            if purchase:
+                warehouse_id = purchase.warehouse_id.id
+            #销售单
+            sale = picking.sale_id  or False
+            if sale:
+                warehouse_id = sale.shop_id.warehouse_id.id
+            #采购退货单
+            purchase_return = picking.purchase_return_id  or False
+            if purchase_return:
+                warehouse_id = purchase_return.warehouse_id.id
+            #销售退货入库单
+            sale_return = picking.sale_return_id  or False
+            if sale_return:
+                warehouse_id = sale_return.warehouse_id.id
+            #内部调拨与其它出入库
+            internal_return = picking.internal_order_id  or False
+            if internal_return:
+                warehouse_id = internal_return.warehouse_id.id
+            if not warehouse_id:
+                res[one_move.id] = False
+                continue
+            store_rack_data = one_move.product_id.product_store_rack_ids
+            has_rack = False
+            for one_rack in store_rack_data:
+                if one_rack.warehouse_id.id == warehouse_id:
+                    has_rack = True
+                    res[one_move.id] = one_rack.id
+                    break
+            if not has_rack:
+                res[one_move.id] = False
+        return res
+
+    _columns = {
+        'pick_rack_id': fields.function(_get_pick_rack, type='many2one', relation='okgj.product.rack', string="拣货货位"),
+        'store_rack_id': fields.function(_get_store_rack, type='many2one', relation='okgj.product.rack', string="存货货位"),
+        'variant':fields.related('product_id', 'variants', type='char', string=u'规格', readonly=True),
+    }
+
+    def create(self, cr, uid, vals, context=None):
+        #先创建，再拆分？
+        mov_id = super(okgj_stock_move,self).create(cr, uid, vals, context=context)
+        warehouse_obj = self.pool.get('stock.warehouse')
+        product_obj = self.pool.get('product.product')
+        mov_obj = self.pool.get('stock.move')
+        warehouse_ids = warehouse_obj.search(cr, uid, [], context=context)
+        warehouse_data = warehouse_obj.browse(cr, uid, warehouse_ids, context=context)
+        lot_stock_ids={}
+        for one_warehouse in warehouse_data:
+            lot_stock_ids[one_warehouse.lot_stock_id.id] = one_warehouse.id
+        location_id = vals.get('location_id')
+        if location_id in lot_stock_ids.keys():
+            product_id = vals.get('product_id')
+            product_qty = vals.get('product_qty')
+            warehouse_id = lot_stock_ids[location_id]
+            prodlot_dict = product_obj.get_out_lot(cr, uid, product_id, product_qty, warehouse_id, context=None)
+            if prodlot_dict:
+                #先处理不足数量
+                all_lot_qty = 0
+                for one_lot_qty in [prodlot_dict[i] for i in prodlot_dict]:
+                    all_lot_qty += one_lot_qty
+                if product_qty > all_lot_qty:
+                    defaults = None
+                    new_vals = mov_obj.copy_data(cr, uid, mov_id, defaults, context=context)
+                    new_vals.update({'product_uos_qty':False, 'prodlot_id':False, 'product_qty':(product_qty-all_lot_qty)})
+                    #UOS复制有无BUG？如何转换?
+                    super(okgj_stock_move,self).create(cr, uid, new_vals, context=context)
+                new_state = False
+                for one_lot in prodlot_dict:
+                    if new_state:
+                        defaults = None
+                        new_vals = mov_obj.copy_data(cr, uid, mov_id, defaults, context=context)
+                        new_vals.update({'product_uos_qty':False, 'prodlot_id':one_lot, 'product_qty':prodlot_dict[one_lot]})
+                        #UOS复制有无BUG？如何转换?
+                        super(okgj_stock_move,self).create(cr, uid, new_vals, context=context)
+                        #mov_obj.create(cr, uid, new_vals, context=context)
+                    else:
+                        mov_obj.write(cr, uid, mov_id, {'prodlot_id':one_lot, 'product_qty':prodlot_dict[one_lot]}, context=context)
+                        new_state = True
+
+        return mov_id
+
+okgj_stock_move()
+

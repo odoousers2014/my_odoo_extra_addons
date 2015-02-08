@@ -1,0 +1,244 @@
+# -*- coding: utf-8 -*-
+##############################################################################
+
+from openerp import tools
+from osv import fields, osv
+import openerp.addons.decimal_precision as dp
+import re
+from openerp.tools.translate import _
+
+#仓库，商品分类，品牌，条码，品名
+
+class okgj_report_jitinventory_wizard(osv.osv_memory):
+    _name = "okgj.report.jitinventory.wizard"
+    _columns = {
+        'logiscenter_id':fields.many2one('stock.warehouse', u'物流中心',required=True),
+        'warehouse_id':fields.many2one('stock.location', u'仓库',required=True, domain=[('usage','=','internal')]),
+        'category_id':fields.many2one('product.category', u'类别'),
+        #'supplier_id':fields.many2one('res.partner', u'供应商'),
+        'brand_id':fields.many2one('okgj.product.brand', u'品牌'),
+        'product_id':fields.many2one('product.product', u'商品'),
+    }
+
+    def action_open_window(self, cr, uid, ids, context=None):
+        """
+            @param cr: the current row, from the database cursor,
+            @param uid: the current user’s ID for security checks,
+            @param ids: the ID or list of IDs if we want more than one
+            @return:
+        """
+        if context is None:
+            context = {}
+        report_data = self.browse(cr, uid, ids, context=context)[0]
+ 
+        logiscenter_id=0
+        warehouse_id=0
+        category_id=0
+        ##supplier_id=0
+        brand_id=0
+        product_id=0
+        
+        if report_data.logiscenter_id:
+            logiscenter_id=report_data.logiscenter_id.id
+        if report_data.warehouse_id:
+             warehouse_id = report_data.warehouse_id.id
+        if report_data.category_id:
+             category_id = report_data.category_id.id
+     ##   if report_data.supplier_id:
+      ##       supplier_id = report_data.supplier_id.id
+        if report_data.brand_id:
+             brand_id = report_data.brand_id.id
+        if report_data.product_id:
+             product_id = report_data.product_id.id
+        
+        strWhere=' 1=1'               
+        if logiscenter_id !=0:
+           ##strWhere=strWhere +'  AND  okgjwarehouse.id='+str(logiscenter_id)
+           context.update({'warehouse_id':logiscenter_id})
+        if  category_id !=0:
+            strWhere=strWhere + '  AND productcategory.id='+str(category_id)
+        ##if  supplier_id !=0:
+         ##   strWhere=strWhere + '  AND partner.id='+str(supplier_id)
+        if  brand_id !=0:
+            strWhere=strWhere + '  AND okgjbrand.id='+str(brand_id)
+        if product_id !=0:
+            strWhere=strWhere +'  AND orderproduct.id='+str(product_id)
+       
+    
+        cr.execute(""" 
+        CREATE or replace VIEW okgj_report_jitinventory_data AS (      
+            --最终查询
+            select
+            orderproduct.id,
+            orderproduct.default_code as productnumber,orderproduct.name_template as productname,
+            orderproduct.variants as variants,
+            substring(getparentcategory(productcategory.id),2,
+            char_length(getparentcategory(productcategory.id))-1) as productcaterotyname,
+            okgjbrand.name as brandname,
+           -- ''as pickrack,
+            --'' as storerack,
+            okgjlocation.complete_name as stockname,
+            productinqty.invqty as invqty
+            
+            from product_product orderproduct 
+            inner join product_template producttemp on orderproduct.product_tmpl_id=producttemp.id
+            left join product_category productcategory on producttemp.categ_id=productcategory.id
+            left join okgj_product_brand okgjbrand on orderproduct.brand_id=okgjbrand.id
+            --left join okgj_product_rack_usage okgjusage on okgjusage.product_id=orderproduct.id
+            --left join okgj_product_rack okgjrack on okgjusage.rack_id=okgjrack.id
+            --left join stock_Warehouse okgjwarehouse on okgjusage.warehouse_id=okgjwarehouse.id
+            left join 
+                (select temgroupinqty.id,temgroupinqty.location_id,(coalesce(temgroupinqty.inqty,0)-coalesce(temgroupoutqty.outqty,0))invqty from( 
+                select product.id,tempinqty.location_id,
+                sum(coalesce(tempinqty.inqty,0))inqty
+                from product_product product
+                left join
+                    (--获取入库数量
+                    select product_id,location_id,sum(inqty) as inqty from 
+                        (select 
+                        stockmove.product_id,stockmove.location_dest_id as location_id,stockmove.product_uom,
+                        (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as inqty
+                        from stock_move stockmove
+                        left join 
+                            (select  product1.id,producttemp1.uom_id,puom1.factor 
+                                from 
+                                product_product product1
+                                inner join product_template producttemp1 on product1.product_tmpl_id=producttemp1.id
+                                left join product_uom puom1 on producttemp1.uom_id=puom1.id) puom 
+                                on stockmove.product_id=puom.id
+                        
+                        left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                            where stockmove.location_id not in("""+str(warehouse_id)+""")
+                            and stockmove.location_dest_id  in("""+str(warehouse_id)+""")
+                            and stockmove.state in ('done')
+                            group by stockmove.product_id,stockmove.location_dest_id,
+                            stockmove.product_uom,stockpuom.factor,puom.factor) temp_totalinqty 
+                    group by product_id,location_id) tempinqty 
+                    on product.id=tempinqty.product_id
+                    group by product.id,tempinqty.location_id) temgroupinqty
+            left join
+                (select product.id,tempoutqty.location_id,
+                sum(coalesce(tempoutqty.outqty,0))outqty
+                  from product_product product
+                        left join (--出库
+                    select product_id,location_id,sum(outqty) as outqty from 
+                        (select stockmove.product_id,stockmove.location_id as location_id ,stockmove.product_uom,
+                        (sum(coalesce(stockmove.product_qty,0))/coalesce(stockpuom.factor,0))*puom.factor as outqty
+                        from stock_move stockmove
+                        left join 
+                            (select  productout.id,producttempout.uom_id,puomout.factor 
+                            from 
+                            product_product productout
+                            inner join product_template producttempout on productout.product_tmpl_id=producttempout.id
+                            left join product_uom puomout on producttempout.uom_id=puomout.id) puom on stockmove.product_id=puom.id
+            
+                        
+                        left join product_uom stockpuom on stockpuom.id=stockmove.product_uom 
+                        where 
+                        stockmove.location_id in("""+str(warehouse_id)+""")
+                        and stockmove.location_dest_id not in("""+str(warehouse_id)+""")
+                        and stockmove.state in ('done')
+                        group by stockmove.product_id,stockmove.location_id,stockmove.product_uom,stockpuom.factor,puom.factor)temp_outqty 
+                        group by product_id,location_id) tempoutqty 
+                        on product.id=tempoutqty.product_id 
+                        group by product.id,tempoutqty.location_id) temgroupoutqty 
+                            on temgroupinqty.id=temgroupoutqty.id and temgroupinqty.location_id=temgroupoutqty.location_id 
+                    ) productinqty 
+                on orderproduct.id=productinqty.id
+            left join stock_location okgjlocation on productinqty.location_id=okgjlocation.id
+
+            where 1=1 AND  """+strWhere+"""         
+        )
+        """
+        )
+
+        
+        return {
+            'name': _('即时库存'),
+            'context': context,
+            'view_type': 'form',
+            "view_mode": 'tree',
+            'res_model':'okgj.report.jitinventory',
+            'type': 'ir.actions.act_window',
+#            'view_id': 'view_okgj_report_sales_comp_tree',
+        }
+okgj_report_jitinventory_wizard()
+
+class okgj_report_jitinventory(osv.osv):
+
+    def _get_pick_rack(self, cr, uid, ids, field_names, arg, context=None):
+        """ Read the 'rack' functional fields. """
+        res = {}
+        warehouse_id = context.get('warehouse_id', False)
+        product_obj = self.pool.get('product.product')
+        for one_record in ids:
+            pick_rack_data = product_obj.browse(cr, uid, one_record, context=context).product_pick_rack_ids
+            has_rack = False
+            for one_rack in pick_rack_data:
+                if one_rack.warehouse_id.id == warehouse_id:
+                    has_rack = True
+                    res[one_record] = one_rack.id
+                    break
+            if not has_rack:
+                res[one_record] = False
+        return res
+
+    def _get_store_rack(self, cr, uid, ids, field_names, arg, context=None):
+        """ Read the 'rack' functional fields. """
+        res ={}
+        warehouse_id = context.get('warehouse_id', False)
+        product_obj = self.pool.get('product.product')
+        for one_record in ids:
+            store_rack_data = product_obj.browse(cr, uid, one_record, context=context).product_store_rack_ids
+            has_rack = False
+            for one_rack in store_rack_data:
+                if one_rack.warehouse_id.id == warehouse_id:
+                    has_rack = True
+                    res[one_record] = one_rack.id
+                    break
+            if not has_rack:
+                res[one_record] = False
+        return res
+
+    _name = "okgj.report.jitinventory"
+    _description = "即时库存报表"
+    _order = 'productcaterotyname desc'
+    _auto = False
+    _columns = {
+        'productcaterotyname': fields.char(u'分类', readonly=True),
+        'productnumber': fields.char(u'对应商品条码',readonly=True),
+        'productname': fields.char(u'对应商品名称',readonly=True),
+        'variants': fields.char(u'规格',readonly=True),
+        'brandname': fields.char(u'品牌',readonly=True),
+        'pickrack': fields.function(_get_pick_rack, type='many2one', relation='okgj.product.rack', string=u'拣货货位'),
+        'storerack': fields.function(_get_store_rack, type='many2one', relation='okgj.product.rack', string=u'存货货位'),
+        ## 'pickrack': fields.char(u'拣货货位',readonly=True),
+        ## 'storerack': fields.char(u'存货货位',readonly=True),
+        'stockname': fields.char(u'仓库',readonly=True),
+        'invqty': fields.float(u'库存数量', readonly=True),
+        }
+
+
+    def init(self, cr):
+        #tools.drop_view_if_exists(cr, 'report_sales_comp')
+        #总的结果查询
+        cr.execute("""
+        CREATE or replace VIEW okgj_report_jitinventory AS (      
+        select 
+            id as id,
+            productnumber as productnumber,
+            productname as productname,
+            variants as variants,
+            productcaterotyname as productcaterotyname,    
+            brandname as brandname,
+            --pickrack as pickrack,
+           -- storerack as storerack,
+            stockname as stockname,
+            invqty as invqty
+            
+        
+           from okgj_report_jitinventory_data
+        )
+        """
+    )
+okgj_report_jitinventory()

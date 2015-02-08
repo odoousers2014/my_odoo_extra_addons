@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+        <!-- Headers forms -->
+        <record id="view_report_header_tree" model="ir.ui.view">
+            <field name="name">res.header.tree</field>
+            <field name="model">res.header</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Reporting Headers">
+                    <field name="name"/>
+                  	<!--field name="rml_header"/-->
+                    <field name="internal"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_report_header_form" model="ir.ui.view">
+            <field name="name">res.header.form</field>
+            <field name="model">res.header</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Reporting Headers">
+                	<group col="4">
+                    	<field name="name" 		 colspan="2"/>
+                    	<field name="internal"   colspan="2"/>
+	                    <field name="rml_header" colspan="4"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="view_report_header_search" model="ir.ui.view">
+            <field name="name">res.header.search</field>
+            <field name="model">res.header</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Reporting Headers">
+                  <group>
+                    <filter string="Internal" icon="terp-accessories-archiver+" domain="[('internal', '=', False)]"/>
+                    <separator orientation="vertical"/>
+                    <field name="name"/>
+                    <field name="rml_header"/>
+                  </group>
+                </search>
+            </field>
+        </record>
+		
+		
+        <record id="action_report_header_form" model="ir.actions.act_window">
+            <field name="name">Reporting Headers</field>
+            <field name="res_model">res.header</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_report_header_search"/>
+            <field name="help">Use this form to create specific RML headers for your own reports</field>
+        </record>
+		
+        <menuitem id="menu_report_header" name="report_header" parent="base.menu_reporting"/>
+        <menuitem id="menu_action_report_header_form" action="action_report_header_form" parent="menu_report_header"/>
+		
+		<!--Print preview Form-->
+		<report id="report_header_preview_portrait" 
+			name="header.preview.portrait" 
+			model="res.header"
+			auto="False" 
+			rml="base_report_header/report/report_header_preview_portrait.rml" 
+			string="Preview (portrait)"/>
+		
+		<!--Print preview Form-->
+		<report id="report_header_preview_landscape" 
+			name="header.preview.landscape" 
+			model="res.header"
+			auto="False" 
+			rml="base_report_header/report/report_header_preview_landscape.rml" 
+			string="Preview (landscape)"/>
+		
+	</data>
+</openerp>

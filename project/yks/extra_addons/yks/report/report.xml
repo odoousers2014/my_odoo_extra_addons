@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<!--   
+<report id="report_yks_sale_order"
+        name="yks_sale_order"
+        auto="True"
+        header="False"
+        model="sale.order"
+        rml="yks/report/yks_sale_order.rml" 
+        string="YKS销售订单：三联纸"
+        usage="default"
+        report_type="pdf"/> 
+-->
+
+<report id="yks_so_invoice" 
+        name="yks_so_invoice" 
+        auto="True" 
+        header="False"
+        model="sale.order" 
+        file="yks/report/yks_so_invoice.mako"  
+        string="普通客户发票" 
+        report_type="webkit"/>
+
+<report id="yks_cn_address" 
+        name="yks_cn_address" 
+        auto="True" 
+        header="False"
+        model="sale.order" 
+        file="yks/report/yks_cn_address.mako"  
+        string="中文地址" 
+        report_type="webkit"/>
+        
+<!--   
+<report id="express_zto" 
+        name="express_zto" 
+        auto="True" 
+        header="False"
+        model="sale.order" 
+        file="yks/report/express_zto.mako"  
+        string="中通快递" 
+        report_type="webkit"/>
+                
+<report id="express_yunda"
+        name="express_yunda"
+        auto="True"
+        header="False"
+        model="sale.order"
+        file="yks/report/express_yunda.mako"
+        string="韵达快递"
+        report_type="webkit"/>
+
+<report id="express_zto_continuously"
+        name="express_zto_continuously"
+        auto="True"
+        header="False"
+        model="sale.order"
+        rml="yks/report/express_zto_continuously.rml"
+        string="中通快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+
+<report id="express_yunda_continuously"
+        name="express_yunda_continuously"
+        auto="True"
+        header="False"
+        model="sale.order"
+        rml="yks/report/express_yunda_continuously.rml"
+        string="韵达快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+
+<report id="express_qf_continuously"
+        name="express_qf_continuously"
+        auto="True"
+        header="False"
+        model="sale.order"
+        rml="yks/report/express_qf_continuously.rml"
+        string="全峰快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+-->
+   
+        
+<report id="yks_stock_out_order"
+        name="yks_stock_out_order"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/yks_stock_out_order.rml" 
+        string="出库凭证：三联纸"
+        usage="default"
+        report_type="pdf"/> 
+<report id="yks_stock_in_order"
+        name="yks_stock_in_order"
+        auto="True"
+        header="False"
+        model="stock.picking.in"
+        rml="yks/report/yks_stock_in_order.rml" 
+        string="入库凭证：三联纸"
+        usage="default"
+        report_type="pdf"/> 
+ <report id="yks_stock_internal_order"
+        name="yks_stock_internal_order"
+        auto="True"
+        header="False"
+        model="stock.picking"
+        rml="yks/report/yks_stock_internal_order.rml" 
+        string="内部调拨：三联纸"
+        usage="default"
+        report_type="pdf"/>
+        
+        
+          
+<report id="stock_express_zto_continuously"
+        name="stock_express_zto_continuously"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/express_zto_continuously.rml"
+        string="中通快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+
+<report id="stock_express_yunda_continuously"
+        name="stock_express_yunda_continuously"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/express_yunda_continuously.rml"
+        string="韵达快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+<report id="stock_express_ane_continuously"
+        name="stock_express_ane_continuously"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/express_ane_continuously.rml"
+        string="安能物流单-后进纸"
+        usage="default"
+        report_type="pdf"/> 
+        
+<report id="stock_express_qf_continuously"
+        name="stock_express_qf_continuously"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/express_qf_continuously.rml"
+        string="全峰快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+                             
+<report id="stock_express_zto" 
+        name="stock_express_zto" 
+        auto="True" 
+        header="False"
+        model="stock.picking.out" 
+        file="yks/report/express_zto.mako"  
+        string="中通快递" 
+        report_type="webkit"/>
+               
+<report id="stock_express_yunda"
+        name="stock_express_yunda"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        file="yks/report/express_yunda.mako"
+        string="韵达快递"
+        report_type="webkit"/>
+<report id="stock_express_ane"
+        name="stock_express_ane"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        file="yks/report/express_ane.mako"
+        string="安能物流"
+        report_type="webkit"/>
+<!--
+<report id="express_qf" 
+        name="express_qf" 
+        auto="True" 
+        header="False"
+        model="sale.order" 
+        file="yks/report/express_qf.mako"  
+        string="全峰快递" 
+        report_type="webkit"/>      
+<report id="sale_back_report"
+		name="sale_back_report"
+		auto="True"
+		header="False"
+		model="sale.back"
+		file="yks/report/sale_back_report.mako"
+		string="退换货单报表"
+		report_type="webkit"/>
+-->   
+<report id="sale_back_report"
+		name="sale_back_report"
+		auto="True"
+		header="True"
+		model="sale.back"
+		file="yks/report/sale_back_report.rml"
+		string="退换货单报表"
+		usage="default"
+		report_type="pdf"/>
+        
+        
+<!-- 
+<report id="old_stock_express_zto_continuously"
+        name="old_stock_express_zto_continuously"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/express_zto_continuously.rml"
+        string="老中通快递单-后进纸"
+        usage="default"
+        report_type="pdf"/>
+
+<report id="old_stock_express_yunda_continuously"
+        name="old_stock_express_yunda_continuously"
+        auto="True"
+        header="False"
+        model="stock.picking.out"
+        rml="yks/report/express_yunda_continuously.rml"
+        string="老韵达快递单-后进纸"
+        usage="default"
+        report_type="pdf"/> 
+        
+<report id="yks_sale_shipping"
+        name="yks_sale_shipping"
+        auto="True"
+        header="True"
+        model="stock.picking.out"
+        rml="yks/report/yks_sale_shipping.rml"
+        string="打出库单"
+        usage="default"
+        report_type="pdf"/>  
+  -->           
+        
+</data>
+</openerp>
+
+
+
+

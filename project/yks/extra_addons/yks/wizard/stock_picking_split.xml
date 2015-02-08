@@ -1,0 +1,26 @@
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="yks_stock_partial_picking_form_view">
+    <field name="name">yks.stock.partial.picking.form</field>
+    <field name="model">stock.partial.picking</field>
+    <field name="inherit_id" ref="stock.stock_partial_picking_form"/>
+    <field name="arch" type="xml">
+    	<field name="hide_tracking" position="after">
+    		<group invisible="not context.get('split')">
+    			<div style="color:red">
+    				<h3>拆分出库单据后，请重新计算出库单需要的快递方式和数量</h3>
+    			</div>
+    			<newline/>
+    			<group>
+		    		<field name="carrier_id" invisible="not context.get('split')"/>
+		    		<field name="need_express_count" invisible="not context.get('split')"/>
+    			</group>
+    			<group></group>
+    		</group>
+    	</field>
+    </field>
+</record>
+
+</data>
+</openerp>

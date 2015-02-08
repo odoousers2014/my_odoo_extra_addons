@@ -1,0 +1,118 @@
+id,old_id,volume,default_code,weight_net,place_production/id,name,brand_id/id######,standard_price,list_price,weight,variants,categ_id/id#####,uom_id/id,suitable_crowd,formula
+__export__.product_product_yks_001,1,,DEAP001,800,base.de,德国爱他美Aptamil德国爱他美奶粉pre段（0-6个月）800g,Aptamil,,318,,800g/罐,,product.product_uom_unit,pre段（0-6个月）,有机
+__export__.product_product_yks_002,2,,DEAP002,800,base.de,德国爱他美Aptamil德国爱他美奶粉1段（0-6个月）800g,Aptamil,,318,,800g/罐,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_003,3,,DEAP003,800,base.de,德国爱他美Aptamil德国爱他美奶粉2段（6-10个月）,Aptamil,,318,,800g/罐,,product.product_uom_unit,2段（6-10个月）,有机
+__export__.product_product_yks_004,4,,DEAP004,800,base.de,德国爱他美Aptamil德国爱他美奶粉3段（10-12个月）,Aptamil,,318,,800g/罐,,product.product_uom_unit,3段（10-12个月）,有机
+__export__.product_product_yks_005,5,,DEAP005,600,base.de,德国爱他美Aptamil德国爱他美奶粉1+（12个月以上）600g,Aptamil,,236,,600g/盒,,product.product_uom_unit,1+（12个月以上）,有机
+__export__.product_product_yks_006,6,,DEAP006,600,base.de,德国爱他美Aptamil德国爱他美奶粉2+（2岁以上）奶粉600g,Aptamil,,286,,600g/盒,,product.product_uom_unit,2+（2岁以上）,有机
+__export__.product_product_yks_007,7,,DEAP007,600,base.de,德国爱他美Aptamil德国爱他美HA免敏奶粉Pre新生儿奶粉,Aptamil,,299,,600g/盒,,product.product_uom_unit,pre段新生儿,免敏
+__export__.product_product_yks_008,8,,DEAP008,600,base.de,德国爱他美Aptamil德国爱他美HA免敏奶粉1段（0-6个月）奶粉600g,Aptamil,,294,,600g/盒,,product.product_uom_unit,1段（0-6个月）,免敏
+__export__.product_product_yks_009,9,,DEAP009,600,base.de,德国爱他美Aptamil德国爱他美HA免敏奶粉2段（6-10个月）奶粉600g,Aptamil,,289,,600g/盒,,product.product_uom_unit,2段（6-10个月）,免敏
+__export__.product_product_yks_010,10,,DEAP010,600,base.de,德国爱他美Aptamil德国爱他美HA免敏奶粉3段（10-12个月）奶粉600g,Aptamil,,326,,600g/盒,,product.product_uom_unit,3段（10-12个月）,免敏
+__export__.product_product_yks_011,11,,DEHO001,400,base.de,德国凯莉泓乐Holle德国凯莉泓乐奶粉1段（0-6个月）400G 英文版,Holle,,228,,400g/盒,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_012,12,,DEHO002,600,base.de,德国凯莉泓乐Holle德国凯莉泓乐奶粉2段（6-12个月）600G 英文版,Holle,,358,,600g/盒,,product.product_uom_unit,2段（6-12个月）,有机
+__export__.product_product_yks_013,13,,DEHO003,600,base.de,德国凯莉泓乐Holle德国凯莉泓乐奶粉3段（1岁以上）600G 英文版,Holle,,246,,600g/盒,,product.product_uom_unit,3段（1岁以上,有机
+__export__.product_product_yks_014,14,,DEHO004,400,base.de,德国凯莉泓乐Holle德国凯莉泓乐羊奶粉(6-36个月)400G 英文版,Holle,,315,,400g/盒,,product.product_uom_unit,(6-36个月),有机
+__export__.product_product_yks_015,15,,DEHO005,400,base.de,德国凯莉泓乐Holle德国凯莉泓乐奶粉1段（0-6个月）400G 德文版,Holle,,246,,400g/盒,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_016,16,,DEHO006,600,base.de,德国凯莉泓乐Holle德国凯莉泓乐奶粉2段（6-10个月）600G 德文版,Holle,,246,,600g/盒,,product.product_uom_unit,2段（6-10个月,有机
+__export__.product_product_yks_017,17,,DEHO007,600,base.de,德国凯莉泓乐Holle德国凯莉泓乐奶粉3段（10个月以上）600g 德文版,Holle,,198,,600g/盒,,product.product_uom_unit,3段（10个月以上,有机
+__export__.product_product_yks_018,18,,DEHO008,600,base.de,德国凯莉泓乐Holle德国凯莉泓乐有机奶粉4段（1岁以上）德国,Holle,,246,,600g/盒,,product.product_uom_unit,4段（1岁以上）,有机
+__export__.product_product_yks_019,19,,DEBE001,500,base.de,德国贝唯他Bebivita德国贝唯他奶粉pre段（0-6个月）500g,Bebivita,,179,,500g/盒,,product.product_uom_unit,pre段（0-6个月）,有机
+__export__.product_product_yks_020,20,,DEBE002,600,base.de,德国贝唯他Bebivita德国贝唯他奶粉1段（0-6个月）600g,Bebivita,,179,,600g/盒,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_021,21,,DEBE003,600,base.de,德国贝唯他Bebivita德国贝唯他奶粉2段（4-9个月）600g,Bebivita,,179,,600g/盒,,product.product_uom_unit,2段（4-9个月）,有机
+__export__.product_product_yks_022,22,,DEBE004,500,base.de,德国贝唯他Bebivita德国贝唯他奶粉3段（10-11个月）500g,Bebivita,,179,,500g/盒,,product.product_uom_unit,3段（10-11个月）,有机
+__export__.product_product_yks_023,23,,DECU001,900,base.de,德国聪满Cumart德国聪满有机奶粉1段（0-12个月）,Cumart,,468,,900g/罐,,product.product_uom_unit,1段（0-12个月,有机
+__export__.product_product_yks_024,24,,DECU002,900,base.de,德国聪满Cumart德国聪满有机奶粉2段（6-18个月）,Cumart,,468,,900g/罐,,product.product_uom_unit,2段（6-18个月）,有机
+__export__.product_product_yks_025,25,,DECU003,900,base.de,德国聪满Cumart德国聪满有机奶粉3段（1-3岁),Cumart,,468,,900g/罐,,product.product_uom_unit,3段（1-3岁),有机
+__export__.product_product_yks_026,26,,DELU001,500,base.de,德国露恩迪Lugomil德国露恩迪奶粉1段（0-6个月）,Lugomil,,288,,500g/罐,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_027,27,,DELU002,500,base.de,德国露恩迪Lugomil德国露恩迪奶粉2段（6-12个月）500g,Lugomil,,288,,500g/罐,,product.product_uom_unit,2段（6-12个月）,有机
+__export__.product_product_yks_028,28,,DELU003,500,base.de,德国露恩迪Lugomil德国露恩迪奶粉3段（1-3岁）500g,Lugomil,,288,,500g/罐,,product.product_uom_unit,3段（1-3岁）,有机
+__export__.product_product_yks_029,29,,DENB001,800,base.de,德国雀巢贝巴Nestle beba德国雀巢贝巴奶粉pre段（0-6个月）800g,Nestle beba,,235,,800g/罐,,product.product_uom_unit,pre段（0-6个月,有机
+__export__.product_product_yks_030,30,,DENB002,800,base.de,德国雀巢贝巴Nestle beba德国雀巢贝巴奶粉1段（0-6个月）800g,Nestle beba,,286,,800g/罐,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_031,31,,DENB003,800,base.de,德国雀巢贝巴Nestle beba德国雀巢贝巴奶粉2段（6-10个月）,Nestle beba,,286,,800g/罐,,product.product_uom_unit,2段（6-10个月）,有机
+__export__.product_product_yks_032,32,,DENB004,800,base.de,德国雀巢贝巴Nestle beba德国雀巢贝巴奶粉3段（10个月以上）800g,Nestle beba,,286,,800g/罐,,product.product_uom_unit,3段（10个月以上）,有机
+__export__.product_product_yks_033,33,,DENB005,600,base.de,德国雀巢贝巴Nestle beba德国雀巢贝巴奶粉1+段（1岁以上）600g,Nestle beba,,269,,600g/盒,,product.product_uom_unit,1+段（1岁以上）,有机
+__export__.product_product_yks_034,34,,DENB006,600,base.de,德国雀巢贝巴Nestle beba德国雀巢贝巴奶粉2+段（2岁以上）600g,Nestle beba,,269,,600g/盒,,product.product_uom_unit,2+段（2岁以上,有机
+__export__.product_product_yks_035,35,,DERA001,250,base.de,德国长发公主Rapunzel有机宝宝面条小麦蔬菜汁彩色数字字母面条,Rapunzel,,39,,250g/袋,,product.product_uom_unit,7个月以上,有机宝宝面条（小麦蔬菜汁）
+__export__.product_product_yks_036,36,,DERA002,250,base.de,德国长发公主Rapunzel有机全谷物婴儿字母面宝宝面条250g,Rapunzel,,35,,250g/袋,,product.product_uom_unit,7个月以上,有机全谷物
+__export__.product_product_yks_037,37,,DERA003,250,base.de,德国长发公主Rapunzel有机婴幼儿细面条儿童意大利面250g,Rapunzel,,35,,250g/袋,,product.product_uom_unit,7个月以上,有机
+__export__.product_product_yks_038,38,,DEJE001,80,base.de,德国简尼Jensen's鹅肝泥,Jensen's,,34,,80g/盒,,product.product_uom_unit,8个月以上,鹅肝泥
+__export__.product_product_yks_039,39,,DEJE002,80,base.de,德国简尼Jensen's顶级猪肝,Jensen's,,34,,80g/盒,,product.product_uom_unit,8个月以上,猪肝
+__export__.product_product_yks_040,40,,DEJE003,80,base.de,德国简尼Jensen's三文鱼肝泥,Jensen's,,34,,80g/盒,,product.product_uom_unit,8个月以上,三文鱼肝泥
+__export__.product_product_yks_041,41,,DEJE004,80,base.de,德国简尼Jensen's三文鱼肝泥,Jensen's,,35,,80g/盒,,product.product_uom_unit,8个月以上,小牛肝酱
+__export__.product_product_yks_042,42,,DEJE005,80,base.de,德国简尼Jensen's三文鱼肝泥,Jensen's,,34,,80g/盒,,product.product_uom_unit,8个月以上,鸭肝泥
+__export__.product_product_yks_043,43,,DEJE006,80,base.de,德国简尼Jensen's三文鱼肝泥,Jensen's,,35,,80g/盒,,product.product_uom_unit,8个月以上,野鹿肝酱肝泥
+__export__.product_product_yks_044,44,,DEOR001,300,base.de,德国智趣意面Organic Kid's Pasta有机野生乐园造型300g,Organic Kid's Pasta,,54,,300g/盒,,product.product_uom_unit,8个月以上,有机意面
+__export__.product_product_yks_045,45,,DEOR002,300,base.de,德国智趣意面Organic Kid's Pasta有机恐龙乐园造型300g,Organic Kid's Pasta,,54,,300g/盒,,product.product_uom_unit,8个月以上,有机意面
+__export__.product_product_yks_046,46,,DESA001,,base.de,德国哈罗闪sanosan婴儿润肤乳湿巾72片袋装,sanosan,,99,,72PCS/袋,,product.product_uom_unit,,润肤乳湿巾
+__export__.product_product_yks_047,47,,DESA002,,base.de,新品德国哈罗闪sanosan婴儿润肤油湿巾80片,sanosan,,99,,80PCS/袋,,product.product_uom_unit,,润肤乳湿巾
+__export__.product_product_yks_048,48,,DESN001,1250,base.de,德国舒氏Snug舒氏奶瓶快速消毒器,Snug,,298,,,,product.product_uom_unit,,
+__export__.product_product_yks_049,49,,DESN002,880,base.de,德国舒氏Snug电子速热暖奶器（双瓶装）,Snug,,119,,,,product.product_uom_unit,,
+__export__.product_product_yks_050,50,,DEBA001,,base.de,德国Babix-inhalat n宝宝感冒鼻塞护理液 不直接滴在鼻子里 10ml,Babix-inhalat n,,80,,10ml,,product.product_uom_unit,,
+__export__.product_product_yks_051,51,,DEBA002,,base.de,德国Babix-inhalat n宝宝感冒精油 缓解鼻塞帮助呼吸 5ml,Babix-inhalat n,,65,,5ml,,product.product_uom_unit,,
+__export__.product_product_yks_052,52,,DESS001,,base.de,新品德国哈罗闪sanosan婴儿滋润沐浴露400ml,sanosan,,139,,400ML/瓶,,product.product_uom_unit,,滋润沐浴露
+__export__.product_product_yks_053,53,,DESS002,,base.de,新品德国哈罗闪sanosan婴儿滋润沐浴露200ml,sanosan,,75,,200ML/瓶,,product.product_uom_unit,,滋润沐浴露
+__export__.product_product_yks_054,54,,DESS003,,base.de,新品德国哈罗闪sanosan婴儿柔润护肤乳50ml,sanosan,,19.9,,50ML/瓶,,product.product_uom_unit,,柔润护肤乳
+__export__.product_product_yks_055,55,,DESS004,,base.de,新品德国哈罗闪sanosan婴儿二合一沐浴洗发露50ml,sanosan,,19.9,,50ML/瓶,,product.product_uom_unit,,沐浴洗发露
+__export__.product_product_yks_056,56,,DESS005,100,base.de,新品德国哈罗闪sanosan婴儿爽身粉 100g,sanosan,,69,,100g/瓶,,product.product_uom_unit,,爽身粉
+__export__.product_product_yks_057,57,,DESS006,,base.de,新品德国哈罗闪sanosan婴儿滋润修护软膏150ml,sanosan,,99,,150ml/瓶,,product.product_uom_unit,,修护软膏
+__export__.product_product_yks_058,58,,DESS007,,base.de,新品德国哈罗闪sanosan婴儿护臀霜 100ml,sanosan,,109,,100ml/瓶,,product.product_uom_unit,,护臀霜 
+__export__.product_product_yks_059,59,,DESS008,,base.de,新品德国哈罗闪sanosan婴儿柔润护肤霜150ml,sanosan,,109,,150ml/瓶,,product.product_uom_unit,,柔润护肤霜
+__export__.product_product_yks_060,60,,DESS009,,base.de,新品德国哈罗闪sanosan婴儿柔润护肤乳 500ml,sanosan,,159,,500ml/瓶,,product.product_uom_unit,,柔润护肤乳
+__export__.product_product_yks_061,61,,DESS010,,base.de,新品德国哈罗闪sanosan婴儿柔润护肤乳200ml,sanosan,,89,,200ML/瓶,,product.product_uom_unit,,柔润护肤乳
+__export__.product_product_yks_062,62,,DESS011,,base.de,新品德国哈罗闪sanosan婴儿柔润护肤油 200ml,sanosan,,109,,200ML/瓶,,product.product_uom_unit,,柔润护肤油
+__export__.product_product_yks_063,63,,DESS012,100,base.de,新品德国哈罗闪sanosan婴儿洁肤皂100g,sanosan,,45,,100g/盒,,product.product_uom_unit,,洁肤皂
+__export__.product_product_yks_064,64,,DESS013,,base.de,新品德国哈罗闪sanosan婴儿洗发露200ml,sanosan,,79,,200ML/瓶,,product.product_uom_unit,,婴儿洗发露
+__export__.product_product_yks_065,65,,DESS014,,base.de,德国哈罗闪sanosan婴儿二合一沐浴洗发露500ml,sanosan,,125,,500ml/瓶,,product.product_uom_unit,,二合一沐浴洗发露
+__export__.product_product_yks_066,66,,DESS015,,base.de,新品德国哈罗闪sanosan婴儿二合一沐浴洗发露200ml,sanosan,,79,,200ML/瓶,,product.product_uom_unit,,二合一沐浴洗发露
+__export__.product_product_yks_067,67,,DEWE001,,base.de,德国维蕾德Weleda金盏花婴儿护臀霜/湿疹霜(Weleda babycreme),Weleda,,88,,75ml/瓶,,product.product_uom_unit,,护臀霜/湿疹霜
+__export__.product_product_yks_068,68,,DEWE002,,base.de,德国维蕾德Weleda金盏花婴儿滋润保湿面霜50ml(Weleda Baby & Kind Calendula Gesichtscreme),Weleda,,89,,50ML/瓶,,product.product_uom_unit,,滋润保湿面霜
+__export__.product_product_yks_069,69,,DEHA001,13500,base.de,德国Hauck双向高景观婴儿推车睡蓝座位二合一婴儿车 棕蓝色拼接,Hauck,,3460,,,,product.product_uom_unit,,二合一婴儿车
+__export__.product_product_yks_070,70,,DEHA002,19100,base.de,德国Hauck旅行系统推车 黑色,Hauck,,5280,,,,product.product_uom_unit,,系统推车
+__export__.product_product_yks_071,71,,DEZY001,,base.de,德国诺华Zymafluor D500维生素D钙片 鱼油 90粒,Zymafluor,,70.5,,90PCS/瓶,,product.product_uom_unit,,维生素D钙片
+__export__.product_product_yks_072,72,,DEDO001,,base.de,德国双心牌Doppel Herz 成人补铁维他命C+B6+B12+叶酸 20包,Doppel Herz ,,99,,20包/盒,,product.product_uom_unit,成人,叶酸
+__export__.product_product_yks_073,73,,DEHR001,,base.de,德国保赫曼妙力Hartmann molimed产妇专用卫生巾大号 14片/包,Hartmann molimed,,79,,14片/包,,product.product_uom_unit,产妇,产妇专用卫生巾大号
+__export__.product_product_yks_074,74,,DEHR002,,base.de,德国保赫曼妙力Hartmann molimed产妇专用卫生巾中号 14片/包,Hartmann molimed,,59,,14片/包,,product.product_uom_unit,产妇,产妇专用卫生巾中号 
+__export__.product_product_yks_075,75,,DEHR003,,base.de,德国保赫曼妙力Hartmann molimed产妇专用卫生巾小号 14片/包,Hartmann molimed,,49,,14片/包,,product.product_uom_unit,产妇,产妇专用卫生巾小号 
+__export__.product_product_yks_076,76,,DETW001,130,base.de,德国德齐氏Twardy 孕妇营养复合维生素补充钙 叶酸,Twardy,,359,,90PCS/盒,,product.product_uom_unit,孕妇,叶酸
+__export__.product_product_yks_077,77,,DESU001,,base.de,德国舒氏SnugSMART灵悦快充电动吸奶器,SnugSMART,,1148,,,,product.product_uom_unit,产妇,吸奶器
+__export__.product_product_yks_078,78,,DESU002,,base.de,德国舒氏SnugSOFT双效变频电动吸奶器,SnugSMART,,379,,,,product.product_uom_unit,产妇,吸奶器
+__export__.product_product_yks_079,79,,DESN003,1500,base.de,德国舒氏Snug舒氏粥状元智能BB煲,Snug,,198,,,,product.product_uom_unit,,BB煲
+__export__.product_product_yks_080,80,,DEHE001,,base.de,德国小甘菊Herbacin 小甘菊护手霜2盒装 20ml*2,Herbacin ,,42,,,,product.product_uom_unit,,护手霜
+__export__.product_product_yks_081,81,,DEHE002,4.8,base.de,德国Herbacin贺本清小甘菊修护唇膏 4.8g,Herbacin ,,35,,,,product.product_uom_unit,,护唇膏
+__export__.product_product_yks_082,82,,DEHE003,,base.de,德国小甘菊Herbacin kamille小甘菊护手霜 20ml,Herbacin ,,19,,,,product.product_uom_unit,,护手霜
+__export__.product_product_yks_083,83,,DEBR001,,base.de,德国碧然德Brita滤水壶净水壶Maxtra滤芯,Brita,,47,,,,product.product_uom_unit,,滤芯
+__export__.product_product_yks_084,84,,DEBR002,,base.de,德国碧然德Brita滤水壶净水壶Marella 2.4L,Brita,,219,,2.4L,,product.product_uom_unit,,滤水壶
+__export__.product_product_yks_085,85,,DEBR003,,base.de,德国碧然德Brita滤水壶净水壶Marella 3.5L,Brita,,249,,3.5L ,,product.product_uom_unit,,滤水壶
+__export__.product_product_yks_086,86,,DEHP001,600,base.de,德国喜宝Hipp德国喜宝奶粉Bio有机新生儿pre段(0-6个月)600g,Hipp,,179,,600g/盒,,product.product_uom_unit,pre段(0-3个月）,有机
+__export__.product_product_yks_087,87,,DEHP002,600,base.de,德国喜宝Hipp德国喜宝奶粉Bio有机1段(0-6个月)600g,Hipp,,225,,600g/盒,,product.product_uom_unit,1段(0-6个月),有机
+__export__.product_product_yks_088,88,,DEHP003,800,base.de,德国喜宝Hipp德国喜宝奶粉Bio有机2段(6-10个月)800g,Hipp,,,,800g/盒,,product.product_uom_unit,2段（6-10个月）,有机
+__export__.product_product_yks_089,89,,DEHP004,800,base.de,德国喜宝Hipp德国喜宝奶粉Bio有机3段(10-12个月)800g,Hipp,,245,,800g/盒,,product.product_uom_unit,3段（10-12个月）,有机
+__export__.product_product_yks_090,90,,DEHP005,800,base.de,德国喜宝Hipp德国喜宝奶粉Bio有机3段(12个月以上)800g,Hipp,,245,,800g/盒,,product.product_uom_unit,12+,有机
+__export__.product_product_yks_091,91,,DEHP006,600,base.de,德国喜宝Hipp德国喜宝奶粉添加益生菌新生儿pre段（0-6个月）600g,Hipp,,236,,600g/盒,,product.product_uom_unit,pre段,益生菌益生元
+__export__.product_product_yks_092,92,,DEHP007,600,base.de,德国喜宝Hipp德国喜宝奶粉添加益生菌新生儿1段（0-6个月）600g,Hipp,,236,,600g/盒,,product.product_uom_unit,1段(0-6个月),益生菌益生元
+__export__.product_product_yks_093,93,,DEHP008,600,base.de,德国喜宝Hipp德国喜宝奶粉添加益生菌新生儿2段（6-10个月）600g,Hipp,,149,,600g/盒,,product.product_uom_unit,2段（6-10个月）,益生菌益生元
+__export__.product_product_yks_094,94,,DEHP009,600,base.de,德国喜宝Hipp德国喜宝奶粉添加益生菌新生儿3段（10-12个月）600g,Hipp,,236,,600g/盒,,product.product_uom_unit,3段（10-12个月）,益生菌益生元
+__export__.product_product_yks_095,95,,DEHP010,600,base.de,德国喜宝Hipp德国喜宝奶粉添加益生菌新生儿1+段（1岁以上）600g,Hipp,,236,,600g/盒,,product.product_uom_unit,1+段（1岁以上）,益生菌益生元
+__export__.product_product_yks_096,96,,DEHP011,600,base.de,德国喜宝Hipp德国喜宝奶粉添加益生菌2+段（2岁以上）600g,Hipp,,236,,600g/盒,,product.product_uom_unit,2+段（2岁以上）,益生菌益生元
+__export__.product_product_yks_097,97,,DETF001,600,base.de,德国特福芬Topfer德国特福芬有机奶粉pre段（0-6个月）600g,特福芬Topfer,,258,,600g/盒,,product.product_uom_unit,pre段(0-6个月）,有机
+__export__.product_product_yks_098,98,,DETF002,600,base.de,德国特福芬Topfer德国特福芬有机奶粉1段（0-6个月）600g,特福芬Topfer,,256,,600g/盒,,product.product_uom_unit,1段（0-6个月）,有机
+__export__.product_product_yks_099,99,,DETF003,600,base.de,德国特福芬Topfer德国特福芬有机奶粉2段（6-10个月）600g,特福芬Topfer,,256,,600g/盒,,product.product_uom_unit,2段（6-10个月）,有机
+__export__.product_product_yks_100,100,,DETF004,600,base.de,德国特福芬Topfer德国特福芬有机奶粉3段（10-36个月）600g,特福芬Topfer,,265,,600g/盒,,product.product_uom_unit,3段（10-36个月）,有机
+__export__.product_product_yks_101,101,,DETF005,500,base.de,德国特福芬Topfer德国特福芬有机奶粉1+段（1岁以上）500g,特福芬Topfer,,256,,500g/盒,,product.product_uom_unit,1+段（1岁以上）,有机
+__export__.product_product_yks_102,102,,DEHP014,250,base.de,德国喜宝Hipp有机七种谷物营养米粉250g,Hipp,,56,,250g/盒,,product.product_uom_unit,6个月以上宝宝,七种谷物营养米粉
+__export__.product_product_yks_103,103,,DEHP015,400,base.de,德国喜宝Hipp有机免敏纯大米米粉400g ,Hipp,,79,,400g/盒,,product.product_uom_unit,4个月以上宝宝,免敏纯大米米粉
+__export__.product_product_yks_104,104,,DEHP016,500,base.de,德国喜宝Hipp香草高钙多种杂粮高钙铁锌米粉500g,Hipp,,86,,500g/盒,,product.product_uom_unit,6个月以上宝宝,杂粮高钙铁锌米粉
+__export__.product_product_yks_105,105,,DEHP017,250,base.de,德国喜宝Hipp有机免敏小米米粉250g ,Hipp,,64,,250g/盒,,product.product_uom_unit,4个月以上宝宝,免敏小米米粉
+__export__.product_product_yks_106,106,,DEHP018,250,base.de,德国喜宝Hipp有机什锦水果早餐米粉无糖无奶250g,Hipp,,64,,250g/盒,,product.product_uom_unit,6个月以上宝宝,水果早餐米粉无糖无奶
+__export__.product_product_yks_107,107,,DEHP019,500,base.de,德国喜宝HIPP无糖苹果全麦晚安米粉高钙铁锌500g ,Hipp,,119,,500g/盒,,product.product_uom_unit,适合8个月以上的宝宝,无糖苹果全麦晚安米粉
+__export__.product_product_yks_108,,,HEFR001,,,荷兰Friso美素1段奶粉(0-6个月)800g,,,120,,,,,,
+__export__.product_product_yks_109,,,HEFR002,,,荷兰Friso美素2段奶粉(7-9个月)800g,,,120,,,,,,
+__export__.product_product_yks_110,,,HEFR003,,,荷兰Friso美素3段奶粉(10-12个月)800g,,,120,,,,,,
+__export__.product_product_yks_111,,,HEFR004,,,荷兰Friso美素4段奶粉(1-2岁) 700g,,,110,,,,,,
+__export__.product_product_yks_112,,,HEFR005,,,荷兰Friso美素5段奶粉(2-7岁) 700g,,,110,,,,,,
+__export__.product_product_yks_113,,,HENU001,,,荷兰Nutrilon牛栏婴儿奶粉1段(0-6个月) 850g,,,170,,,,,,
+__export__.product_product_yks_114,,,HENU002,,,荷兰Nutrilon牛栏婴儿奶粉2段（7-9个月）850g,,,170,,,,,,
+__export__.product_product_yks_115,,,HENU003,,,荷兰Nutrilon牛栏婴儿奶粉3段（10-12个月）800g,,,170,,,,,,
+__export__.product_product_yks_116,,,HENU004,,,荷兰Nutrilon牛栏婴儿奶粉4段（1-2岁）800g,,,170,,,,,,
+__export__.product_product_yks_117,,,HENU005,,,荷兰Nutrilon牛栏婴儿奶粉5段（2岁以上）800g,,,170,,,,,,

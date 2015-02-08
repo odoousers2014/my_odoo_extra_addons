@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id='yks_express_batch_create_form_view' model='ir.ui.view'>
+			<field name='name'>yks.express.batch.create</field>
+			<field name='model'>express.batch.create</field>
+			<field name="arch" type="xml">
+				<form string='批量增加快递' version='7.0'>
+					<group>
+						<field name="carrier_id"/>
+						<field name="amount"/>
+						<field name="prefix"/>
+						<field name="start_number"/>
+						<field name="end_number"/>
+					</group>
+					<footer>
+						<button name='express_create' string="确定" type="object" class="oe_hightlight"/>
+						or
+						<button string="Cancel" class="oe_link" special='cancel'/>
+					</footer>
+				</form>
+			</field>
+		</record> 
+		<act_window
+			id='yks_express_batch_create_action'
+			multi="True"
+			key2="client_action_multi"
+			name="批量增加快递"
+			res_model='express.batch.create'
+			src_model="express.express"
+			view_mode="form"
+			target='new'
+			view_type="form"/>
+	</data>
+</openerp>

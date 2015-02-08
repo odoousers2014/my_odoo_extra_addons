@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="wkf_adjust_sale_price" model="workflow">
+            <field name="name">adjust.sale.price</field>
+            <field name="osv">adjust.sale.price</field>
+            <field name="on_create">True</field>
+        </record>
+        <record id="act_draft" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_adjust_sale_price"/>
+            <field name="flow_start">True</field>
+            <field name="name">draft</field>
+        </record>
+        <record id="act_topurchase" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_adjust_sale_price"/>
+            <field name="name">topurchase</field>
+            <field name="kind">function</field>
+            <field name="action">action_topurchase()</field>
+        </record>
+        <record id="act_tofinance" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_adjust_sale_price"/>
+            <field name="name">tofinance</field>
+            <field name="kind">function</field>
+            <field name="action">action_tofinance()</field>
+        </record>
+        <record id="act_wait" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_adjust_sale_price"/>
+            <field name="name">wait</field>
+            <field name="kind">function</field>
+            <field name="action">action_wait()</field>
+        </record>     
+        <record id="act_done" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_adjust_sale_price"/>
+            <field name="name">done</field>
+            <field name="kind">function</field>
+            <field name="action">action_done()</field>
+            <field name="flow_stop">True</field>
+        </record>
+
+        <record id="act_cancel" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_adjust_sale_price"/>
+            <field name="name">cancel</field>
+            <field name="flow_stop">True</field>
+            <field name="kind">function</field>
+            <field name="action">action_cancel()</field>
+        </record>
+
+        <record id="trans_draft_topurchase" model="workflow.transition">
+            <field name="act_from" ref="act_draft"/>
+            <field name="act_to" ref="act_topurchase"/>
+            <field name="signal">button_confirm</field>
+        </record>
+        <record id="trans_topurchase_tofinance" model="workflow.transition">
+            <field name="act_from" ref="act_topurchase"/>
+            <field name="act_to" ref="act_tofinance"/>
+            <field name="condition">action_tofinance()</field>
+        </record>             
+        <record id="trans_tofinance_wait" model="workflow.transition">
+            <field name="act_from" ref="act_tofinance"/>
+            <field name="act_to" ref="act_wait"/>
+            <field name="condition">action_wait()</field>
+        </record>
+        <record id="trans_wait_again_done" model="workflow.transition">
+            <field name="act_from" ref="act_wait"/>
+            <field name="act_to" ref="act_done"/>
+            <field name="condition">action_done()</field>
+        </record>             
+        <record id="trans_topurchase_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_topurchase"/>
+            <field name="act_to" ref="act_cancel"/>
+             <field name="condition">allow_cancel()</field>
+            <field name="signal">button_cancel</field>
+        </record>
+        <record id="trans_tofinance_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_tofinance"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="condition">allow_cancel()</field>
+            <field name="signal">button_cancel</field>
+        </record>
+        <record id="trans_draft_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_draft"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">button_cancel</field>
+        </record>
+
+    </data>
+</openerp>

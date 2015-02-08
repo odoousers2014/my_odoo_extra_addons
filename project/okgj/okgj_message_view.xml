@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+	    <record id="view_okgj_message_tree" model="ir.ui.view">
+		<field name="name">view.okgj.message.tree</field>
+		<field name="model">okgj.message</field>
+		<field name="arch" type="xml">
+		    <tree string="短信设置">
+			<field name="message"/>
+			<field name="message_type"/>
+			<field name="create_uid"/>
+			<field name="create_date"/>
+			<field name="write_uid"/>
+			<field name="write_date"/>
+			<field name="enable"/>
+		    </tree>
+		</field>
+	    </record>
+
+	    <record id="view_okgj_message_form" model="ir.ui.view">
+		<field name="name">view.okgj.message.form</field>
+		<field name="model">okgj.message</field>
+		<field name="arch" type="xml">
+		    <form string="短信设置">
+			<field name="message_type"/>
+			<field name="enable"/>
+			<field name="message" colspan="4"/>
+			<separator string="联系人电话需用@phone@替代，联系人需用@name@替代, 相应单号需用@order@替代，每类消息只允许一个可用" colspan="4"/>
+		    </form>
+		</field>
+	    </record>
+
+	    <record id="action_okgj_message" model="ir.actions.act_window">
+		<field name="name">Message Reminder</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="res_model">okgj.message</field>
+	    </record>
+
+	    <menuitem name="消息" id="base.menu_okgj_messagereminder" 
+		      parent="base.menu_base_partner" 
+		      sequence="9"/>
+
+	    <menuitem name="短信设置" id="base.menu_okgj_messagereminder_set" 
+		      parent="base.menu_okgj_messagereminder" 
+		      sequence="90" action="okgj.action_okgj_message"/>		    
+	    
+	</data>
+</openerp>

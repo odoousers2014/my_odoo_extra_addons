@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+<record model="ir.ui.view" id="wizard_stock_move_sample_report">
+    <field name="name">wizard.stock.move.sample.report.form</field>
+    <field name="model">wizard.stock.move.sample.report</field>
+    <field name="arch" type="xml">
+        <form string='Sample Report' version='7.0'>
+        	<group >
+        		<field name='start_date'/>
+        		<field name='end_date'/>
+        		<button name='do_report' string='Print' type='object' class='oe_highlight'/>
+        	</group>
+        </form>
+
+    </field>
+</record>
+
+<act_window id="action_wizard_stock_move_sample_report"
+    multi="True"
+    key2="client_action_multi"
+    name="Sample Report"
+    res_model="wizard.stock.move.sample.report"
+    src_model="stock.move"
+    view_mode="form" target="new" view_type="form" />
+    
+<menuitem id="menu_sample_stock_move_report" name="Sample Report" parent="stock.menu_stock_products_moves"  action='action_wizard_stock_move_sample_report' sequence='50'/>
+
+    
+</data>
+</openerp>

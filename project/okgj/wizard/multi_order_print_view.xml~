@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+	<!--明细行-->
+	<record id="view_okgj_multi_order_print_line_form" model="ir.ui.view">
+            <field name="name">view.okgj.multi.order.print.line.form</field>
+            <field name="model">okgj.multi.order.print.line</field>
+            <field name="arch" type="xml">
+		<form string="Products">
+		    <field name="product_id"/>
+		    <field name="product_qty"/> 
+		    <field name="product_uom"/>
+		    <field name="rack"/>
+		    <field name="orders"/>          
+		</form>
+            </field>
+        </record>
+
+	<record id="view_okgj_multi_order_print_line_tree" model="ir.ui.view">
+            <field name="name">view.okgj.multi.order.print.line.tree</field>
+            <field name="model">okgj.multi.order.print.line</field>
+            <field name="arch" type="xml">
+		<tree string="Products">
+		    <field name="product_id"/>
+		    <field name="product_qty"/> 
+		    <field name="product_uom"/>
+		    <field name="rack"/>
+		    <field name="orders"/>          
+		</tree>
+            </field>
+        </record>
+
+	<!--汇拣单-->
+	<record id="view_okgj_multi_order_print_form" model="ir.ui.view">
+            <field name="name">view.okgj.multi.order.print.form</field>
+            <field name="model">okgj.multi.order.print</field>
+            <field name="arch" type="xml">
+		<form string="汇拣单" version="7.0">
+		    <group>
+			<field name="name"/>
+			<field name="warehouse_id"  on_change="onchange_picking_ids(warehouse_id, picking_ids)" colspan="2"/>
+		    </group>
+		    <field name="picking_ids" on_change="onchange_picking_ids(warehouse_id, picking_ids)" widget="many2many"/>
+		    <field name="line_ids" string="拣货单">
+                        <tree string="商品行" editable="top">
+                            <field name="product_id"/>
+                            <field name="product_qty"/> 
+			    <field name="product_uom"/>
+			    <field name="rack"/>
+			    <field name="orders"/>
+                        </tree>
+                    </field>                    
+		    <footer>
+			<button name="do_print" string="打印" type="object" class="oe_highlight"/>
+			<button string="取消" class="oe_link" special="cancel" />
+		    </footer>
+		</form>
+            </field>
+        </record>
+
+	<record id="view_okgj_multi_order_print_tree" model="ir.ui.view">
+            <field name="name">view.okgj.multi.order.print.tree</field>
+            <field name="model">okgj.multi.order.print</field>
+            <field name="arch" type="xml">
+		<tree string="汇拣单">
+		    <field name="warehouse_id"/>
+		    <field name="picking_ids"/>
+		    <field name="line_ids"/> 
+		</tree>
+            </field>
+        </record>
+
+        <record id="action_okgj_multi_order_print" model="ir.actions.act_window">
+            <field name="name">打印汇拣单</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">okgj.multi.order.print</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form,tree</field>
+            <field name="view_id" ref="view_okgj_multi_order_print_form"/>
+        </record>
+
+	<menuitem action="action_okgj_multi_order_print" id="menu_action_okgj_multi_order_print" parent="stock.menu_stock_warehouse_mgmt"/>
+
+    </data>
+</openerp>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+
+<!--  PO tree view  -->
+<record model="ir.ui.view" id="yks_purchase_order_tree">
+   <field name="name">yks.purchase.order.tree</field>
+   <field name="model">purchase.order</field>
+   <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+   <field name="arch" type="xml">
+	    <field name="name" position="after">
+	        <field  name="shipped"/>
+	        <field  name="invoiced"/>
+	        <field  name="create_uid"/>
+	    </field>
+   </field>
+</record>
+<!-- PO search view -->
+<record model="ir.ui.view" id="yks_purchase_order_search_view">
+	<field name="name">yks.purchase.order.form</field>
+	<field name="model">purchase.order</field>
+	<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+	<field name="arch" type="xml">
+	    <field name="name" position="after">
+	       <filter string="我的采购单" name="my_purchase_order" domain="[('create_uid','=', uid)]"/>
+	    </field>
+    </field>
+</record>
+<!-- PO form view -->
+<record id="yks_purchase_order_form" model="ir.ui.view">
+	<field name="name">ykspurchase.order.form</field>
+	<field name="model">purchase.order</field>
+	<field name="inherit_id" ref="purchase.purchase_order_form" />
+	<field name="arch" type="xml">
+		<notebook position="before">
+		    <button name="action_pol_fill"  string="批量选择产品" type="object" states="draft"/>
+		</notebook>
+        <button name="wkf_send_rfq" states="draft" string="Send by Email" type="object" context="{'send_rfq':True}" class="oe_highlight" position="replace">
+        </button>
+        <button name="wkf_send_rfq" states="sent" string="Send by Email" type="object" context="{'send_rfq':True}" position="replace">
+        </button>
+        <button name="print_quotation" string="Print" type="object" states="draft" class="oe_highlight" groups="base.group_user" position="replace">
+        </button>
+        <button name="print_quotation" string="Print" type="object" states="sent" groups="base.group_user" position="replace">
+        </button>
+
+		<button name="view_picking" string="Receive Products" type="object" position="replace">
+		    <button name="view_picking" string="查看入库单" type="object" attrs="{'invisible': [('state','=', 'draft')]}" class="oe_highlight"/>
+		</button>
+		<button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" position="replace">
+		    <button name="action_cancel" attrs="{'invisible':['|',('invoiced','=',True),('state','=','cancel')]}" string="Cancel Order" type="object"/>
+		</button>
+		<button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" position="replace">
+		</button>
+		<field name="warehouse_id" position="attributes">
+			<attribute name="attrs">{'readonly':['|',('state','!=','draft')]}</attribute>
+		</field>
+		<xpath expr="//field[@name='order_line']/tree/field[@name='name']"  position='attributes'>
+			<attribute name='groups'>base.group_system</attribute>
+		</xpath>
+	</field>
+</record>
+<record id="purchase.purchase_rfq" model="ir.actions.act_window">
+    <field name="name">Quotations</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">purchase.order</field>
+    <field name="context">{'search_default_my_purchase_order':1}</field>
+    <field name="domain">[('state','in',('draft','sent','confirmed'))]</field>
+    <field name="view_mode">tree,form,graph,calendar</field>
+    <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+</record>
+<record id="purchase.purchase_form_action" model="ir.actions.act_window">
+    <field name="name">Purchase Orders</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">purchase.order</field>
+    <field name="view_mode">tree,form,graph,calendar</field>
+    <field name="context">{'search_default_my_purchase_order':1}</field>
+    <field name="domain">[('state','not in',('draft','sent','confirmed'))]</field>
+    <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+</record>
+
+
+<!-- POL fill view -->
+ <record id="yks_wizard_pol_fill_form" model="ir.ui.view">
+         <field name="name">yks.wizard.pol.fill.form</field>
+         <field name="model">wizard.pol.fill</field>
+         <field name="arch" type="xml">
+         <form string="Products" version="7.0">
+            <field name="product_ids" >
+            </field>                    
+	         <footer>
+		         <button name="do_fill" string="完成" type="object" class="oe_highlight"/>
+		         <button string="Cancel" class="oe_link" special="cancel" />
+	         </footer>
+        </form>
+    </field>
+</record>
+
+<record id="yks_yks_wizard_pol_fill" model="ir.actions.act_window">
+    <field name="name">产品选择</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">wizard.pol.fill</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">form</field>
+    <field name="view_id" ref="yks_wizard_pol_fill_form"/>
+    <field name="target">new</field>
+</record>
+
+<!-- YKS POL Menu -->
+<record model="ir.ui.view" id="yks_purchase_order_line_tree_view">
+    <field name="name">yks.purchase.order.line.tree</field>
+    <field name="model">purchase.order.line</field>
+    <field name="type">tree</field>
+    <field name="arch" type="xml">
+        <tree string="采购明细" create="false">
+	        <field name="order_id"/>
+	        <field name="product_id"/>
+	        <field name="product_qty"/>
+	        <field name="price_unit"/>
+	        <field name="partner_id"/>
+	        <field name="create_uid"/>
+	        <field name="state"/>
+        </tree>
+    </field>
+</record>
+<record model="ir.actions.act_window" id="yks_action_purchase_order_line">
+    <field name="name">采购明细</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">purchase.order.line</field>
+    <field name="view_type">form</field>
+    <field name="view_mode">tree</field>
+    <field name="view_id" ref="yks_purchase_order_line_tree_view"/>
+</record>
+<menuitem id="menu_yks_purchase_order_line" name="采购明细" parent="purchase.menu_procurement_management" action="yks_action_purchase_order_line"/>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+    
+</data>
+</openerp>
